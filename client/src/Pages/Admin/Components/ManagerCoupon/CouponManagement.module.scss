@@ -1,0 +1,185 @@
+.coupon-management {
+    margin: 20px;
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+
+        .title-section {
+            h2 {
+                margin: 0;
+                font-size: 20px;
+            }
+
+            .subtitle {
+                color: #8c8c8c;
+                margin-top: 4px;
+                margin-bottom: 0;
+                font-size: 14px;
+            }
+        }
+
+        .actions {
+            display: flex;
+            gap: 16px;
+
+            .search-input {
+                width: 250px;
+            }
+
+            .add-button {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+    }
+
+    .table-card {
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+
+        .coupons-table {
+            :global {
+                .ant-table-thead > tr > th {
+                    background-color: #fafafa;
+                    font-weight: 500;
+                }
+
+                .ant-pagination {
+                    margin-top: 16px;
+                }
+
+                .ant-table-row-expand-icon-cell {
+                    width: 48px;
+                }
+
+                .ant-table-expanded-row {
+                    background-color: #fafafa;
+                }
+            }
+        }
+    }
+
+    .coupon-code {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .coupon-icon {
+            color: #1677ff;
+            font-size: 14px;
+        }
+
+        .code {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #1677ff;
+            font-family: 'Courier New', monospace;
+        }
+    }
+
+    .discount-tag {
+        font-weight: 600;
+        padding: 1px 8px;
+        border-radius: 10px;
+    }
+
+    .usage-info {
+        width: 130px;
+    }
+
+    .date-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .date-icon {
+            color: #8c8c8c;
+        }
+    }
+
+    .min-price {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+
+        .price-icon {
+            color: #52c41a;
+        }
+    }
+
+    .inactive-row {
+        background-color: #fafafa;
+        opacity: 0.8;
+    }
+
+    .action-buttons {
+        :global {
+            .ant-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 8px;
+                height: 32px;
+
+                .anticon {
+                    font-size: 14px;
+                }
+            }
+        }
+    }
+
+    .expanded-content {
+        padding: 16px;
+
+        .expanded-item {
+            margin-bottom: 8px;
+
+            strong {
+                margin-right: 8px;
+                color: #555;
+            }
+        }
+    }
+
+    .coupon-modal {
+        .modal-title {
+            display: flex;
+            align-items: center;
+
+            .modal-icon {
+                color: #f50;
+                margin-right: 8px;
+                font-size: 18px;
+            }
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 8px;
+
+            .discount-input,
+            .quantity-input {
+                flex: 1;
+            }
+        }
+
+        .product-option {
+            padding: 4px;
+        }
+
+        .active-switch {
+            margin-top: 24px;
+        }
+
+        :global {
+            .ant-form-item-label > label {
+                font-weight: 500;
+            }
+        }
+    }
+}

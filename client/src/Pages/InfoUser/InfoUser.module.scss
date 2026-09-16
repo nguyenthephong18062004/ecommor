@@ -1,0 +1,108 @@
+.user-info-layout {
+    min-height: 500px;
+    margin: 20px auto;
+    max-width: 80%;
+    background-color: #fff;
+}
+
+.user-sidebar {
+    background-color: #fff;
+    border-right: 1px solid #f0f0f0;
+}
+
+.sidebar-title {
+    padding: 16px;
+    margin: 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.user-content {
+    width: 100%;
+    padding: 24px;
+
+    :global(.ant-card) {
+        width: 100%;
+    }
+
+    :global(.ant-card-body) {
+        width: 100%;
+    }
+
+    :global(.ant-table-wrapper) {
+        width: 100%;
+    }
+}
+
+.user-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.user-avatar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.info-item {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 10px;
+    align-items: flex-start;
+}
+
+.label {
+    font-weight: bold;
+    width: 120px;
+    color: #666;
+    padding-top: 4px;
+}
+
+.value {
+    flex: 1;
+
+    :global(.ant-form-item) {
+        margin-bottom: 0;
+    }
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.edit-btn,
+.save-btn,
+.cancel-btn {
+    display: flex;
+    align-items: center;
+}
+
+.save-btn {
+    margin-right: 8px;
+}
+
+@media (min-width: 768px) {
+    .user-info-container {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .user-avatar {
+        width: 150px;
+        margin-bottom: 0;
+    }
+
+    .user-details {
+        flex: 1;
+    }
+}

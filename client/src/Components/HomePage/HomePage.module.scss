@@ -1,0 +1,17 @@
+.inner {
+    width: 80%;
+    margin: 0px auto;
+}
+
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.header {
+    margin: 20px;
+    h2 {
+        text-align: center;
+    }
+}

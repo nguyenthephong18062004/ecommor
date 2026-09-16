@@ -1,0 +1,56 @@
+services:
+    mongodb:
+        image: mongo:7
+        container_name: mongodb
+        ports:
+            - '27017:27017'
+        volumes:
+            - mongodb_data:/data/db
+        restart: unless-stopped
+
+    ollama:
+        image: ollama/ollama
+        container_name: ollama
+        profiles:
+            - chatbot
+        ports:
+            - '11434:11434'
+        volumes:
+            - ollama_data:/root/.ollama
+        restart: unless-stopped
+        entrypoint: >
+            sh -c "
+              /bin/ollama serve & 
+              sleep 2 && 
+              /bin/ollama run GandalfBaum/llama3.2-claude3.7 && 
+              tail -f /dev/null
+            "
+
+    backend:
+        build: ./server
+        container_name: backend
+        restart: always
+        ports:
+            - '3000:3000'
+        environment:
+            - CONNECT_DB=mongodb://mongodb:27017/watch
+        volumes:
+            - ./server:/app
+        depends_on:
+            - mongodb
+        command: sh -c "npm install && npm run dev"
+
+    nginx:
+        image: nginx:alpine
+        container_name: nginx
+        ports:
+            - '80:80'
+        volumes:
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - ./client/dist:/usr/share/nginx/html
+        depends_on:
+            - backend
+
+volumes:
+    ollama_data:
+    mongodb_data:

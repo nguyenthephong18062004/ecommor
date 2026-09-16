@@ -1,0 +1,112 @@
+.wrapper {
+    width: 100%;
+    background-color: #f8f8f8;
+    padding: 40px 0;
+    margin-top: 20px;
+}
+
+.inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 15px;
+}
+
+.column {
+    flex: 1;
+    padding: 0 15px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.description {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.certification {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 20px;
+
+    img {
+        max-height: 50px;
+        width: auto;
+    }
+}
+
+.service-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+        margin-bottom: 12px;
+    }
+
+    a {
+        color: #555;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.2s ease;
+
+        &:hover {
+            color: #ff6600;
+        }
+    }
+}
+
+.contact-info {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+
+    .location {
+        margin-bottom: 15px;
+    }
+
+    .location-title {
+        margin-bottom: 5px;
+    }
+
+    .hotline {
+        color: #333;
+        font-weight: 500;
+        margin-top: 5px;
+    }
+
+    .phone-email {
+        margin-top: 15px;
+
+        p {
+            margin-bottom: 8px;
+        }
+    }
+
+    .company-info {
+        margin-top: 15px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+}
+
+// Responsive styles
+@media (max-width: 992px) {
+    .inner {
+        flex-direction: column;
+    }
+
+    .column {
+        margin-bottom: 30px;
+    }
+}

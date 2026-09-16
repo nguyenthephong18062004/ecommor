@@ -1,0 +1,27 @@
+.manager-user {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h2 {
+            margin: 0;
+        }
+    }
+
+    :global {
+        .ant-table-thead > tr > th {
+            background-color: #f7f7f7;
+            font-weight: 600;
+        }
+
+        .ant-switch-checked {
+            background-color: #52c41a;
+        }
+    }
+}

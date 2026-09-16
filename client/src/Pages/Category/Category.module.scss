@@ -1,0 +1,29 @@
+.banner {
+    img {
+        width: 100%;
+    }
+}
+
+.inner {
+    width: 80%;
+    margin: 20px auto;
+    h2 {
+        text-align: center;
+        border-bottom: 1px solid #ef683a;
+        padding-bottom: 10px;
+    }
+}
+
+.filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.list-product {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
