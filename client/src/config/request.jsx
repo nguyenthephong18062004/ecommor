@@ -1,4 +1,4 @@
-﻿import axios from 'axios';
+import axios from 'axios';
 import cookies from 'js-cookie';
 
 import { apiClient } from './axiosClient';
@@ -313,11 +313,11 @@ let isRefreshing = false;
 let failedRequestsQueue = [];
 
 request.interceptors.response.use(
-    (response) => response, // Tráº£ vá» náº¿u khĂ´ng cĂ³ lá»—i
+    (response) => response, // Trả về nếu không có lỗi
     async (error) => {
         const originalRequest = error.config;
 
-        // Náº¿u lá»—i 401 (Unauthorized) vĂ  request chÆ°a tá»«ng thá»­ refresh
+        // Nếu lỗi 401 (Unauthorized) và request chưa từng thử refresh
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
@@ -325,28 +325,28 @@ request.interceptors.response.use(
                 isRefreshing = true;
 
                 try {
-                    // Gá»­i yĂªu cáº§u refresh token
+                    // Gửi yêu cầu refresh token
                     const token = cookies.get('logged');
                     if (!token) {
                         return;
                     }
                     await requestRefreshToken();
 
-                    // Xá»­ lĂ½ láº¡i táº¥t cáº£ cĂ¡c request bá»‹ lá»—i 401 trÆ°á»›c Ä‘Ă³
+                    // Xử lý lại tất cả các request bị lỗi 401 trước đó
                     failedRequestsQueue.forEach((req) => req.resolve());
                     failedRequestsQueue = [];
                 } catch (refreshError) {
-                    // Náº¿u refresh tháº¥t báº¡i, Ä‘Äƒng xuáº¥t
+                    // Nếu refresh thất bại, đăng xuất
                     failedRequestsQueue.forEach((req) => req.reject(refreshError));
                     failedRequestsQueue = [];
                     localStorage.clear();
-                    window.location.href = '/login'; // Chuyá»ƒn vá» trang Ä‘Äƒng nháº­p
+                    window.location.href = '/login'; // Chuyển về trang đăng nhập
                 } finally {
                     isRefreshing = false;
                 }
             }
 
-            // Tráº£ vá» má»™t Promise Ä‘á»ƒ retry request sau khi token má»›i Ä‘Æ°á»£c cáº­p nháº­t
+            // Trả về một Promise để retry request sau khi token mới được cập nhật
             return new Promise((resolve, reject) => {
                 failedRequestsQueue.push({
                     resolve: () => {
@@ -360,4 +360,3 @@ request.interceptors.response.use(
         return Promise.reject(error);
     },
 );
-
