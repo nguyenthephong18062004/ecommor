@@ -177,7 +177,13 @@ function Messger() {
                                     className="rounded-full border-gray-200 hover:border-blue-400 focus:border-blue-500 transition-colors pr-12"
                                     size="large"
                                 />
-                                <Button type="text" className="absolute right-2 top-1/2 transform -translate-y-1/2" />
+                                <Button
+                                    type="text"
+                                    icon={<SendOutlined className="text-blue-500" />}
+                                    onClick={handleSendMessage}
+                                    disabled={!inputValue.trim()}
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-blue-50"
+                                />
                             </div>
                         </div>
                     </footer>
