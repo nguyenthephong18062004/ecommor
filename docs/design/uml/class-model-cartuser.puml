@@ -1,0 +1,23 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "cartUser" as M_cartUser <<Model>> {
+  userId : String {require=true; ref='user'}
+  product : Array<subdocument>
+  product[].productId : Schema.Types.ObjectId {ref='product'}
+  product[].quantity : Number {require=true}
+  fullName : String {require=true}
+  phone : String {require=true}
+  address : String {require=true}
+  note : String {require=true}
+  totalPrice : Number {require=true}
+  nameCoupon : String {require=true}
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "category" as M_category <<Model>> {
+  name : String {require=true}
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+@enduml

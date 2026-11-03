@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Radio, Row, Col, Typography, Space, Divider, AutoComplete } from 'antd';
-import { HomeOutlined, PhoneOutlined, UserOutlined, DollarOutlined, GiftOutlined } from '@ant-design/icons';
+import React, { useEffect, useRef, useState } from 'react';
+import { Form, Input, Button, Radio, Row, Col, Typography, Space, Divider, message } from 'antd';
+import { PhoneOutlined, UserOutlined, DollarOutlined, GiftOutlined } from '@ant-design/icons';
 import Footer from '../../Components/Footer/Footer';
 import Header from '../../Components/Header/Header';
 import styles from './CheckOut.module.scss';
 import classNames from 'classnames/bind';
 import { useStore } from '../../hooks/userStore';
 
-import axios from 'axios';
-import useDebounce from '../../hooks/useDebounce';
-import { requestCreatePayment, requestUpdateInfoCart } from '../../config/request';
+import { requestCreatePayment } from '../../config/request';
 import { useNavigate } from 'react-router-dom';
+import { uploadUrl } from '../../config/runtimeUrls';
+import ShippingCheckout from './ShippingCheckout';
+import ShippingInfo from '../../Components/ShippingInfo/ShippingInfo';
+import { SavedAddressSelect } from '../../Components/AddressBook';
 
 const { Title, Text } = Typography;
 
@@ -18,19 +20,13 @@ const cx = classNames.bind(styles);
 
 function CheckOut() {
     const [form] = Form.useForm();
-    const [addressOptions, setAddressOptions] = useState([]);
+    const [shippingQuote, setShippingQuote] = useState(null);
+    const nameCoupon = Form.useWatch('nameCoupon', form);
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [loading, setLoading] = useState(false);
-    const [address, setAddress] = useState('');
+    const submitting = useRef(false);
     const [coupon, setCoupon] = useState({});
 
-    const debounce = useDebounce(address, 500);
-
-    useEffect(() => {
-        if (debounce) {
-            onAddressSearch(debounce);
-        }
-    }, [debounce]);
 
     useEffect(() => {
         document.title = 'Thanh Toán';
@@ -49,31 +45,18 @@ function CheckOut() {
         image: item?.product.images.split(',')[0],
     }));
 
-    const onAddressSearch = (value) => {
-        if (!value || value.length < 3) {
-            setAddressOptions([]);
-            return;
-        }
-
-        // In a real application, this would make an API call to fetch address suggestions
-        setTimeout(async () => {
-            const response = await axios.get('https://rsapi.goong.io/Place/AutoComplete', {
-                params: {
-                    input: value,
-                    api_key: 'oAyJuGlP3ylS5UGBA3HgpppFgwaBhPUUrP7Xv5Ak',
-                },
-            });
-
-            const data = response.data.predictions;
-
-            setAddressOptions(data);
-        }, 300); // Simulate network delay
-    };
-
     const navigate = useNavigate();
 
     const onFinish = async (values) => {
+        if (submitting.current) return;
+        if (!shippingQuote || shippingQuote.method !== paymentMethod || new Date(shippingQuote.expiresAt) <= new Date()) {
+            message.warning('Vui lòng lấy báo giá GHN hợp lệ trước khi đặt hàng.'); return;
+        }
+        submitting.current = true;
+        setLoading(true);
         const data = {
+            cartId: dataCart?.cartId,
+            shippingQuoteId: shippingQuote.quoteId,
             fullName: values.fullName,
             phone: values.phone,
             address: values.address,
@@ -83,19 +66,19 @@ function CheckOut() {
             nameCoupon: values.nameCoupon,
         };
 
-        await requestUpdateInfoCart(data);
-        if (paymentMethod === 'COD') {
+        try {
             const res = await requestCreatePayment(data);
-            navigate(`/payments/${res.metadata._id}`);
-            await getCart();
-        }
-        if (paymentMethod === 'VNPAY') {
-            const res = await requestCreatePayment(data);
-            window.open(res.metadata, '_blank');
-        }
-        if (paymentMethod === 'MOMO') {
-            const res = await requestCreatePayment(data);
-            window.open(res.metadata, '_blank');
+            if (paymentMethod === 'COD') {
+                navigate(`/payments/${res.metadata._id}`);
+                await getCart().catch(() => message.warning('Đã tạo đơn; chưa cập nhật được giỏ hàng.'));
+            } else {
+                window.location.assign(res.metadata);
+            }
+        } catch (error) {
+            message.error(error.response?.data?.message || 'Không thể tạo thanh toán');
+        } finally {
+            submitting.current = false;
+            setLoading(false);
         }
     };
 
@@ -146,6 +129,7 @@ function CheckOut() {
                                 <Title level={3} className={cx('section-title')}>
                                     Thông tin giao hàng
                                 </Title>
+                                <SavedAddressSelect form={form} />
                                 <Form.Item
                                     name="fullName"
                                     label="Họ và tên"
@@ -165,23 +149,8 @@ function CheckOut() {
                                     <Input prefix={<PhoneOutlined />} placeholder="Nhập số điện thoại" size="large" />
                                 </Form.Item>
 
-                                <Form.Item
-                                    name="address"
-                                    label="Địa chỉ"
-                                    rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
-                                >
-                                    <AutoComplete
-                                        options={addressOptions.map((item) => ({
-                                            value: item.description,
-                                        }))}
-                                        placeholder="Nhập địa chỉ của bạn"
-                                        style={{ width: '100%' }}
-                                        onChange={(value) => setAddress(value)}
-                                        size="large"
-                                    >
-                                        <Input prefix={<HomeOutlined />} size="large" />
-                                    </AutoComplete>
-                                </Form.Item>
+                                <ShippingCheckout form={form} cart={dataCart} method={paymentMethod}
+                                    nameCoupon={nameCoupon} onQuoteChange={setShippingQuote} />
 
                                 <Form.Item name="notes" label="Ghi chú">
                                     <Input.TextArea
@@ -204,7 +173,7 @@ function CheckOut() {
                                             <div className={cx('item-info')}>
                                                 <img
                                                     className={cx('item-image')}
-                                                    src={`${import.meta.env.VITE_URL_IMAGE_API}/${item.image}`}
+                                                    src={uploadUrl(item.image)}
                                                     alt={item.nameProduct}
                                                 />
                                                 <div className={cx('item-details')}>
@@ -246,26 +215,14 @@ function CheckOut() {
                                 <Divider />
 
                                 <div className={cx('order-summary')}>
-                                    <div className={cx('summary-row', 'total')}>
-                                        <Text strong>Tổng cộng</Text>
-
-                                        {coupon?.discount ? (
-                                            <Text>Giảm giá {coupon.discount.toLocaleString('vi-VN')} VNĐ</Text>
-                                        ) : (
-                                            <Text>Không áp dụng mã giảm giá</Text>
-                                        )}
-
-                                        <Text strong className={cx('total-price')}>
-                                            {dataCart?.totalPrice
-                                                ? (dataCart.totalPrice - (coupon?.discount || 0)).toLocaleString(
-                                                      'vi-VN',
-                                                  ) + ' VNĐ'
-                                                : '0 VNĐ'}
-                                        </Text>
-                                    </div>
+                                    <p>Tiền hàng: {Number(dataCart?.totalPrice || 0).toLocaleString('vi-VN')}đ</p>
+                                    <p>Giảm giá: {Number(coupon?.discount || 0).toLocaleString('vi-VN')}đ</p>
+                                    <p>Thanh toán trước qua VNPay: shop hỗ trợ 50% phí ship. COD: khách trả đủ phí.</p>
+                                    {shippingQuote ? <>
+                                        <ShippingInfo shipping={shippingQuote} />
+                                        <Text strong>Tổng thanh toán: {shippingQuote.totalPrice.toLocaleString('vi-VN')}đ</Text>
+                                    </> : <Text type="secondary">Chọn địa chỉ và chờ báo giá GHN để biết tổng thanh toán.</Text>}
                                 </div>
-
-                                <Divider />
 
                                 <div className={cx('payment-section')}>
                                     <Title level={4} className={cx('section-title')}>
@@ -296,11 +253,11 @@ function CheckOut() {
                                                         </span>
                                                     </div>
                                                 </Radio>
-                                                <Radio value="MOMO" className={cx('payment-option')}>
+                                                <Radio disabled value="MOMO" className={cx('payment-option')}>
                                                     <div className={cx('payment-content')}>
                                                         {paymentIcons.MOMO}
                                                         <span className={cx('payment-label')}>
-                                                            Thanh toán qua Ví MoMo
+                                                            MoMo chưa hỗ trợ vận chuyển GHN
                                                         </span>
                                                     </div>
                                                 </Radio>
@@ -315,6 +272,7 @@ function CheckOut() {
                                     size="large"
                                     block
                                     loading={loading}
+                                    disabled={!shippingQuote || shippingQuote.method !== paymentMethod || !dataCart?.cartItems?.length}
                                     className={cx('submit-button')}
                                 >
                                     Đặt hàng

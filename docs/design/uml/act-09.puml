@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Khách hàng đã đăng nhập|
+start
+:Mở chat, tải lịch sử hoặc nhập tin;
+|Frontend|
+:POST message/create;
+|Backend|
+:authUser; tìm admin đầu tiên;
+if (Không có admin?) then (Có)
+ :Lỗi truy cập null;
+ stop
+endif
+:Lưu Message conversationId từ cặp id sort;
+if (Admin có socket?) then (Có)
+ :Emit newMessage;
+endif
+:Trả 201;
+|Quản trị viên|
+:Mở sidebar hội thoại, chọn khách;
+|Frontend|
+:GET all, read-message, get-message;
+|Backend|
+:Aggregate latest/unread; update isRead conversation;
+:Trả lịch sử;
+|Quản trị viên|
+:Gửi trả lời;
+|Backend|
+:authAdmin; lưu Message;
+if (Khách có socket?) then (Có)
+ :Emit newMessageUser;
+endif
+|Frontend|
+:Provider cập nhật message state;
+note right
+Socket được nhận diện bằng JWT cookie.
+Không có sự kiện đọc hoặc giao tin bắt buộc.
+end note
+stop
+@enduml

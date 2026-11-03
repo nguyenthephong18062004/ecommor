@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Quản trị viên|
+start
+:Chọn dashboard hoặc tab users;
+|Frontend|
+:GET statistical hoặc users;
+|Backend|
+:authAdmin từ DB;
+if (Đủ quyền?) then (Không)
+ :401;
+ stop
+endif
+if (Thống kê?) then (Có)
+ :Aggregate users;
+ :Aggregate products;
+ :Aggregate orders;
+ :Aggregate delivered revenue;
+ :Aggregate reviews;
+ if (Query lỗi?) then (Có)
+  :500 với message/error;
+  stop
+ endif
+ :200 metadata;
+ |Frontend|
+ :Hiển thị cards/charts;
+else (Users)
+ |Backend|
+ :Find all users, trả document;
+ |Quản trị viên|
+ if (Đổi quyền?) then (Có)
+  |Frontend|
+  :POST update-user-admin id/isAdminUser;
+  |Backend|
+  :authAdmin; gán isAdmin theo body;
+  :200 document user;
+ endif
+endif
+stop
+@enduml

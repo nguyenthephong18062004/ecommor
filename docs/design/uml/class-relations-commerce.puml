@@ -1,0 +1,32 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "user" as U <<Model>>
+class "cartUser" as C <<Model>>
+class "CartItem" as CI <<Embedded>>
+class "products" as P <<Model>>
+class "payments" as O <<Model>>
+class "OrderItem" as OI <<Embedded>>
+class "paymentAttempts" as A <<Model>>
+class "coupon" as CP <<Model>>
+class "category" as CT <<Model>>
+class "brand" as B <<Model>>
+U "0..1" <-- "0..*" C : userId String ref=user
+U "0..1" <-- "0..*" O : userId ref=users
+C "1" *-- "0..*" CI : product[]
+O "1" *-- "0..*" OI : product[] + snapshot
+CI "0..*" --> "0..1" P : productId ref=product
+OI "0..*" --> "0..1" P : productId ref=product
+O "0..1" <-- "0..*" A : orderId ref=payments
+C "0..*" ..> "0..1" CP : nameCoupon String id (không ref)
+O "0..*" ..> "0..1" CP : nameCoupon String id (không ref)
+P "0..*" ..> "0..1" CT : category String id (không ref)
+P "0..*" ..> "0..1" B : brand String name (không ref)
+note bottom of U
+Không có unique userId trên cartUser;
+không khẳng định một user chỉ một giỏ trong DB.
+end note
+@enduml

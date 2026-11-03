@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-21",
+  "command": "npm run lint",
+  "cwd": "client",
+  "exit_code": 0,
+  "status": "PASS",
+  "note": "Đã chạy một lần, không --fix; verify_design.py chỉ đọc lại kết quả này, không tự chạy lint."
+}

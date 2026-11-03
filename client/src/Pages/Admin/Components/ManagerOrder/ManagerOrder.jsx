@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Tag, Select, Button, Card, Typography, Space, Modal, Divider, Row, Col, message, Image } from 'antd';
 import { requestGetOrderAdmin, requestUpdateOrderStatus } from '../../../../config/request';
+import { uploadUrl } from '../../../../config/runtimeUrls';
+import ShippingPanel from './ShippingPanel';
+import { shippingStatus } from '../../../../utils/shippingStatus';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -21,6 +24,7 @@ function ManagerOrder() {
             const response = await requestGetOrderAdmin();
             setOrders(response.metadata);
             setLoading(false);
+            return response.metadata;
         } catch (error) {
             console.error('Error fetching orders:', error);
             setLoading(false);
@@ -36,17 +40,17 @@ function ManagerOrder() {
             };
             await requestUpdateOrderStatus(data);
 
-            setOrders(orders.map((order) => (order._id === orderId ? { ...order, status: newStatus } : order)));
+            const refreshed = await fetchOrders();
 
             message.success(`Trạng thái đơn hàng đã được thay đổi thành ${translateStatus(newStatus)}`);
 
             // Nếu đang xem chi tiết đơn hàng này, cập nhật trạng thái
             if (selectedOrder && selectedOrder._id === orderId) {
-                setSelectedOrder({ ...selectedOrder, status: newStatus });
+                setSelectedOrder(refreshed?.find((order) => order._id === orderId) || { ...selectedOrder, status: newStatus });
             }
         } catch (error) {
             console.error('Error updating order status:', error);
-            message.error('Không thể cập nhật trạng thái đơn hàng');
+            message.error(error.response?.data?.message || 'Không thể cập nhật trạng thái đơn hàng');
         }
     };
 
@@ -106,6 +110,13 @@ function ManagerOrder() {
         }
     };
 
+    const statusChoices = (order) => (
+        { pending: ['confirmed', 'cancelled'], confirmed: ['shipped', 'cancelled'], shipped: ['delivered'] }[order.status] || []
+    ).filter((status) => {
+        if (order.paymentMethod !== 'VNPAY') return status !== 'cancelled' || order.paymentMethod === 'COD';
+        return status === 'cancelled' ? ['pending', 'failed', 'expired'].includes(order.paymentStatus) : order.paymentStatus === 'paid';
+    });
+
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleString('vi-VN');
     };
@@ -151,6 +162,21 @@ function ManagerOrder() {
             render: (status) => <Tag color={getStatusColor(status)}>{translateStatus(status)}</Tag>,
         },
         {
+            title: 'Thanh toán',
+            dataIndex: 'paymentStatus',
+            key: 'paymentStatus',
+            render: (status) => <Tag color={status === 'paid' ? 'green' : status === 'refund_required' ? 'red' : 'orange'}>{({
+                pending: 'Chờ thanh toán', paid: 'Đã thanh toán', failed: 'Thất bại', expired: 'Hết hạn',
+                refund_required: 'Cần đối soát/hoàn tiền', unpaid: 'Chưa thanh toán',
+            })[status] || 'Cần xác minh'}</Tag>,
+        },
+        {
+            title: 'Vận đơn GHN', key: 'ghn',
+            render: (_, order) => order.shipment?.code ? <Space direction="vertical" size={0}>
+                <Text copyable>{order.shipment.code}</Text><Tag>{shippingStatus(order.shipment.status)}</Tag>
+            </Space> : <Text type="secondary">{order.shipment?.state === 'unknown' ? 'Cần đồng bộ' : 'Chưa tạo'}</Text>,
+        },
+        {
             title: 'Thao tác',
             key: 'actions',
             render: (_, record) => (
@@ -163,12 +189,11 @@ function ManagerOrder() {
                         style={{ width: 150 }}
                         size="small"
                         onChange={(value) => handleStatusChange(record._id, value)}
+                        disabled={record.paymentStatus === 'refund_required'}
                     >
-                        <Option value="pending">Chờ xác nhận</Option>
-                        <Option value="confirmed">Đã xác nhận</Option>
-                        <Option value="shipped">Đang giao hàng</Option>
-                        <Option value="delivered">Đã giao hàng</Option>
-                        <Option value="cancelled">Đã hủy</Option>
+                        <Option value={record.status}>{translateStatus(record.status)}</Option>
+                        {statusChoices(record)
+                            .map((status) => <Option key={status} value={status}>{translateStatus(status)}</Option>)}
                     </Select>
                 </Space>
             ),
@@ -184,7 +209,7 @@ function ManagerOrder() {
                 <Image
                     width={70}
                     height={70}
-                    src={`${import.meta.env.VITE_URL_IMAGE_API}/${images.split(',')[0]}`}
+                    src={uploadUrl(images.split(',')[0])}
                     alt="Sản phẩm"
                     style={{ objectFit: 'cover' }}
                     preview={false}
@@ -284,6 +309,10 @@ function ManagerOrder() {
                         <Divider />
 
                         <Title level={5}>Thông tin thanh toán</Title>
+                        <ShippingPanel order={selectedOrder} onChange={shipment => {
+                            setSelectedOrder(previous => ({ ...previous, shipment }));
+                            setOrders(previous => previous.map(order => order._id === selectedOrder._id ? { ...order, shipment } : order));
+                        }} />
                         <Row gutter={[16, 8]}>
                             <Col span={24}>
                                 <Text strong>Phương thức:</Text> {translatePaymentMethod(selectedOrder.paymentMethod)}
@@ -304,15 +333,38 @@ function ManagerOrder() {
                                     value={selectedOrder.status}
                                     style={{ width: 200 }}
                                     onChange={(value) => handleStatusChange(selectedOrder._id, value)}
+                                    disabled={selectedOrder.paymentStatus === 'refund_required'}
                                 >
-                                    <Option value="pending">Chờ xác nhận</Option>
-                                    <Option value="confirmed">Đã xác nhận</Option>
-                                    <Option value="shipped">Đang giao hàng</Option>
-                                    <Option value="delivered">Đã giao hàng</Option>
-                                    <Option value="cancelled">Đã hủy</Option>
+                                    <Option value={selectedOrder.status}>{translateStatus(selectedOrder.status)}</Option>
+                                    {statusChoices(selectedOrder)
+                                        .map((status) => <Option key={status} value={status}>{translateStatus(status)}</Option>)}
                                 </Select>
                             </Col>
                         </Row>
+                        {selectedOrder.paymentAttempts?.length > 0 && (
+                            <>
+                                <Divider />
+                                <Title level={5}>Giao dịch VNPay</Title>
+                                <Table
+                                    dataSource={selectedOrder.paymentAttempts}
+                                    rowKey="transactionRef"
+                                    size="small"
+                                    pagination={false}
+                                    scroll={{ x: 900 }}
+                                    columns={[
+                                        { title: 'TxnRef', dataIndex: 'transactionRef' },
+                                        { title: 'Mã VNPay', dataIndex: 'transactionNo' },
+                                        { title: 'Số tiền', dataIndex: 'amount', render: formatPrice },
+                                        { title: 'Ngân hàng', dataIndex: 'bankCode' },
+                                        { title: 'Response', dataIndex: 'responseCode' },
+                                        { title: 'Status', dataIndex: 'transactionStatus' },
+                                        { title: 'PayDate', dataIndex: 'payDate' },
+                                        { title: 'Nhận IPN', dataIndex: 'receivedAt', render: (value) => value ? formatDate(value) : '' },
+                                        { title: 'Đối soát', dataIndex: 'status' },
+                                    ]}
+                                />
+                            </>
+                        )}
                     </div>
                 )}
             </Modal>

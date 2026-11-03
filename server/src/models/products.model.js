@@ -21,16 +21,31 @@ const modelProduct = new Schema(
         strapMaterial: { type: String, required: true }, // Dây đeo
         faceColor: { type: String }, // Màu mặt số
         waterResistance: { type: String, required: true }, // Chống nước
-        price: { type: Number, required: true },
-        discount: { type: Number, default: 0 },
+        price: { type: Number, required: true, min: 0, validate: Number.isSafeInteger },
+        discount: { type: Number, default: 0, min: 0, max: 100 },
         description: { type: String, required: true },
         images: { type: String, required: true },
-        stock: { type: Number, required: true },
+        stock: { type: Number, required: true, min: 0, max: 1000000, validate: Number.isSafeInteger },
+        publicationStatus: { type: String, enum: ['preview', 'published', 'archived'], default: 'preview' },
+        verificationStatus: { type: String, enum: ['unverified', 'verified', 'demo'], default: 'unverified' },
+        verificationNote: { type: String, maxlength: 2000 },
+        allowPreorder: { type: Boolean, default: false },
+        expectedRestockAt: Date,
+        condition: { type: String, enum: ['new', 'preowned'] },
+        boxPapers: { type: String, maxlength: 2000 },
+        searchText: { type: String, select: false },
+        shippingPackage: {
+            type: new Schema({ weight: Number, length: Number, width: Number, height: Number }, { _id: false }),
+            default: undefined,
+        },
         soldCount: { type: Number, default: 0 },
     },
     {
         timestamps: true,
     },
 );
+
+modelProduct.index({ publicationStatus: 1, brand: 1, createdAt: -1, _id: -1 });
+modelProduct.index({ publicationStatus: 1, category: 1, createdAt: -1, _id: -1 });
 
 module.exports = mongoose.model('products', modelProduct);

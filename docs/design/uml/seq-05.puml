@@ -1,0 +1,39 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách vãng lai" as U
+participant "LoginUser.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+participant "Google" as E
+U -> E : GoogleLogin popup
+E --> UI : credential
+UI -> A : requestLoginGoogle(credential)
+A -> R : POST /api/login-google
+R -> C : loginGoogle()
+alt Thiếu credential/GOOGLE_CLIENT
+C --> A : 403 Không thể xác thực Google
+else Có cấu hình
+C -> E : verifyIdToken(audience GOOGLE_CLIENT)
+alt Token sai / email chưa verified
+C --> A : 403 Google credential không hợp lệ / email chưa xác minh
+else Token được xác minh
+C -> DB : user.findOne(email)
+opt Email mới
+C -> DB : user.create(typeLogin=google)
+end
+C -> S : Rotate RSA; ký access/refresh
+S -> DB : apikey upsert/read
+C --> A : 200 + cookie phiên
+UI -> A : Auth + cart
+UI -> UI : Điều hướng theo isAdmin
+end
+end
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách hàng đã đăng nhập" as U
+participant "PaymentSuccess.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+participant "VNPay" as E
+U -> UI : Thanh toán lại
+UI -> A : requestRetryVnpay(idOrder)
+A -> R : POST /api/retry-payment-vnpay
+R -> W : authUser
+W -> C : retryVnpay()
+C -> S : retry(req)
+S -> DB : Transaction; order thuộc user, VNPAY, status pending
+alt Không đủ điều kiện / paymentStatus ngoài pending-failed-expired
+S --> A : 409 Order cannot be paid
+else paymentStatus=pending
+S -> DB : Read attempt với +paymentUrl
+alt Attempt còn hạn
+S --> A : 200 URL hiện tại
+else Đã quá hạn nhưng worker chưa xử lý
+S --> A : 409 Payment is awaiting expiry processing; retry shortly
+end
+else paymentStatus failed/expired
+S -> DB : Reserve kho/coupon theo snapshot
+alt Thiếu kho/coupon
+S -> DB : Rollback
+S --> A : 400
+else Reserve thành công
+S -> S : newAttempt() ref mới
+S -> DB : Save attempt và order pending; commit
+S --> A : 200 URL mới
+end
+end
+A --> UI : URL hoặc message.error
+opt Có URL
+UI -> E : Browser chuyển VNPay
+end
+@enduml

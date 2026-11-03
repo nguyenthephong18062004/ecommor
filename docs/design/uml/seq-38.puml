@@ -1,0 +1,33 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Quản trị viên" as U
+participant "ManagerStatistical.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+database "Model / MongoDB" as DB
+U -> UI : Mở dashboard
+UI -> A : requestStatistical()
+A -> R : GET /api/statistical
+R -> W : authAdmin
+W -> C : getStatistical()
+C -> DB : aggregate users facets
+C -> DB : aggregate products total/category/topSelling
+C -> DB : aggregate orders status/paymentMethod
+C -> DB : aggregate delivered revenue total/month/7 days
+C -> DB : aggregate reviews total/average/bestRated
+alt Các query thành công
+C --> A : 200 metadata kết quả
+A --> UI : Cards/biểu đồ/bảng
+else Query lỗi
+C --> A : 500 message + error.message
+end
+note over C,DB : Các aggregate chạy tuần tự; không dùng par;
+note over C,DB : loginType/product/name khác field schema thực tế (xem 05)
+@enduml

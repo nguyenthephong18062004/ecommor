@@ -1,0 +1,16 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "blog" as M_blog <<Model>> {
+  title : String {require=true}
+  content : String {require=true}
+  image : String {require=true}
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+@enduml

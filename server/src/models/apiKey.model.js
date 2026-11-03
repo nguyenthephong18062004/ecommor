@@ -4,9 +4,9 @@ const Schema = mongoose.Schema;
 
 const modelApiKey = new Schema(
     {
-        userId: { type: String, require: true, ref: 'user' },
-        publicKey: { type: String, require: true },
-        privateKey: { type: String, require: true },
+        userId: { type: String, required: true, unique: true, index: true, ref: 'user' },
+        publicKey: { type: String, required: true },
+        privateKey: { type: String, required: true },
     },
     {
         timestamps: true,

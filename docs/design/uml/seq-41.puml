@@ -1,0 +1,22 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách vãng lai" as U
+participant "Contact.jsx" as UI
+participant "Google Maps và các kênh liên hệ (liên kết ngoài)" as E
+U -> UI : Mở /contact
+UI -> UI : Đọc config/contactInfo.js và render
+alt Có phone/email/social link
+UI --> U : Hiển thị liên kết
+opt Người dùng click
+U -> E : Mở tel/mailto/bản đồ/mạng xã hội
+end
+else Chưa cấu hình
+UI --> U : Đang cập nhật / liên kết chưa có
+end
+note over UI : Không gọi API backend hoặc ghi dữ liệu
+@enduml

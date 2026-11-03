@@ -1,6 +1,8 @@
 const modelCart = require('../models/cartUser.model');
 const modelProduct = require('../models/products.model');
 const modelCoupon = require('../models/coupon.model');
+const mongoose = require('mongoose');
+const { assertSale } = require('../services/product-data.service');
 
 const { BadRequestError } = require('../core/error.response');
 const { Created, OK } = require('../core/success.response');
@@ -14,15 +16,17 @@ function calculateItemPrice(price, quantity, discount) {
 }
 
 async function quantityProduct(productId, quantity) {
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+        throw new BadRequestError('Số lượng sản phẩm không hợp lệ');
+    }
     const findProduct = await modelProduct.findById(productId);
     if (!findProduct) {
         throw new BadRequestError('Sản phẩm không tồn tại');
     }
+    assertSale(findProduct);
     if (quantity > findProduct.stock) {
         throw new BadRequestError('Số lượng sản phẩm không đủ');
     }
-    findProduct.stock -= quantity;
-    await findProduct.save();
 }
 
 class controllerCartUser {
@@ -31,7 +35,7 @@ class controllerCartUser {
         const { productId, quantity } = req.body;
 
         if (!id || !productId) {
-            throw new BadRequestError('Missing required fields');
+            throw new BadRequestError('Vui lòng nhập đầy đủ thông tin bắt buộc.');
         }
 
         // Tìm thông tin sản phẩm
@@ -43,6 +47,7 @@ class controllerCartUser {
         // Hàm tính tổng giá
 
         // Tính giá cho sản phẩm hiện tại
+        await quantityProduct(productId, quantity);
         const itemPrice = calculateItemPrice(findDataProduct?.price, quantity, findDataProduct.discount);
 
         // Tìm giỏ hàng của người dùng
@@ -53,6 +58,7 @@ class controllerCartUser {
             const findProduct = findCartUser.product.find((item) => item.productId.toString() === productId);
 
             if (findProduct) {
+                await quantityProduct(productId, findProduct.quantity + quantity);
                 // Nếu sản phẩm đã có trong giỏ hàng, cập nhật số lượng
                 findProduct.quantity += quantity;
             } else {
@@ -80,7 +86,6 @@ class controllerCartUser {
             }
 
             findCartUser.totalPrice = totalPrice;
-            await quantityProduct(productId, quantity);
             await findCartUser.save();
 
             new OK({
@@ -100,8 +105,6 @@ class controllerCartUser {
                 ],
                 totalPrice: itemPrice,
             });
-            await quantityProduct(productId, quantity);
-
             new Created({
                 message: 'Thêm sản phẩm vào giỏ hàng thành công',
                 statusCode: 201,
@@ -113,35 +116,46 @@ class controllerCartUser {
     async getCart(req, res) {
         const { id } = req.user;
         const findCartUser = await modelCart.findOne({ userId: id });
+        if (!findCartUser) {
+            return new OK({
+                message: 'Giỏ hàng trống',
+                statusCode: 200,
+                metadata: { cartItems: [], totalPrice: 0, dataCoupon: [] },
+            }).send(res);
+        }
+
+        const cartItems = (
+            await Promise.all(
+                findCartUser.product.map(async (item) => {
+                    if (!mongoose.isValidObjectId(item.productId)) return null;
+
+                    const product = await modelProduct.findById(item.productId);
+                    return product ? { item, product } : null;
+                }),
+            )
+        ).filter(Boolean);
+        const totalPrice = cartItems.reduce(
+            (total, { item, product }) => total + calculateItemPrice(product.price, item.quantity, product.discount),
+            0,
+        );
+
+        if (cartItems.length !== findCartUser.product.length || findCartUser.totalPrice !== totalPrice) {
+            findCartUser.product = cartItems.map(({ item }) => item);
+            findCartUser.totalPrice = totalPrice;
+            await findCartUser.save();
+        }
+
         const currentDate = new Date();
         const dataCoupon = await modelCoupon.find({
-            minPrice: { $lte: findCartUser.totalPrice },
+            minPrice: { $lte: totalPrice },
             quantity: { $gt: 0 },
             startDate: { $lte: currentDate },
             endDate: { $gte: currentDate },
         });
-        if (!findCartUser) {
-            new OK({
-                message: 'Giỏ hàng trống',
-                statusCode: 200,
-                metadata: [],
-            }).send(res);
-        }
-
-        const cartItems = await Promise.all(
-            findCartUser.product.map(async (item) => {
-                const product = await modelProduct.findById(item.productId);
-                return {
-                    item,
-                    product,
-                };
-            }),
-        );
-        const totalPrice = findCartUser.totalPrice;
         new OK({
             message: 'Lấy giỏ hàng thành công',
             statusCode: 200,
-            metadata: { cartItems, totalPrice, dataCoupon },
+            metadata: { cartId: findCartUser._id, cartItems, totalPrice, dataCoupon },
         }).send(res);
     }
 
@@ -170,7 +184,6 @@ class controllerCartUser {
 
         // Xóa sản phẩm khỏi giỏ hàng
         findCartUser.product = findCartUser.product.filter((item) => item.productId.toString() !== productId);
-        await modelProduct.findByIdAndUpdate(productId, { $inc: { stock: findProduct.quantity } });
         // Cập nhật tổng giá
         findCartUser.totalPrice = findCartUser.totalPrice - itemPrice;
         await findCartUser.save();
@@ -185,6 +198,8 @@ class controllerCartUser {
     async updateProductCart(req, res) {
         const { id } = req.user;
         const { productId, quantity } = req.body;
+
+        await quantityProduct(productId, quantity);
 
         const findCartUser = await modelCart.findOne({ userId: id });
         if (!findCartUser) {
@@ -207,7 +222,6 @@ class controllerCartUser {
 
         // Tính giá mới của sản phẩm sau khi cập nhật số lượng
         const newItemPrice = calculateItemPrice(productInfo.price, quantity, productInfo.discount);
-        await modelProduct.findByIdAndUpdate(productId, { $inc: { stock: findProduct.quantity - quantity } });
         // Cập nhật số lượng và tổng giá
         findProduct.quantity = quantity;
         findCartUser.totalPrice = findCartUser.totalPrice - oldItemPrice + newItemPrice;

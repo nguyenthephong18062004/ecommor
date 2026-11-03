@@ -15,6 +15,7 @@ const { Text, Title } = Typography;
 function ChatWindow({ selectedUser, messages, setMessages }) {
     const [inputValue, setInputValue] = useState('');
     const messagesEndRef = useRef(null);
+    const handledMessageIdRef = useRef(null);
     const { dataUser, newMessageAdmin } = useStore();
 
     const scrollToBottom = () => {
@@ -22,10 +23,21 @@ function ChatWindow({ selectedUser, messages, setMessages }) {
     };
 
     useEffect(() => {
-        if (newMessageAdmin && selectedUser && newMessageAdmin.senderId === selectedUser.senderId) {
-            setMessages((prevMessages) => [...prevMessages, newMessageAdmin]);
+        const messageId = newMessageAdmin?._id;
+
+        if (
+            !messageId ||
+            handledMessageIdRef.current === messageId ||
+            selectedUser?.senderId !== newMessageAdmin.senderId
+        ) {
+            return;
         }
-    }, [newMessageAdmin]);
+
+        handledMessageIdRef.current = messageId;
+        setMessages((prevMessages) =>
+            prevMessages.some((message) => message._id === messageId) ? prevMessages : [...prevMessages, newMessageAdmin],
+        );
+    }, [newMessageAdmin, selectedUser?.senderId, setMessages]);
 
     useEffect(() => {
         scrollToBottom();

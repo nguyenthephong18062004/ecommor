@@ -1,0 +1,49 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách vãng lai" as U
+participant "Register.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+participant "Gmail" as E
+U -> UI : Nhập thông tin và submit
+UI -> A : requestRegister(body)
+A -> R : POST /api/register
+R -> W : otpSendLimiter
+alt Quá giới hạn IP
+W --> A : 429
+else Được xử lý
+W -> C : registerWithVerification()
+alt Dữ liệu thiếu hoặc email sai
+C --> A : 400 Registration information is invalid
+else Dữ liệu hợp lệ
+C -> DB : user.findOne(email chuẩn hóa)
+alt Email đã có
+C --> A : 202 thông báo chung
+else Email chưa có
+C -> S : issue(verifyAccount, registration đã bcrypt)
+S -> DB : Đọc otp; kiểm cooldown/window; update/create mã đã hash
+alt Cooldown/rate record
+S --> A : 429
+else Đã issue
+C -> E : mailService.sendOtpEmail()
+alt Mail thất bại
+E --> A : 503 Email delivery is unavailable.
+else Mail được chấp nhận
+C --> A : 201 Registration created...
+end
+end
+end
+end
+end
+A --> UI : Response hoặc lỗi
+UI -> UI : Thành công: bước nhập OTP; lỗi: message.error
+@enduml

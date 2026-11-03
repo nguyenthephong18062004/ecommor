@@ -1,0 +1,31 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "otp" as M_otp <<Model>> {
+  email : String {required=true; trim=true; lowercase=true; ref='user'}
+  otp : String {required=true}
+  time : Date {default=Date.now; index={ expires: 600 }}
+  type : M_otp_Enum3 {required=true}
+  attempts : Number {default=0; min=0}
+  resendAvailableAt : Date
+  sendWindowStartedAt : Date
+  sendCount : Number {default=0; min=0}
+  registration : Object nhúng
+  registration.fullName : String
+  registration.passwordHash : String
+  registration.phone : String
+  registration.address : String
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+enum "Enum3" as M_otp_Enum3 <<enumeration>> {
+  forgotPassword
+  verifyAccount
+}
+M_otp --> M_otp_Enum3
+@enduml

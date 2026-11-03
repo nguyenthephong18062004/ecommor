@@ -1,0 +1,96 @@
+validation/
+sample-*
+__pycache__/
+*.pyc
+*.vpp.bak_*
+*.vpp.lck
+*.lck
+
+# Additional exports created by VP XML export; canonical names are in the catalog.
+/images/act-01 — Đăng ký và xác minh email2.png
+/images/act-02 — Đăng nhập và phân quyền2.png
+/images/act-03 — Khôi phục mật khẩu2.png
+/images/act-04 — Mua hàng2.png
+/images/act-05 — VNPay Return và xác nhận2.png
+/images/act-06 — VNPay hết hạn và đối soát2.png
+/images/act-07 — Xử lý đơn hàng2.png
+/images/act-08 — Quản lý catalog2.png
+/images/act-09 — Chat realtime2.png
+/images/act-10 — Chatbot Gemini2.png
+/images/act-11 — Thống kê và người dùng2.png
+/images/act-12 — Blog2.png
+/images/act-13 — MoMo legacy2.png
+/images/act-state-order2.png
+/images/act-state-payment2.png
+/images/class-architecture2.png
+/images/class-backend-account2.png
+/images/class-backend-commerce2.png
+/images/class-backend-content2.png
+/images/class-client-admin2.png
+/images/class-client-core2.png
+/images/class-client-storefront2.png
+/images/class-model-apikey2.png
+/images/class-model-blog2.png
+/images/class-model-brand2.png
+/images/class-model-cartuser2.png
+/images/class-model-category2.png
+/images/class-model-coupon2.png
+/images/class-model-message2.png
+/images/class-model-otp2.png
+/images/class-model-paymentattempts2.png
+/images/class-model-payments2.png
+/images/class-model-previewproduct2.png
+/images/class-model-products2.png
+/images/class-model-user2.png
+/images/class-relations-account2.png
+/images/class-relations-commerce2.png
+/images/seq-01 — Đăng ký tài khoản2.png
+/images/seq-02 — Xác minh email đăng ký2.png
+/images/seq-03 — Gửi lại mã xác minh đăng ký2.png
+/images/seq-04 — Đăng nhập email2.png
+/images/seq-05 — Đăng nhập Google2.png
+/images/seq-06 — Kiểm tra và gia hạn phiên2.png
+/images/seq-07 — Đăng xuất2.png
+/images/seq-08 — Khôi phục mật khẩu bằng OTP2.png
+/images/seq-09 — Xem và cập nhật hồ sơ2.png
+/images/seq-10 — Xem catalog trang chủ2.png
+/images/seq-11 — Tìm kiếm và lọc sản phẩm2.png
+/images/seq-12 — Xem chi tiết sản phẩm và đánh giá2.png
+/images/seq-13 — Tạo đánh giá sản phẩm2.png
+/images/seq-14 — Xem giỏ hàng2.png
+/images/seq-15 — Thêm sản phẩm vào giỏ2.png
+/images/seq-16 — Sửa số lượng giỏ2.png
+/images/seq-17 — Xóa sản phẩm khỏi giỏ2.png
+/images/seq-18 — Chọn coupon và thông tin giao hàng2.png
+/images/seq-19 — Đặt hàng COD2.png
+/images/seq-20 — Khởi tạo thanh toán VNPay2.png
+/images/seq-21 — Hiển thị kết quả Return VNPay2.png
+/images/seq-22 — Xác nhận IPN VNPay2.png
+/images/seq-23 — Thanh toán lại VNPay2.png
+/images/seq-24 — Đối soát trạng thái VNPay2.png
+/images/seq-25 — Thanh toán MoMo2.png
+/images/seq-26 — Xem đơn hàng của mình2.png
+/images/seq-27 — Hủy đơn hàng của mình2.png
+/images/seq-28 — Đọc blog2.png
+/images/seq-29 — Chat với quản trị viên2.png
+/images/seq-30 — Quản trị hội thoại2.png
+/images/seq-31 — Tư vấn bằng chatbot Gemini2.png
+/images/seq-32 — Quản lý sản phẩm2.png
+/images/seq-33 — Quản lý danh mục2.png
+/images/seq-34 — Quản lý coupon2.png
+/images/seq-35 — Quản lý bài viết2.png
+/images/seq-36 — Xem người dùng và đổi quyền2.png
+/images/seq-37 — Xử lý đơn hàng phía quản trị2.png
+/images/seq-38 — Xem thống kê2.png
+/images/seq-39 — Tải ảnh sản phẩm hoặc blog2.png
+/images/seq-40 — Xem danh sách thương hiệu2.png
+/images/seq-41 — Xem thông tin liên hệ2.png
+/images/uc-module-012.png
+/images/uc-module-022.png
+/images/uc-module-032.png
+/images/uc-module-042.png
+/images/uc-module-052.png
+/images/uc-module-062.png
+/images/uc-module-072.png
+/images/uc-module-082.png
+/images/uc-overview2.png

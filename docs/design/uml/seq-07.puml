@@ -1,0 +1,31 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách hàng đã đăng nhập" as U
+participant "Header.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+U -> UI : Chọn đăng xuất
+UI -> A : requestLogout()
+A -> R : GET /api/logout
+R -> C : logout()
+opt Có access token
+C -> S : verifyToken()
+alt Verify thành công
+S -> DB : Đọc key
+C -> DB : apikey.deleteMany(userId)
+else Verify lỗi / access hết hạn
+C -> C : catch; tiếp tục clear cookie
+end
+end
+C --> A : 200 + Clear-Cookie token/refreshToken/logged
+A --> UI : ClearAuth hoặc chuyển /login
+note over C,DB : Không verify refresh để thu hồi key khi access hết hạn
+@enduml

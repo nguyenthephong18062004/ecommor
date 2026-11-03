@@ -8,7 +8,7 @@ function useDebounce(value, delay) {
         // tao effect
         const handler = setTimeout(() => setDebounceValue(value), delay); // xét thời gian gọi API
         return () => clearTimeout(handler); // clear timeout
-    }, [value]); // xét lại value, nếu thay đổi thì set code useeffect
+    }, [value, delay]); // xét lại value/delay, nếu thay đổi thì set code useeffect
     return debounceValue; // trả về value để gọi api
 }
 

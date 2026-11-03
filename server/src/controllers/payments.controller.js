@@ -6,12 +6,10 @@ const modelCoupon = require('../models/coupon.model');
 const { BadRequestError } = require('../core/error.response');
 const { Created, OK } = require('../core/success.response');
 
-const querystring = require('querystring');
-
 const crypto = require('crypto');
 const axios = require('axios');
 
-const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
+const vnpayService = require('../services/vnpay.service');
 
 require('dotenv').config();
 
@@ -23,74 +21,55 @@ async function caclulateTotalPrice(cart) {
     return cart.totalPrice;
 }
 
+function requireConfig(name, value) {
+    if (!value) {
+        throw new Error(`Missing required configuration: ${name}`);
+    }
+    return value;
+}
+
+async function releaseInventory(items) {
+    await Promise.all(
+        items.map((item) => modelProduct.updateOne({ _id: item.productId }, { $inc: { stock: item.quantity } })),
+    );
+}
+
+async function reserveInventory(items) {
+    const reservedItems = [];
+
+    try {
+        for (const item of items) {
+            if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+                throw new BadRequestError('Số lượng sản phẩm không hợp lệ');
+            }
+
+            const result = await modelProduct.updateOne(
+                { _id: item.productId, stock: { $gte: item.quantity } },
+                { $inc: { stock: -item.quantity } },
+            );
+            if (result.modifiedCount !== 1) {
+                throw new BadRequestError('Sản phẩm không đủ tồn kho');
+            }
+            reservedItems.push(item);
+        }
+    } catch (error) {
+        await releaseInventory(reservedItems);
+        throw error;
+    }
+}
+
 class controllerPayments {
     async createPayment(req, res) {
-        const { id } = req.user;
         const { typePayment } = req.body;
         if (!typePayment) {
             throw new BadRequestError('Vui lòng chọn phương thức thanh toán');
         }
-        const findCart = await modelCart.findOne({ userId: id });
-        if (!findCart) {
-            throw new BadRequestError('Không tìm thấy giỏ hàng');
+        if (typePayment === 'COD' || typePayment === 'VNPAY') {
+            const metadata = await vnpayService.checkout(req);
+            return new Created({ message: 'Tạo đơn hàng thành công', metadata }).send(res);
         }
-        if (!findCart.fullName || !findCart.phone || !findCart.address) {
-            throw new BadRequestError('Vui lòng nhập đầy đủ thông tin');
-        }
-        if (typePayment === 'COD') {
-            const payment = await modelPayments.create({
-                userId: id,
-                product: findCart.product,
-                fullName: findCart.fullName,
-                phone: findCart.phone,
-                address: findCart.address,
-                note: findCart.note,
-                totalPrice: await caclulateTotalPrice(findCart),
-                status: 'pending',
-                nameCoupon: findCart.nameCoupon,
-                paymentMethod: 'COD',
-            });
-            await modelCoupon.updateOne({ _id: findCart.nameCoupon }, { $inc: { quantity: -1 } });
-            await modelCart.findByIdAndDelete(findCart._id);
-            new Created({
-                message: 'Tạo đơn hàng thành công',
-                statusCode: 201,
-                metadata: payment,
-            }).send(res);
-        }
-        if (typePayment === 'VNPAY') {
-            const vnpay = await new VNPay({
-                // Thông tin cấu hình bắt buộc
-                tmnCode: 'GS1I559X',
-                secureSecret: 'WWS2Y89FTXLSQKVH54CERAMWNAJMNUB5',
-                vnpayHost: 'https://sandbox.vnpayment.vn/merchantv2',
-                // Cấu hình tùy chọn
-                testMode: true, // Chế độ test
-                hashAlgorithm: 'SHA512', // Thuật toán mã hóa
-                enableLog: true, // Bật/tắt ghi log
-                loggerFn: ignoreLogger, // Hàm xử lý log tùy chỉnh
-            });
-
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const resVnpay = vnpay.buildPaymentUrl({
-                vnp_Amount: await caclulateTotalPrice(findCart), //
-                vnp_IpAddr: '127.0.0.1', //
-                vnp_TxnRef: findCart._id, //
-                vnp_OrderInfo: findCart._id, //
-                vnp_OrderType: ProductCode.Other,
-                vnp_ReturnUrl: `http://localhost:3000/api/check-payment-vnpay`, //
-                vnp_Locale: VnpLocale.VN, // 'vn' hoặc 'en'
-                vnp_CreateDate: dateFormat(new Date()), // tùy chọn, mặc định là hiện tại
-                vnp_ExpireDate: dateFormat(tomorrow), // tùy chọn
-            });
-
-            new Created({
-                message: 'Tạo đơn hàng thành công',
-                statusCode: 201,
-                metadata: resVnpay,
-            }).send(res);
-        }
+        if (typePayment === 'MOMO') throw new BadRequestError('MoMo chưa hỗ trợ báo giá GHN. Vui lòng chọn COD hoặc VNPay.', 400);
+        if (typePayment !== 'MOMO') throw new BadRequestError('Phương thức thanh toán không hợp lệ', 400);
         if (typePayment === 'MOMO') {
             const { id } = req.user;
             const findCart = await modelCart.findOne({ userId: id });
@@ -102,15 +81,15 @@ class controllerPayments {
                 throw new BadRequestError('Vui lòng cập nhật thông tin nhận hàng');
             }
 
-            var partnerCode = 'MOMO';
+            var partnerCode = requireConfig('MOMO_PARTNER_CODE', process.env.MOMO_PARTNER_CODE);
 
-            var accessKey = 'F8BBA842ECF85';
-            var secretkey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+            var accessKey = requireConfig('MOMO_ACCESS_KEY', process.env.MOMO_ACCESS_KEY);
+            var secretkey = requireConfig('MOMO_SECRET_KEY', process.env.MOMO_SECRET_KEY);
             var requestId = partnerCode + new Date().getTime();
             var orderId = requestId;
             var orderInfo = `thanh toan ${findCart._id}`; // nội dung giao dịch thanh toán
-            var redirectUrl = 'http://localhost:3000/api/check-payment-momo'; // 8080
-            var ipnUrl = 'http://localhost:3000/api/check-payment-momo';
+            var redirectUrl = requireConfig('MOMO_REDIRECT_URL', process.env.MOMO_REDIRECT_URL);
+            var ipnUrl = requireConfig('MOMO_IPN_URL', process.env.MOMO_IPN_URL);
             // var ipnUrl = redirectUrl = "https://webhook.site/454e7b77-f177-4ece-8236-ddf1c26ba7f8";
             var amount = await caclulateTotalPrice(findCart);
             var requestType = 'captureWallet';
@@ -158,7 +137,7 @@ class controllerPayments {
                 lang: 'en',
             });
 
-            const response = await axios.post('https://test-payment.momo.vn/v2/gateway/api/create', requestBody, {
+            const response = await axios.post(requireConfig('MOMO_ENDPOINT', process.env.MOMO_ENDPOINT), requestBody, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -168,54 +147,75 @@ class controllerPayments {
     }
 
     async checkPaymentVnpay(req, res) {
-        const { vnp_OrderInfo, vnp_ResponseCode } = req.query;
+        const data = vnpayService.verify(req.query);
+        if (!data) return res.status(400).json({ message: 'Dữ liệu hoặc chữ ký VNPay không hợp lệ' });
+        const Attempts = require('../models/paymentAttempt.model');
+        const attempt = await Attempts.findOne({ transactionRef: data.vnp_TxnRef });
+        if (!attempt) return res.status(404).json({ message: 'Không tìm thấy giao dịch' });
+        if (Number(data.vnp_Amount) !== attempt.amount * 100) {
+            return res.status(400).json({ message: 'Số tiền thanh toán không khớp' });
+        }
+        const paymentPath = `/payments/${attempt.orderId}`;
+        return res.redirect(process.env.NODE_ENV === 'production'
+            ? new URL(paymentPath, vnpayService.config().clientUrl).toString()
+            : paymentPath);
+    }
+
+    async ipnVnpay(req, res) {
         try {
-            if (vnp_ResponseCode === '00') {
-                const findCart = await modelCart.findOne({ _id: vnp_OrderInfo });
-                const newPayment = new modelPayments({
+            return res.json(await vnpayService.ipn(req.query));
+        } catch {
+            return res.json({ RspCode: '99', Message: 'Chưa xử lý được yêu cầu.' });
+        }
+    }
+
+    async retryVnpay(req, res) {
+        return new OK({ message: 'Tạo URL thanh toán', metadata: await vnpayService.retry(req) }).send(res);
+    }
+
+    async reconcileVnpay(req, res) {
+        return new OK({ message: 'VNPay payment status',
+            metadata: await vnpayService.reconcile(req.body.idOrder, req.user.id) }).send(res);
+    }
+
+    async checkPaymentMomo(req, res, next) {
+        const { orderInfo, orderId, resultCode } = req.query;
+        if (resultCode === '0') {
+            const transactionRef = `MOMO:${orderId}`;
+            const existingPayment = await modelPayments.findOne({ transactionRef });
+            if (existingPayment) {
+                return res.redirect(`${process.env.DOMAIN_URL}/payments/${existingPayment._id}`);
+            }
+
+            const result = orderInfo.split(' ')[2];
+
+            const findCart = await modelCart.findOne({ _id: result });
+            if (!findCart) {
+                throw new BadRequestError('Không tìm thấy giỏ hàng');
+            }
+
+            await reserveInventory(findCart.product);
+            let newPayment;
+            try {
+                newPayment = new modelPayments({
                     fullName: findCart.fullName,
                     phone: findCart.phone,
                     address: findCart.address,
                     product: findCart.product,
-                    total: findCart?.totalPrice,
-                    paymentMethod: 'VNPAY',
-                    userId: findCart.userId,
-                    status: 'pending',
+                    totalPrice: await caclulateTotalPrice(findCart),
                     nameCoupon: findCart.nameCoupon,
+                    paymentMethod: 'MOMO',
+                    transactionRef,
+                    userId: findCart.userId,
                     note: findCart.note,
+                    status: 'pending',
                 });
+
                 await newPayment.save();
-                await modelCoupon.updateOne({ _id: findCart.nameCoupon }, { $inc: { quantity: -1 } });
-                await findCart.deleteOne();
-                return res.redirect(`${process.env.DOMAIN_URL}/payments/${newPayment._id}`);
+            } catch (error) {
+                await releaseInventory(findCart.product);
+                throw error;
             }
-        } catch (error) {
-            console.log(error);
-            return res.status(500).json({ message: 'Lỗi server' });
-        }
-    }
-
-    async checkPaymentMomo(req, res, next) {
-        const { orderInfo, resultCode } = req.query;
-        if (resultCode === '0') {
-            const result = orderInfo.split(' ')[2];
-
-            const findCart = await modelCart.findOne({ _id: result });
-
-            const newPayment = new modelPayments({
-                fullName: findCart.fullName,
-                phone: findCart.phone,
-                address: findCart.address,
-                product: findCart.product,
-                total: findCart?.totalPrice,
-                nameCoupon: findCart.nameCoupon,
-                paymentMethod: 'MOMO',
-                userId: findCart.userId,
-                note: findCart.note,
-                status: 'pending',
-            });
-
-            await newPayment.save();
             await modelCoupon.updateOne({ _id: findCart.nameCoupon }, { $inc: { quantity: -1 } });
             await findCart.deleteOne();
             return res.redirect(`${process.env.DOMAIN_URL}/payments/${newPayment._id}`);
@@ -233,13 +233,13 @@ class controllerPayments {
         const products = await Promise.all(
             findPayment.product.map(async (item) => {
                 const product = await modelProduct.findOne({ _id: item.productId });
-                const price = product.discount > 0 ? product.price * (1 - product.discount / 100) : product.price;
+                const price = item.unitPrice ?? (product ? vnpayService.unitPrice(product) : 0);
                 return {
                     id: item.productId,
-                    nameProduct: product.nameProduct,
+                    nameProduct: item.nameProduct || product?.nameProduct || 'Sản phẩm đã xóa',
                     price: price,
                     quantity: item.quantity,
-                    image: product.images.split(',')[0],
+                    image: (item.images || product?.images || '').split(',')[0],
                 };
             }),
         );
@@ -252,6 +252,12 @@ class controllerPayments {
             note: findPayment.note,
             paymentMethod: findPayment.paymentMethod,
             status: findPayment.status,
+            paymentStatus: findPayment.paymentStatus,
+            expiresAt: findPayment.expiresAt,
+            shippingFee: findPayment.shippingFee,
+            shipping: findPayment.shipping,
+            shipment: findPayment.shipment,
+            couponDiscount: findPayment.couponDiscount,
             products: products,
             totalPrice: findPayment.totalPrice,
         };
@@ -273,17 +279,14 @@ class controllerPayments {
                     const productsDetails = await Promise.all(
                         order.product.map(async (item) => {
                             const product = await modelProduct.findOne({ _id: item.productId });
-                            if (!product) return null;
-
-                            const price =
-                                product.discount > 0 ? product.price * (1 - product.discount / 100) : product.price;
+                            const price = item.unitPrice ?? (product ? vnpayService.unitPrice(product) : 0);
 
                             return {
                                 productId: item.productId,
-                                nameProduct: product.nameProduct,
+                                nameProduct: item.nameProduct || product?.nameProduct || 'Sản phẩm đã xóa',
                                 price: price,
                                 quantity: item.quantity,
-                                images: product.images,
+                                images: item.images || product?.images || '',
                             };
                         }),
                     );
@@ -297,7 +300,11 @@ class controllerPayments {
                         note: order.note,
                         status: order.status,
                         paymentMethod: order.paymentMethod,
+                        paymentStatus: order.paymentStatus,
                         totalPrice: order.totalPrice,
+                        shippingFee: order.shippingFee,
+                        shipping: order.shipping,
+                        shipment: order.shipment,
                         products: productsDetails.filter((p) => p !== null),
                     };
                 }),
@@ -315,15 +322,7 @@ class controllerPayments {
     }
 
     async cancelOrder(req, res) {
-        const { id } = req.user;
-        const { idOrder } = req.body;
-        const findOrder = await modelPayments.findOne({ _id: idOrder, userId: id });
-        if (!findOrder) {
-            throw new BadRequestError('Không tìm thấy đơn hàng');
-        }
-        findOrder.status = 'cancelled';
-        await modelCoupon.updateOne({ _id: findOrder.nameCoupon }, { $inc: { quantity: 1 } });
-        await findOrder.save();
+        await vnpayService.changeStatus(req.body.idOrder, 'cancelled', req.user.id);
         new OK({ message: 'Đơn hàng đã được hủy bỏ' }).send(res);
     }
 
@@ -332,31 +331,24 @@ class controllerPayments {
         const data = await Promise.all(
             orders.map(async (order) => {
                 const products = await modelProduct.find({ _id: { $in: order.product.map((item) => item.productId) } });
-                return { ...order._doc, products };
+                const paymentAttempts = await require('../models/paymentAttempt.model').find({ orderId: order._id }).sort({ createdAt: -1 }).lean();
+                const snapshots = order.product.map((item) => {
+                    const current = products.find((product) => String(product._id) === String(item.productId));
+                    return { _id: item.productId, nameProduct: item.nameProduct || current?.nameProduct || 'Sản phẩm đã xóa',
+                        images: item.images || current?.images || '', price: item.unitPrice ?? (current ? vnpayService.unitPrice(current) : 0),
+                        quantity: item.quantity };
+                });
+                return { ...order._doc, products: snapshots, paymentAttempts };
             }),
         );
         new OK({ message: 'Lấy đơn hàng thành công', metadata: data }).send(res);
     }
 
     async updateOrderStatus(req, res) {
-        const { status, idOrder } = req.body;
-
-        const findOrder = await modelPayments.findOne({ _id: idOrder });
-
-        findOrder.status = status;
-        await findOrder.save();
-
-        if (status === 'delivered') {
-            await Promise.all(
-                findOrder.product.map(async (item) => {
-                    const product = await modelProduct.findOne({ _id: item.productId });
-                    product.soldCount += item.quantity;
-                    await product.save();
-                }),
-            );
-        }
+        await vnpayService.changeStatus(req.body.idOrder, req.body.status);
         new OK({ message: 'Cập nhật trạng thái đơn hàng thành công' }).send(res);
     }
+
 }
 
 module.exports = new controllerPayments();

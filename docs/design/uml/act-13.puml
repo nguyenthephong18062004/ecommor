@@ -1,0 +1,42 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Khách hàng đã đăng nhập|
+start
+:Chọn MOMO;
+|Frontend|
+:Lưu shipping vào cart; gọi create-payment;
+|Backend|
+:authUser; đọc cart/total/coupon;
+:Ký HMAC SHA256 request;
+|MoMo|
+:Nhận request và trả payUrl;
+|Frontend|
+:Chuyển browser;
+|MoMo|
+:Callback GET về server;
+|Backend|
+if (resultCode=0?) then (Không)
+ :Không có nhánh kết thúc response;
+ stop
+endif
+note right
+Không thấy verify callback signature/amount.
+end note
+if (transactionRef đã có?) then (Có)
+ :Redirect đơn cũ;
+ stop
+endif
+:Đọc cartId từ orderInfo;
+:Reserve kho có bù khi reserve/save lỗi;
+if (Save đơn được?) then (Không)
+ :Bù kho, throw lỗi;
+ stop
+endif
+:Trừ coupon; xóa cart;
+:Redirect trang đơn;
+stop
+@enduml

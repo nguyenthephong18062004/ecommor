@@ -1,0 +1,40 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách hàng đã đăng nhập" as U
+participant "CheckOut.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+participant "Goong (gợi ý địa chỉ tùy chọn)" as E
+U -> UI : Nhập shipping và chọn coupon
+opt Địa chỉ >=3 ký tự sau debounce 500ms
+UI -> E : Goong AutoComplete qua axios trực tiếp
+alt Thành công
+E --> UI : predictions
+else Lỗi/abort
+UI -> UI : Bỏ gợi ý; vẫn cho nhập tay
+end
+end
+UI -> UI : Gán nameCoupon=id, tổng tiền dự kiến
+alt MoMo
+UI -> A : requestUpdateInfoCart()
+A -> R : POST /api/update-info-cart
+R -> W : authUser
+W -> C : updateInfoCart()
+C -> DB : find cart user; gán shipping/nameCoupon; save
+C --> A : 200 hoặc 403 thiếu cart
+else COD/VNPay
+UI -> A : Gửi shipping/nameCoupon trong create-payment
+A -> S : checkout snapshot kiểm lại coupon từ DB
+end
+note over R,C : GET /api/coupon legacy thiếu authUser, req.user undefined ->500;
+note over UI,A : UI thực dùng dataCoupon từ get-cart
+@enduml

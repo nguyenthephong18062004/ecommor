@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Khách vãng lai|
+start
+:Nhập câu hỏi;
+|Frontend|
+:POST chatbot;
+|Backend|
+if (Quá 10 request/phút/IP?) then (Có)
+ :429 RATE_LIMIT;
+ stop
+endif
+if (Question/history hợp lệ?) then (Không)
+ :400 INVALID_INPUT;
+ stop
+endif
+if (Có GEMINI_API_KEY?) then (Không)
+ :503 INVALID_KEY;
+ stop
+endif
+:Lấy 10 sản phẩm còn hàng; systemInstruction;
+:Đặt attempt=0;
+repeat
+ |Gemini|
+ :generateContent timeout 30s/lần;
+ |Backend|
+ :Classify lỗi hoặc kiểm safety/STOP/content;
+ if (Lỗi retryable và còn lượt?) then (Có)
+  :Delay 300ms hoặc 600ms; attempt++;
+ endif
+repeat while (Cần thử lại?) is (Có) not (Không)
+if (Nội dung hợp lệ?) then (Có)
+ :200 metadata text;
+else (Không)
+ :422/429/502/503/504 kèm errorCode;
+endif
+|Frontend|
+:Lọc control chars, cắt 4000 ký tự, render text;
+:Lỗi có nút thử lại;
+stop
+@enduml

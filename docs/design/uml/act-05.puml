@@ -1,0 +1,60 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Khách hàng đã đăng nhập|
+start
+:Chọn VNPAY;
+|Backend|
+:Validate config và cart; transaction snapshot/reserve;
+if (Hợp lệ?) then (Không)
+ :Rollback và trả lỗi;
+ stop
+endif
+:Tạo attempt 15m, save order, xóa cart;
+|Frontend|
+:Chuyển browser theo URL;
+|VNPay|
+:Khách thanh toán hoặc hủy;
+note right
+Return browser và IPN server-to-server độc lập.
+Không có fork/join đòi hỏi cả hai cùng tới.
+end note
+if (Kênh đang xét là Return?) then (Có)
+ |Backend|
+ :Verify signature, ref và amount;
+ if (Khớp?) then (Có)
+  :302 tới trang đơn;
+  |Frontend|
+  :GET đơn; đối soát khi đến lịch;
+ else (Không)
+  |Backend|
+  :400/404; không đổi trạng thái;
+ endif
+else (IPN hoặc querydr)
+ |Backend|
+ :Verify dữ liệu theo từng kênh;
+ if (Không hợp lệ?) then (Có)
+  :IPN 97/01/04; querydr giữ trạng thái;
+  stop
+ endif
+ :Transaction đọc attempt/order;
+ if (receivedAt hoặc reconciledAt đã có?) then (Có)
+  :IPN RspCode=02; không ghi lại;
+  stop
+ endif
+ if (Response=00 và TransactionStatus=00?) then (Có)
+  if (Attempt hiện tại, order pending, còn reserve?) then (Có)
+   :paymentStatus=paid, attempt=paid;
+  else (Không)
+   :refund_required; release khi còn reserve;
+  endif
+ else (Thất bại/hủy)
+  :attempt failed; current pending thì release và order failed;
+ endif
+ :Save attempt/order, commit;
+endif
+stop
+@enduml

@@ -9,7 +9,7 @@ import { useStore } from './hooks/userStore';
 
 function App() {
     useEffect(() => {
-        document.title = 'Đồng Hồ Chính Hãng | Miễn Phí Giao Hàng & Bảo Hành Dài Hạn';
+        document.title = 'Đồng hồ theo phong cách và ngân sách | ECOMMOR';
     }, []);
 
     const { dataUser } = useStore();

@@ -2,324 +2,137 @@ import classNames from 'classnames/bind';
 import styles from './DetailProduct.module.scss';
 import Header from '../../Components/Header/Header';
 import Footer from '../../Components/Footer/Footer';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Alert, Button, Image, InputNumber, Modal, Result, Space, Tag, message } from 'antd';
+import { ShoppingCartOutlined } from '@ant-design/icons';
+import { useEffect, useRef, useState } from 'react';
 import useFetch from '../../hooks/useFetch';
-import { Rate, Button, InputNumber, Divider, message, Tag, List, Avatar } from 'antd';
-import { Comment } from '@ant-design/compatible';
-import { MinusOutlined, PlusOutlined, CheckOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
-import { useEffect, useState, useRef } from 'react';
+import useSeo from '../../hooks/useSeo';
 import Loading from '../../Components/Loading/Loading';
 import CardBody from '../../Components/CardBody/CardBody';
+import ProductActions from '../../Components/ProductActions';
+import ProductReviews from '../../Components/ProductReviews';
+import RichText from '../../Components/RichText';
 import { requestCreateCart } from '../../config/request';
 import { useStore } from '../../hooks/userStore';
+import { uploadUrl } from '../../config/runtimeUrls';
+import useRequireAuth from '../../hooks/useRequireAuth';
+import { money, salePrice, canBuy, canOrder, availability, productSpecs, specValue, dateTime } from '../../utils/format';
+
 const cx = classNames.bind(styles);
-
-function DetailProduct() {
+export default function DetailProduct() {
     const { id } = useParams();
-    const [quantity, setQuantity] = useState(1);
-    const { data, loading, error } = useFetch(`/api/get-product-by-id?id=${id}`);
-    const { data: reviewsData, loading: reviewsLoading } = useFetch('/api/get-preview-product-home');
-    const [selectedImage, setSelectedImage] = useState(null);
-
-    const navigate = useNavigate();
-
-    const { getCart } = useStore();
-
+    const { data, loading, error, reFetch } = useFetch(`/api/get-product-by-id?id=${encodeURIComponent(id)}`);
     const product = data?.product;
-    const relatedProducts = Array.isArray(data?.relatedProducts) ? data.relatedProducts : [];
-    const reviews = reviewsData?.filter((review) => review.productId === id) || [];
-
-    const productRef = useRef(null);
+    const [quantity, setQuantity] = useState(1);
+    const [selectedImage, setSelectedImage] = useState('');
+    const [sizeOpen, setSizeOpen] = useState(false);
+    const [busy, setBusy] = useState(false);
+    const submitting = useRef(false);
+    const { getCart, addRecent } = useStore();
+    const requireAuth = useRequireAuth();
+    const navigate = useNavigate();
+    useSeo({ title: product?.nameProduct || 'Thông tin đồng hồ', product,
+        breadcrumbs: [['Trang chủ', '/'], ['Đồng hồ', '/category/all'], [product?.nameProduct || 'Sản phẩm', `/product/${id}`]],
+        description: product ? `${product.nameProduct} — xem thông số, tình trạng, bảo hành và phương thức mua hàng tại ECOMMOR.` : undefined });
 
     useEffect(() => {
-        if (product) {
-            document.title = `${product.nameProduct}`;
-            setSelectedImage(product.images?.split(',')?.[0] || null);
-            productRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [product]);
+        if (!product) return;
+        setSelectedImage(product.images?.split(',')[0] || '');
+        setQuantity(1);
+        addRecent(product._id);
+    }, [product, addRecent]);
 
-    const handleQuantityChange = (value) => {
-        if (value > product?.stock) {
-            message.error('Số lượng sản phẩm không đủ');
-            return;
-        }
-        setQuantity(value);
+    const buy = async checkout => {
+        if (submitting.current || !canBuy(product) || !requireAuth('mua hàng')) return;
+        submitting.current = true; setBusy(true);
+        try {
+            await requestCreateCart({ productId: product._id, quantity });
+            await getCart();
+            if (checkout) navigate('/checkout');
+            else message.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng.`);
+        } catch (err) {
+            message.error(err.response?.data?.message || 'Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
+        } finally { submitting.current = false; setBusy(false); }
     };
 
-    const handleAddToCart = async () => {
-        await requestCreateCart({
-            productId: product._id,
-            quantity,
-        });
-        await getCart();
-        message.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
-    };
-
-    const handleBuyNow = async () => {
-        const data = {
-            productId: product._id,
-            quantity: 1,
-        };
-        await requestCreateCart(data);
-        await getCart();
-        navigate('/checkout');
-        message.success('Đang chuyển đến trang thanh toán');
-    };
-
-    const calculateDiscountedPrice = (price, discount) => {
-        if (!price || !discount) return price;
-        return price - (price * discount) / 100;
-    };
-
-    const formatPrice = (price) => {
-        return price ? new Intl.NumberFormat('vi-VN').format(price) + 'đ' : '';
-    };
-
-    if (error) return <div className={cx('error')}>Có lỗi xảy ra: {error}</div>;
-
-    return (
-        <div className={cx('wrapper')} ref={productRef}>
-            <header>
-                <Header />
-            </header>
-            {loading ? (
-                <Loading />
-            ) : (
-                <main className={cx('product-detail')}>
-                    <div className={cx('container')}>
-                        <div className={cx('breadcrumb')}>
-                            <span>Trang chủ</span> / <span>{product?.category || 'Sản phẩm'}</span> /{' '}
-                            <span>{product?.nameProduct}</span>
-                        </div>
-                        <div className={cx('product-layout')}>
-                            <div className={cx('product-images')}>
-                                <div className={cx('thumbnail-list')}>
-                                    {product?.images &&
-                                        product.images.split(',').map((image, index) => (
-                                            <div
-                                                onClick={() => setSelectedImage(image)}
-                                                key={index}
-                                                className={cx('thumbnail-item', { active: image === selectedImage })}
-                                            >
-                                                <img
-                                                    src={`${import.meta.env.VITE_URL_IMAGE_API}/${image}`}
-                                                    alt={`${product.nameProduct} - ảnh ${index + 1}`}
-                                                />
-                                            </div>
-                                        ))}
-                                </div>
-                                <div className={cx('main-image')}>
-                                    {selectedImage && (
-                                        <img
-                                            src={`${import.meta.env.VITE_URL_IMAGE_API}/${selectedImage}`}
-                                            alt={product?.name}
-                                        />
-                                    )}
-                                </div>
+    return <div className={cx('wrapper')}>
+        <Header />
+        {loading ? <Loading /> : error ? <main className="page-shell"><Alert type="error" message={error} action={<Button onClick={reFetch}>Thử lại</Button>} /></main>
+            : !product ? <Result status="404" title="Không tìm thấy sản phẩm" /> : <main className={cx('product-detail')}>
+                <div className={cx('container')}>
+                    <nav className={cx('breadcrumb')} aria-label="Đường dẫn">
+                        <Link to="/">Trang chủ</Link> / <Link to={`/category/${product.category || 'all'}`}>Đồng hồ</Link> / {product.nameProduct}
+                    </nav>
+                    <div className={cx('product-layout')}>
+                        <div className={cx('product-images')}>
+                            <div className={cx('thumbnail-list')}>
+                                {product.images?.split(',').map((image, index) => <button type="button" key={image}
+                                    aria-label={`Xem ảnh ${index + 1}`} aria-pressed={image === selectedImage}
+                                    onClick={() => setSelectedImage(image)} className={cx('thumbnail-item', { active: image === selectedImage })}>
+                                    <img src={uploadUrl(image)} alt={`${product.nameProduct} — ảnh ${index + 1}`} loading="lazy" width="80" height="80" />
+                                </button>)}
                             </div>
-
-                            <div className={cx('product-info')}>
-                                <h1 className={cx('product-name')}>{product?.nameProduct}</h1>
-                                <div className={cx('product-header')}>
-                                    <div className={cx('product-meta')}>
-                                        <span>
-                                            Thương hiệu: <a href="#">{product?.brand}</a>
-                                        </span>
-                                        <span>Model: {product?.modelNumber}</span>
-                                    </div>
+                            <div className={cx('main-image')}>
+                                {selectedImage && <Image src={uploadUrl(selectedImage)} alt={product.nameProduct} width="100%" />}
+                            </div>
+                        </div>
+                        <div className={cx('product-info')}>
+                            <h1 className={cx('product-name')}>{product.nameProduct}</h1>
+                            <p><Link to={`/category/brand/${encodeURIComponent(product.brand)}`}>{product.brand}</Link> · Mã: {product.modelNumber}</p>
+                            <ProductActions id={product._id} />
+                            <div className={cx('product-summary')}>
+                                <div className={cx('product-price')}>
+                                    <strong className={cx('sale-price')}>{money(salePrice(product))}</strong>
+                                    {product.discount > 0 && <del className={cx('original-price')}>{money(product.price)}</del>}
                                 </div>
-
-                                <div className={cx('product-summary')}>
-                                    <div className={cx('product-price')}>
-                                        <span className={cx('sale-price')}>
-                                            {formatPrice(calculateDiscountedPrice(product?.price, product?.discount))}
-                                        </span>
-                                        {product?.discount > 0 && (
-                                            <span className={cx('original-price')}>{formatPrice(product?.price)}</span>
-                                        )}
-                                        {product?.discount > 0 && (
-                                            <span className={cx('discount-badge')}>-{product.discount}%</span>
-                                        )}
-                                    </div>
-                                    <div className={cx('stock-info')}>
-                                        <span className={cx('label')}>Tình trạng:</span>
-                                        <span className={cx('stock-status', { 'in-stock': product?.stock > 0 })}>
-                                            {product?.stock > 0 ? 'Còn hàng' : 'Hết hàng'} ({product?.stock} sản phẩm)
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <Divider />
-
-                                <div className={cx('product-actions')}>
-                                    <div className={cx('quantity-selector')}>
-                                        <span className={cx('label')}>Số lượng:</span>
-                                        <Button
-                                            icon={<MinusOutlined />}
-                                            onClick={() => handleQuantityChange(Math.max(1, quantity - 1))}
-                                            disabled={product?.stock <= 0}
-                                        />
-                                        <InputNumber
-                                            min={1}
-                                            max={product?.stock}
-                                            value={quantity}
-                                            onChange={handleQuantityChange}
-                                            disabled={product?.stock <= 0}
-                                        />
-                                        <Button
-                                            icon={<PlusOutlined />}
-                                            onClick={() => handleQuantityChange(Math.min(product?.stock, quantity + 1))}
-                                            disabled={product?.stock <= 0}
-                                        />
-                                    </div>
-
+                                <Tag color={canBuy(product) ? 'green' : 'default'}>{availability(product)}</Tag>
+                                {product.verificationStatus !== 'verified' && <Alert showIcon type="info" message="Giá và thông số mang tính tham khảo. Cửa hàng cần xác nhận thông tin trước khi bán." />}
+                                {product.expectedRestockAt && canOrder(product) && <p>Dự kiến có hàng: {dateTime(product.expectedRestockAt)}. Lịch cụ thể được xác nhận khi tư vấn.</p>}
+                            </div>
+                            <div className={cx('product-actions')}>
+                                {canBuy(product) ? <>
+                                    <Space><label htmlFor="product-quantity">Số lượng</label><InputNumber id="product-quantity" min={1} max={product.stock} precision={0}
+                                        value={quantity} onChange={value => setQuantity(Number.isInteger(value) && value > 0 ? Math.min(value, product.stock) : 1)} /></Space>
                                     <div className={cx('action-buttons')}>
-                                        <Button
-                                            type="primary"
-                                            ghost
-                                            icon={<ShoppingCartOutlined />}
-                                            className={cx('add-to-cart')}
-                                            onClick={handleAddToCart}
-                                            disabled={product?.stock <= 0}
-                                        >
-                                            THÊM VÀO GIỎ
-                                        </Button>
-
-                                        <Button
-                                            type="primary"
-                                            className={cx('buy-now')}
-                                            onClick={handleBuyNow}
-                                            disabled={product?.stock <= 0}
-                                        >
-                                            MUA NGAY
-                                        </Button>
+                                        <Button icon={<ShoppingCartOutlined />} loading={busy} onClick={() => buy(false)}>Thêm vào giỏ</Button>
+                                        <Button type="primary" loading={busy} onClick={() => buy(true)}>Mua ngay</Button>
                                     </div>
-                                </div>
-
-                                <div className={cx('policy-box')}>
-                                    <div className={cx('policy-item')}>
-                                        <img src="/icons/warranty.svg" alt="Warranty" className={cx('policy-icon')} />
-                                        <span>Bảo hành chính hãng 2 năm</span>
-                                    </div>
-                                    <div className={cx('policy-item')}>
-                                        <img src="/icons/shipping.svg" alt="Shipping" className={cx('policy-icon')} />
-                                        <span>Miễn phí vận chuyển toàn quốc</span>
-                                    </div>
-                                    <div className={cx('policy-item')}>
-                                        <img src="/icons/exchange.svg" alt="Exchange" className={cx('policy-icon')} />
-                                        <span>Miễn phí 1 đổi 1 trong 7 ngày</span>
-                                    </div>
-                                </div>
+                                </> : canOrder(product) ? <Button type="primary" onClick={() => {
+                                    if (requireAuth('đặt hàng theo yêu cầu')) navigate(`/dat-hang/${product._id}`);
+                                }}>Đặt hàng theo yêu cầu</Button> : <Link to="/contact"><Button>Liên hệ tư vấn</Button></Link>}
                             </div>
-                        </div>
-                        <div className={cx('product-specs-layout')}>
-                            <div className={cx('product-description')}>
-                                <h2>Mô tả sản phẩm</h2>
-                                <div dangerouslySetInnerHTML={{ __html: product?.description }} />
-                            </div>
-                            <div className={cx('product-specs')}>
-                                <h2>Thông tin sản phẩm</h2>
-                                <table className={cx('specs-table')}>
-                                    <tbody>
-                                        <tr>
-                                            <td>Thương hiệu</td>
-                                            <td>{product?.brand}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Xuất xứ</td>
-                                            <td>{product?.origin}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Giới tính</td>
-                                            <td>{product?.gender}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Loại máy</td>
-                                            <td>{product?.movement}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Chất liệu kính</td>
-                                            <td>{product?.glassMaterial}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Chất liệu dây</td>
-                                            <td>{product?.strapMaterial}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Đường kính mặt số</td>
-                                            <td>{product?.dialDiameter} mm</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Bề dày mặt số</td>
-                                            <td>{product?.caseThickness} mm</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Chống nước</td>
-                                            <td>{product?.waterResistance}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div className={cx('product-reviews')}>
-                            <h2>Đánh giá từ khách hàng</h2>
-                            {reviewsLoading ? (
-                                <Loading />
-                            ) : reviews.length > 0 ? (
-                                <List
-                                    className={cx('review-list')}
-                                    itemLayout="horizontal"
-                                    dataSource={reviews}
-                                    renderItem={(review) => (
-                                        <List.Item>
-                                            <Comment
-                                                author={<a>{review.user.name}</a>}
-                                                avatar={<Avatar icon={<UserOutlined />} />}
-                                                content={
-                                                    <div>
-                                                        <Rate disabled value={review.rating || 5} />
-                                                        <p>{review.content}</p>
-                                                        {review.image && (
-                                                            <div className={cx('review-image')}>
-                                                                <img src={review.image} alt="Review" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                }
-                                                datetime={
-                                                    <span>
-                                                        {new Date(review.createdAt).toLocaleDateString('vi-VN')}
-                                                    </span>
-                                                }
-                                            />
-                                        </List.Item>
-                                    )}
-                                />
-                            ) : (
-                                <div className={cx('no-reviews')}>
-                                    <p>Chưa có đánh giá nào cho sản phẩm này.</p>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className={cx('product-related')}>
-                            <h2>Sản phẩm liên quan</h2>
-                            <div className={cx('product-list')}>
-                                {relatedProducts.map((product) => (
-                                    <CardBody key={product._id} item={product} />
-                                ))}
+                            <Button type="link" onClick={() => setSizeOpen(true)}>Hướng dẫn chọn kích thước</Button>
+                            <div className={cx('policy-box')}>
+                                <p>Bảo hành: {product.warrantyGlobal || 'Liên hệ cửa hàng để xác nhận theo sản phẩm.'}</p>
+                                <p><Link to="/chinh-sach/giao-hang">Xem giao hàng và phí vận chuyển</Link></p>
+                                <p><Link to="/chinh-sach/doi-tra">Điều kiện đổi trả và hỗ trợ sau mua</Link></p>
                             </div>
                         </div>
                     </div>
-                </main>
-            )}
-            <footer>
-                <Footer />
-            </footer>
-        </div>
-    );
+                    <div className={cx('product-specs-layout')}>
+                        <section className={cx('product-description')}><h2>Mô tả sản phẩm</h2><RichText html={product.description} /></section>
+                        <section className={cx('product-specs')}><h2>Thông tin sản phẩm</h2>
+                            <table className={cx('specs-table')}><tbody>
+                                {productSpecs.map(([key, label]) => <tr key={key}><th scope="row">{label}</th><td>{specValue(product, key)}</td></tr>)}
+                                <tr><th scope="row">Tình trạng sản phẩm</th><td>{product.condition === 'preowned' ? 'Đã qua sử dụng' : product.condition === 'new' ? 'Mới' : 'Chưa xác minh'}</td></tr>
+                                {product.verificationNote && <tr><th scope="row">Thông tin xác minh</th><td>{product.verificationNote}</td></tr>}
+                            </tbody></table>
+                        </section>
+                    </div>
+                    <ProductReviews productId={id} />
+                    <section className={cx('product-related')}><h2>Sản phẩm liên quan</h2>
+                        <div className={cx('product-list')}>{(data.relatedProducts || []).map(item => <CardBody key={item._id} item={item} variant="catalog" />)}</div>
+                    </section>
+                </div>
+            </main>}
+        <Modal title="Chọn kích thước đồng hồ" open={sizeOpen} onCancel={() => setSizeOpen(false)} footer={<Button onClick={() => setSizeOpen(false)}>Đóng</Button>}>
+            <ol><li>Đo chu vi cổ tay bằng thước dây tại vị trí bạn thường đeo đồng hồ.</li>
+                <li>Đối chiếu đường kính mặt, độ dày và kích thước dây trong bảng thông số của từng mẫu.</li>
+                <li>Với mặt chữ nhật hoặc nhiều lựa chọn cỡ, xem kích thước đầy đủ trong mô tả và trao đổi với cửa hàng.</li></ol>
+            <p>Chu vi cổ tay và đường kính mặt là hai thông số khác nhau. Bạn nên thử trực tiếp hoặc yêu cầu tư vấn trước khi chọn.</p>
+            <Link to="/contact">Liên hệ tư vấn kích thước</Link>
+        </Modal>
+        <Footer />
+    </div>;
 }
-
-export default DetailProduct;

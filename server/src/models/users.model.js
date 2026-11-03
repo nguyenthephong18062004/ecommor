@@ -13,6 +13,10 @@ const modelUser = new Schema(
         typeLogin: { type: String, require: true, enum: ['email', 'google'] },
         lastLoginAt: { type: Date, default: Date.now },
         isOnline: { type: Boolean, default: true },
+        wishlist: { type: [{ type: Schema.Types.ObjectId, ref: 'products' }], default: [], validate: value => value.length <= 100 },
+        savedSearches: { type: [new Schema({ name: String, url: String }, { _id: false })], default: [], validate: value => value.length <= 10 },
+        addresses: { type: [new Schema({ label: String, fullName: String, phone: String, address: String,
+            provinceId: Number, districtId: Number, wardCode: String }, { _id: false })], default: [], validate: value => value.length <= 8 },
     },
     {
         timestamps: true,

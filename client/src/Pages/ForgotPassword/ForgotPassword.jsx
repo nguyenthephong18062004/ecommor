@@ -1,148 +1,62 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { MailOutlined, LockOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import classNames from 'classnames/bind';
 import styles from './ForgotPassword.module.scss';
 import Header from '../../Components/Header/Header';
-import { requestForgotPassword, requestResetPassword } from '../../config/request';
+import { requestForgotPassword, requestResetPassword, requestVerifyResetPassword } from '../../config/request';
 import { useNavigate } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 const { Title, Text } = Typography;
 
 function ForgotPassword() {
-    const [form] = Form.useForm();
     const [step, setStep] = useState(1);
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
-
+    const [cooldown, setCooldown] = useState(0);
     const navigate = useNavigate();
 
-    const handleSendOTP = async (values) => {
-        try {
-            setLoading(true);
-            // TODO: Call API to send OTP
-            console.log(values);
+    useEffect(() => {
+        if (!cooldown) return undefined;
+        const timer = window.setInterval(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
+        return () => window.clearInterval(timer);
+    }, [cooldown]);
 
-            await requestForgotPassword({ email: values.email });
-            message.success('Mã xác thực đã được gửi đến email của bạn');
-            setEmail(values.email);
-            setStep(2);
-            setLoading(false);
-        } catch (error) {
-            message.error(error.response?.data?.message || error.message || 'Khong the ket noi server');
-            setLoading(false);
-        }
+    const send = async (address) => {
+        await requestForgotPassword({ email: address });
+        setEmail(address);
+        setCooldown(60);
+        setStep(2);
+        message.success('Nếu email đủ điều kiện, mã xác minh sẽ được gửi đến bạn.');
     };
 
-    const handleVerifyAndReset = async (values) => {
-        try {
-            setLoading(true);
-            const data = {
-                email,
-                otp: values.otp,
-                password: values.password,
-                confirmPassword: values.confirmPassword,
-            };
-
-            await requestResetPassword(data);
-            navigate('/login');
-            // Simulate API call
-            setTimeout(() => {
-                message.success('Đặt lại mật khẩu thành công');
-                // TODO: Redirect to login page
-                setLoading(false);
-            }, 1000);
-        } catch (error) {
-            message.error(error.response?.data?.message || error.message || 'Khong the ket noi server');
-            setLoading(false);
-        }
+    const run = async (action, fallback) => {
+        setLoading(true);
+        try { await action(); } catch (error) { message.error(error.response?.data?.message || fallback); } finally { setLoading(false); }
     };
 
-    const renderStep1 = () => (
-        <Form form={form} onFinish={handleSendOTP}>
-            <Form.Item
-                name="email"
-                rules={[
-                    { required: true, message: 'Vui lòng nhập email' },
-                    { type: 'email', message: 'Email không hợp lệ' },
-                ]}
-            >
-                <Input prefix={<MailOutlined />} placeholder="Nhập email của bạn" size="large" />
-            </Form.Item>
-            <Form.Item>
-                <Button type="primary" htmlType="submit" block size="large" loading={loading}>
-                    Gửi mã xác thực
-                </Button>
-            </Form.Item>
-        </Form>
-    );
-
-    const renderStep2 = () => (
-        <Form form={form} onFinish={handleVerifyAndReset}>
-            <Form.Item
-                name="otp"
-                rules={[
-                    { required: true, message: 'Vui lòng nhập mã OTP' },
-                    { len: 6, message: 'Mã OTP phải có 6 số' },
-                ]}
-            >
-                <Input prefix={<SafetyCertificateOutlined />} placeholder="Nhập mã OTP" size="large" />
-            </Form.Item>
-            <Form.Item
-                name="password"
-                rules={[
-                    { required: true, message: 'Vui lòng nhập mật khẩu mới' },
-                    { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' },
-                ]}
-            >
-                <Input.Password prefix={<LockOutlined />} placeholder="Nhập mật khẩu mới" size="large" />
-            </Form.Item>
-            <Form.Item
-                name="confirmPassword"
-                dependencies={['password']}
-                rules={[
-                    { required: true, message: 'Vui lòng xác nhận mật khẩu' },
-                    ({ getFieldValue }) => ({
-                        validator(_, value) {
-                            if (!value || getFieldValue('password') === value) {
-                                return Promise.resolve();
-                            }
-                            return Promise.reject(new Error('Mật khẩu không khớp'));
-                        },
-                    }),
-                ]}
-            >
-                <Input.Password prefix={<LockOutlined />} placeholder="Xác nhận mật khẩu mới" size="large" />
-            </Form.Item>
-            <Form.Item>
-                <Button type="primary" htmlType="submit" block size="large" loading={loading}>
-                    Đặt lại mật khẩu
-                </Button>
-            </Form.Item>
-        </Form>
-    );
-
-    return (
-        <div className={cx('wrapper')}>
-            <header>
-                <Header />
-            </header>
-            <div className={cx('content')}>
-                <Card className={cx('card')}>
-                    <Title level={2} className={cx('title')}>
-                        Quên mật khẩu
-                    </Title>
-                    <Text className={cx('description')}>
-                        {step === 1 && 'Nhập email của bạn để nhận mã xác thực'}
-                        {step === 2 && 'Nhập mã OTP và mật khẩu mới cho tài khoản của bạn'}
-                    </Text>
-                    {step === 1 && renderStep1()}
-                    {step === 2 && renderStep2()}
-                </Card>
-            </div>
-        </div>
-    );
+    return <div className={cx('wrapper')}>
+        <header><Header /></header>
+        <div className={cx('content')}><Card className={cx('card')}>
+            <Title level={2} className={cx('title')}>Quên mật khẩu</Title>
+            <Text className={cx('description')}>{step === 1 ? 'Yêu cầu mã xác minh qua email.' : step === 2 ? 'Nhập mã xác minh đã nhận.' : 'Đặt mật khẩu mới cho tài khoản.'}</Text>
+            {step === 1 && <Form onFinish={({ email: address }) => run(() => send(address), 'Không thể kết nối máy chủ. Vui lòng thử lại.')}>
+                <Form.Item name="email" rules={[{ required: true, message: 'Vui lòng nhập email' }, { type: 'email', message: 'Email không hợp lệ' }]}><Input prefix={<MailOutlined />} placeholder="Email" size="large" /></Form.Item>
+                <Button type="primary" htmlType="submit" block size="large" loading={loading}>Gửi mã xác minh</Button>
+            </Form>}
+            {step === 2 && <Form onFinish={({ otp }) => run(async () => { await requestVerifyResetPassword({ email, otp }); setStep(3); }, 'Không thể xác minh mã. Vui lòng thử lại.')}>
+                <Form.Item name="otp" rules={[{ required: true, message: 'Vui lòng nhập mã xác minh' }, { pattern: /^\d{6}$/, message: 'Mã xác minh phải gồm 6 chữ số' }]}><Input prefix={<SafetyCertificateOutlined />} placeholder="Mã xác minh gồm 6 chữ số" inputMode="numeric" size="large" /></Form.Item>
+                <Button type="primary" htmlType="submit" block size="large" loading={loading}>Xác minh mã</Button>
+                <Button type="link" block disabled={cooldown > 0 || loading} onClick={() => run(() => send(email), 'Không thể gửi lại mã. Vui lòng thử lại.')}>{cooldown ? `Có thể gửi lại sau ${cooldown} giây` : 'Gửi lại mã xác minh'}</Button>
+            </Form>}
+            {step === 3 && <Form onFinish={(values) => run(async () => { await requestResetPassword(values); message.success('Đã đặt lại mật khẩu.'); navigate('/login'); }, 'Không thể đặt lại mật khẩu. Vui lòng thử lại.')}>
+                <Form.Item name="password" rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới' }, { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' }]}><Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu mới" size="large" /></Form.Item>
+                <Form.Item name="confirmPassword" dependencies={['password']} rules={[{ required: true, message: 'Vui lòng xác nhận mật khẩu' }, ({ getFieldValue }) => ({ validator(_, value) { return !value || value === getFieldValue('password') ? Promise.resolve() : Promise.reject(new Error('Mật khẩu xác nhận không khớp')); } })]}><Input.Password prefix={<LockOutlined />} placeholder="Xác nhận mật khẩu mới" size="large" /></Form.Item>
+                <Button type="primary" htmlType="submit" block size="large" loading={loading}>Đặt lại mật khẩu</Button>
+            </Form>}
+        </Card></div>
+    </div>;
 }
 
 export default ForgotPassword;

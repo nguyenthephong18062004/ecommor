@@ -1,0 +1,37 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách vãng lai" as U
+participant "DetailProduct.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Controller" as C
+database "Model / MongoDB" as DB
+U -> UI : Mở /product/:id
+UI -> A : useFetch(get-product-by-id?id) và useFetch(get-preview-product-home)
+A -> R : GET /api/get-product-by-id
+R -> C : getProductById()
+C -> DB : products.findById(id)
+alt Product null / id sai
+C --> A : 500 CastError/TypeError qua asyncHandler
+else Có sản phẩm
+C -> DB : Related category, loại id; limit 8
+C -> DB : previewProduct.find(productId)
+loop Mỗi đánh giá
+C -> DB : user.findById(userId)
+alt User mất
+C --> A : 500 truy cập fullName
+else User còn
+C -> C : Ghép tên user
+end
+end
+C --> A : 200 product/relatedProducts/previewProduct
+A --> UI : Render chi tiết
+end
+note over C,DB : API get-preview-product-home riêng lấy 10 review; không sort
+UI -> UI : reviewsData từ home API lọc productId; giới hạn 10 toàn hệ thống
+@enduml

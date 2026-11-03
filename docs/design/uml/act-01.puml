@@ -1,0 +1,57 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Khách vãng lai|
+start
+:Nhập thông tin đăng ký;
+|Frontend|
+:Validate form; POST register;
+|Backend|
+if (IP/record vượt hạn?) then (Có)
+ :Trả 429;
+ stop
+endif
+if (Dữ liệu hợp lệ?) then (Không)
+ :Trả 400;
+ stop
+endif
+if (Email đã tồn tại?) then (Có)
+ :Trả 202 thông báo chung;
+ stop
+endif
+:Bcrypt password; issue OTP hash;
+|Gmail|
+:OAuth2 và gửi mã;
+if (Gửi được?) then (Không)
+ |Backend|
+ :Trả 503, record OTP có thể còn;
+ stop
+endif
+|Frontend|
+:Chuyển bước OTP, countdown 60s;
+|Khách vãng lai|
+if (Cần gửi lại?) then (Có)
+ |Backend|
+ :Resend kiểm cooldown/window;
+ |Gmail|
+ :Gửi mã mới nếu được phép;
+endif
+|Khách vãng lai|
+:Nhập mã;
+|Backend|
+:Validate email/6 chữ số và consume verifyAccount;
+if (Mã đúng, chưa hết hạn, chưa consume?) then (Có)
+ :Xóa OTP atomically;
+ :Kiểm registration/email; tạo user;
+ |Frontend|
+ :Thông báo và chuyển login;
+else (Không)
+ |Backend|
+ :Sai mã tăng attempts; hết hạn/5 lần thì xóa;
+ :Trả 400;
+endif
+stop
+@enduml

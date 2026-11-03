@@ -7,13 +7,17 @@ const { jwtDecode } = require('jwt-decode');
 require('dotenv').config();
 
 const createApiKey = async (userId) => {
+    const normalizedUserId = userId.toString();
     const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
 
     const privateKeyString = privateKey.export({ type: 'pkcs8', format: 'pem' });
     const publicKeyString = publicKey.export({ type: 'spki', format: 'pem' });
 
-    const newApiKey = new modelApiKey({ userId, publicKey: publicKeyString, privateKey: privateKeyString });
-    return await newApiKey.save();
+    return modelApiKey.findOneAndUpdate(
+        { userId: normalizedUserId },
+        { publicKey: publicKeyString, privateKey: privateKeyString },
+        { new: true, upsert: true, setDefaultsOnInsert: true },
+    );
 };
 
 const createToken = async (payload) => {

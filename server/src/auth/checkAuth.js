@@ -1,4 +1,4 @@
-const { BadUserRequestError } = require('../core/error.response');
+const { BadUserRequestError, BadUser2RequestError } = require('../core/error.response');
 const { verifyToken } = require('../services/tokenSevices');
 const modelUser = require('../models/users.model');
 
@@ -10,7 +10,7 @@ const asyncHandler = (fn) => {
 
 const authUser = async (req, res, next) => {
     try {
-        const user = req.cookies.token;
+        const user = req.cookies?.token;
         if (!user) throw new BadUserRequestError('Vui lòng đăng nhập');
         const token = user;
         const decoded = await verifyToken(token);
@@ -23,14 +23,14 @@ const authUser = async (req, res, next) => {
 
 const authAdmin = async (req, res, next) => {
     try {
-        const user = req.cookies.token;
+        const user = req.cookies?.token;
         if (!user) throw new BadUserRequestError('Bạn không có quyền truy cập');
         const token = user;
         const decoded = await verifyToken(token);
         const { id } = decoded;
         const findUser = await modelUser.findById(id);
-        if (findUser?.isAdmin === false) {
-            throw new BadUserRequestError('Bạn không có quyền truy cập');
+        if (!findUser || findUser.isAdmin !== true) {
+            throw new BadUser2RequestError('Bạn không có quyền truy cập');
         }
         req.user = decoded;
         next();

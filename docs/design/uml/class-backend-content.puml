@@ -1,0 +1,65 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+class "checkAuth" as Auth <<Middleware>> {
+  authUser()
+  authAdmin()
+  asyncHandler()
+}
+class "blog.routes.js" as R0 <<Router>>
+class "blog.controller.js" as C0 <<Controller>> {
+  uploadImage()
+  createBlog()
+  getAllBlog()
+  updateBlog()
+  deleteBlog()
+  getBlogById()
+}
+R0 --> Auth
+R0 --> C0
+class "blog.model" as M0_0 <<Model>>
+C0 --> M0_0
+class "message.routes.js" as R1 <<Router>>
+class "message.controller.js" as C1 <<Controller>> {
+  createMessage()
+  createMessageAdmin()
+  getAllUserMessage()
+  getMessage()
+  getMessageUser()
+  readMessage()
+}
+R1 --> Auth
+R1 --> C1
+class "users.model" as M1_0 <<Model>>
+C1 --> M1_0
+class "message.model" as M1_1 <<Model>>
+C1 --> M1_1
+class "previewProduct.routes.js" as R2 <<Router>>
+class "previewProduct.controller.js" as C2 <<Controller>> {
+  createPreviewProduct()
+  getPreviewProductHome()
+}
+R2 --> Auth
+R2 --> C2
+class "previewProduct.model" as M2_0 <<Model>>
+C2 --> M2_0
+class "products.model" as M2_1 <<Model>>
+C2 --> M2_1
+class "users.model" as M2_2 <<Model>>
+C2 --> M2_2
+class "socket" as Socket <<Service>> {
+ initSocket()
+ getIO()
+}
+class "chatbot" as Bot <<Service>> {
+ askQuestion()
+}
+class "server.js" as Server <<EntryPoint>>
+Server --> Bot
+Server --> Socket
+C1 --> Socket
+@enduml

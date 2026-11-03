@@ -106,3 +106,8 @@
         flex: 1;
     }
 }
+@media (max-width: 768px) {
+    .user-info-layout { max-width: calc(100% - 24px); flex-direction: column; }
+    .user-sidebar { flex: 0 0 auto !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+    .user-content { padding: 16px; min-width: 0; }
+}

@@ -32,7 +32,6 @@ import {
     requestCreateCoupon,
     requestDeleteCoupon,
     requestGetAllCoupon,
-    requestGetAllProduct,
     requestUpdateCoupon,
 } from '../../../../config/request';
 
@@ -42,15 +41,7 @@ const { Option } = Select;
 const { Search } = Input;
 
 function CouponManagement() {
-    // Mock data
-    const [products, setProducts] = useState([]);
-
     const [coupons, setCoupons] = useState([]);
-
-    const fetchData = async () => {
-        const res = await requestGetAllProduct();
-        setProducts(res.metadata);
-    };
 
     const fetchCoupons = async () => {
         const res = await requestGetAllCoupon();
@@ -59,7 +50,6 @@ function CouponManagement() {
 
     useEffect(() => {
         fetchCoupons();
-        fetchData();
     }, []);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -146,19 +136,6 @@ function CouponManagement() {
                 message.success('Mã giảm giá đã được xóa!');
             },
         });
-    };
-
-    const getProductNames = (productIds) => {
-        if (productIds.includes('all')) {
-            return 'Tất cả sản phẩm';
-        }
-
-        return productIds
-            .map((id) => {
-                const product = products.find((p) => p._id === id);
-                return product ? product.nameProduct : '';
-            })
-            .join(', ');
     };
 
     const columns = [

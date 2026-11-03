@@ -4,10 +4,20 @@ const Schema = mongoose.Schema;
 
 const modelOtp = new Schema(
     {
-        email: { type: String, require: true, ref: 'user' },
-        otp: { type: String, require: true },
-        time: { type: Date, default: Date.now(), index: { expires: 300 } },
-        type: { type: String, enum: ['forgotPassword', 'verifyAccount'], require: true },
+        email: { type: String, required: true, trim: true, lowercase: true, ref: 'user' },
+        otp: { type: String, required: true },
+        time: { type: Date, default: Date.now, index: { expires: 600 } },
+        type: { type: String, enum: ['forgotPassword', 'verifyAccount'], required: true },
+        attempts: { type: Number, default: 0, min: 0 },
+        resendAvailableAt: { type: Date },
+        sendWindowStartedAt: { type: Date },
+        sendCount: { type: Number, default: 0, min: 0 },
+        registration: {
+            fullName: { type: String },
+            passwordHash: { type: String },
+            phone: { type: String },
+            address: { type: String },
+        },
     },
     {
         timestamps: true,

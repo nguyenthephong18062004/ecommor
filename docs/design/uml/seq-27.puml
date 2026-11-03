@@ -1,0 +1,35 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách hàng đã đăng nhập" as U
+participant "OrderUser.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+U -> UI : Hủy đơn
+UI -> A : requestCancelOrder(idOrder)
+A -> R : POST /api/cancel-order
+R -> W : authUser
+W -> C : cancelOrder()
+C -> S : changeStatus(idOrder,cancelled,userId)
+S -> DB : Transaction tìm order theo owner
+alt Không tồn tại
+S --> A : 404 Order not found
+else Đã cancelled
+S --> A : 200 không release lần nữa
+else Không pending / online paid hoặc refund_required
+S --> A : 409 theo rule trạng thái/thanh toán
+else Được hủy
+S -> DB : Release kho/coupon, cancel attempt pending nếu VNPAY
+S -> DB : status=cancelled; VNPAY paymentStatus=failed; commit
+C --> A : 200 Đơn hàng đã được hủy bỏ
+UI -> A : Tải lại order-user
+end
+@enduml

@@ -1,0 +1,136 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+class "checkAuth" as Auth <<Middleware>> {
+  authUser()
+  authAdmin()
+  asyncHandler()
+}
+class "products.routes.js" as R0 <<Router>>
+class "products.controller.js" as C0 <<Controller>> {
+  uploadImages()
+  createProduct()
+  getProductNew()
+  getProductCatalog()
+  getCatalogOptions()
+  browseProducts()
+  getProductById()
+  getProductByCategory()
+  getAllProduct()
+  updateProduct()
+  deleteProduct()
+  getProductManufactured()
+  searchProduct()
+}
+R0 --> Auth
+R0 --> C0
+class "products.model" as M0_0 <<Model>>
+C0 --> M0_0
+class "category.model" as M0_1 <<Model>>
+C0 --> M0_1
+class "previewProduct.model" as M0_2 <<Model>>
+C0 --> M0_2
+class "users.model" as M0_3 <<Model>>
+C0 --> M0_3
+class "coupon.model" as M0_4 <<Model>>
+C0 --> M0_4
+class "cartUser.routes.js" as R1 <<Router>>
+class "cartUser.controller.js" as C1 <<Controller>> {
+  addToCart()
+  getCart()
+  deleteProductCart()
+  updateProductCart()
+  updateInfoCart()
+}
+R1 --> Auth
+R1 --> C1
+class "cartUser.model" as M1_0 <<Model>>
+C1 --> M1_0
+class "products.model" as M1_1 <<Model>>
+C1 --> M1_1
+class "coupon.model" as M1_2 <<Model>>
+C1 --> M1_2
+class "payments.route.js" as R2 <<Router>>
+class "payments.controller.js" as C2 <<Controller>> {
+  createPayment()
+  checkPaymentVnpay()
+  ipnVnpay()
+  retryVnpay()
+  reconcileVnpay()
+  checkPaymentMomo()
+  getPaymentSuccess()
+  getOrderUser()
+  cancelOrder()
+  getOrderAdmin()
+  updateOrderStatus()
+}
+R2 --> Auth
+R2 --> C2
+class "payments.model" as M2_0 <<Model>>
+C2 --> M2_0
+class "cartUser.model" as M2_1 <<Model>>
+C2 --> M2_1
+class "products.model" as M2_2 <<Model>>
+C2 --> M2_2
+class "coupon.model" as M2_3 <<Model>>
+C2 --> M2_3
+class "paymentAttempt.model" as M2_4 <<Model>>
+C2 --> M2_4
+class "category.routes.js" as R3 <<Router>>
+class "category.controller.js" as C3 <<Controller>> {
+  createCategory()
+  getAllCategory()
+  updateCategory()
+  deleteCategory()
+}
+R3 --> Auth
+R3 --> C3
+class "category.model" as M3_0 <<Model>>
+C3 --> M3_0
+class "products.model" as M3_1 <<Model>>
+C3 --> M3_1
+class "coupon.routes.js" as R4 <<Router>>
+class "coupon.controller.js" as C4 <<Controller>> {
+  createCoupon()
+  getCoupons()
+  getAllCoupon()
+  deleteCoupon()
+  updateCoupon()
+}
+R4 --> Auth
+R4 --> C4
+class "coupon.model" as M4_0 <<Model>>
+C4 --> M4_0
+class "cartUser.model" as M4_1 <<Model>>
+C4 --> M4_1
+class "products.model" as M4_2 <<Model>>
+C4 --> M4_2
+class "vnpay.service" as VNP <<Service>> {
+ checkout()
+ retry()
+ ipn()
+ reconcile()
+ expirePending()
+ changeStatus()
+}
+class "vnpay-query.service" as Q <<Service>> {
+ queryAttempt()
+}
+class "product-catalog.service" as PC <<Service>>
+class "catalog-browse.service" as CB <<Service>>
+class "brand.service" as BS <<Service>>
+C2 --> VNP
+VNP --> Q
+C0 --> PC
+C0 --> CB
+CB --> BS
+class "brand.routes.js" as BrandR <<Router>>
+BrandR --> Auth
+BrandR --> BS
+class "Multer / routes/index.js" as Upload <<Middleware>>
+Upload --> Auth
+@enduml

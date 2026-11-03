@@ -1,17 +1,14 @@
+import RichText from '../../Components/RichText';
+import useSeo from '../../hooks/useSeo';
 import { useEffect, useState } from 'react';
 import { Typography, Breadcrumb, Avatar, Tag, Divider, Button, Card, Skeleton, Alert, BackTop } from 'antd';
 import {
     CalendarOutlined,
     EyeOutlined,
     UserOutlined,
-    ShareAltOutlined,
-    HeartOutlined,
     BookOutlined,
     HomeOutlined,
     ArrowLeftOutlined,
-    FacebookOutlined,
-    TwitterOutlined,
-    LinkedinOutlined,
 } from '@ant-design/icons';
 import Footer from '../../Components/Footer/Footer';
 import Header from '../../Components/Header/Header';
@@ -19,7 +16,7 @@ import { requestGetBlogById, requestGetAllBlog } from '../../config/request';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph, Text } = Typography;
-const URL_IMAGE = import.meta.env.VITE_URL_IMAGE_API;
+import { uploadUrl } from '../../config/runtimeUrls';
 
 function DetailBlog() {
     const { id } = useParams();
@@ -28,7 +25,7 @@ function DetailBlog() {
     const [relatedBlogs, setRelatedBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [liked, setLiked] = useState(false);
+    useSeo({ title: blog?.title || 'Bài viết', description: blog?.title ? `Kiến thức và tư vấn đồng hồ: ${blog.title}.` : undefined });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -59,6 +56,7 @@ function DetailBlog() {
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -66,29 +64,16 @@ function DetailBlog() {
         });
     };
 
-    const handleShare = (platform) => {
-        const url = window.location.href;
-        const title = blog?.title || 'Bài viết hay';
-
-        const shareUrls = {
-            facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
-            twitter: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
-            linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
-        };
-
-        window.open(shareUrls[platform], '_blank', 'width=600,height=400');
-    };
-
     const RelatedBlogCard = ({ blog }) => (
         <Card
             hoverable
             className="group border-0 shadow-md hover:shadow-lg transition-all duration-300"
-            bodyStyle={{ padding: 0 }}
+            styles={{ body: { padding: 0 } }}
             onClick={() => navigate(`/blogs/${blog._id}`)}
         >
             <div className="flex">
                 <img
-                    src={`${URL_IMAGE}${blog.image}`}
+                    src={uploadUrl(blog.image)}
                     alt={blog.title}
                     className="w-24 h-24 object-cover flex-shrink-0"
                 />
@@ -234,7 +219,7 @@ function DetailBlog() {
                                 {/* Featured Image */}
                                 <div className="px-8 mb-8">
                                     <img
-                                        src={`${URL_IMAGE}${blog.image}`}
+                                        src={uploadUrl(blog.image)}
                                         alt={blog.title}
                                         className="w-full h-96 object-cover rounded-lg shadow-md"
                                     />
@@ -248,9 +233,9 @@ function DetailBlog() {
                                         </Paragraph>
 
                                         {/* Mock content - replace with actual blog content */}
-                                        <p
+                                        <RichText
                                             className="text-gray-700 leading-relaxed text-base mb-6"
-                                            dangerouslySetInnerHTML={{ __html: blog.content }}
+                                            html={blog.content}
                                         />
                                     </div>
                                 </div>

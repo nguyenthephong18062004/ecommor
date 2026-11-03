@@ -1,18 +1,22 @@
 import classNames from 'classnames/bind';
 import styles from './PaymentSuccess.module.scss';
-import { Result, Button, Descriptions, Card, Typography, Space, Tag, Table } from 'antd';
-import { CheckCircleFilled, ShoppingOutlined, HomeOutlined } from '@ant-design/icons';
+import { Result, Button, Descriptions, Card, Typography, Space, Tag, Table, message } from 'antd';
+import { ShoppingOutlined, ReloadOutlined } from '@ant-design/icons';
 import Header from '../../Components/Header/Header';
 import Footer from '../../Components/Footer/Footer';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { requestGetPaymentSuccess } from '../../config/request';
+import { requestGetPaymentSuccess, requestRetryVnpay, requestReconcileVnpay } from '../../config/request';
+import { uploadUrl } from '../../config/runtimeUrls';
+import ShippingInfo from '../../Components/ShippingInfo/ShippingInfo';
 
 const { Title, Text } = Typography;
 const cx = classNames.bind(styles);
 
 function PaymentSuccess() {
     const navigate = useNavigate();
+    const [error, setError] = useState('');
+    const [retrying, setRetrying] = useState(false);
 
     const [paymentInfo, setPaymentInfo] = useState({
         orderId: '',
@@ -27,22 +31,63 @@ function PaymentSuccess() {
     });
 
     useEffect(() => {
-        document.title = 'Thanh toán thành công';
+        document.title = 'Kết quả thanh toán';
     }, []);
 
     const { id } = useParams();
 
     useEffect(() => {
+        let active = true;
+        let timer;
+        let polls = 0;
+        let nextCheckAt = 0;
         const fetchData = async () => {
             try {
                 const res = await requestGetPaymentSuccess(id);
+                if (!active) return;
+                if (res.metadata.paymentMethod === 'VNPAY' && ['pending', 'expired', 'failed'].includes(res.metadata.paymentStatus) &&
+                    Date.now() >= nextCheckAt) {
+                    try {
+                        const checked = await requestReconcileVnpay(id);
+                        res.metadata.paymentStatus = checked.metadata.paymentStatus;
+                        nextCheckAt = checked.metadata.nextCheckAt ? new Date(checked.metadata.nextCheckAt).getTime() : Date.now() + 300000;
+                    } catch {
+                        nextCheckAt = Date.now() + 300000;
+                    }
+                }
+                if (!active) return;
                 setPaymentInfo(res.metadata);
+                setError('');
+                if (res.metadata.paymentStatus === 'pending' && polls++ < 200) timer = setTimeout(fetchData, 3000);
             } catch (error) {
-                console.error('Error fetching payment data:', error);
+                if (active) setError(error.response?.data?.message || 'Không thể tải đơn hàng');
             }
         };
         fetchData();
+        return () => { active = false; clearTimeout(timer); };
     }, [id]);
+
+    const paymentLabels = {
+        pending: 'Đang chờ xác nhận thanh toán', paid: 'Đã thanh toán', failed: 'Thanh toán thất bại',
+        expired: 'Thanh toán hết hạn', refund_required: 'Giao dịch cần đối soát và hoàn tiền', unpaid: 'Chưa thanh toán',
+    };
+    const online = paymentInfo.paymentMethod === 'VNPAY';
+    const failed = ['failed', 'expired', 'refund_required'].includes(paymentInfo.paymentStatus) || paymentInfo.status === 'cancelled';
+    const resultStatus = error ? 'error' : failed ? 'warning' : !paymentInfo.orderId || (online && paymentInfo.paymentStatus !== 'paid') ? 'info' : 'success';
+    const resultTitle = error || (paymentInfo.status === 'cancelled' ? 'Đơn hàng đã hủy' : online ?
+        paymentLabels[paymentInfo.paymentStatus] || 'Đang tải kết quả thanh toán' : paymentInfo.orderId ? 'Đặt hàng thành công!' : 'Đang tải đơn hàng');
+
+    const retryPayment = async () => {
+        setRetrying(true);
+        try {
+            const response = await requestRetryVnpay(id);
+            window.location.assign(response.metadata);
+        } catch (error) {
+            message.error(error.response?.data?.message || 'Không thể thanh toán lại');
+        } finally {
+            setRetrying(false);
+        }
+    };
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -103,7 +148,7 @@ function PaymentSuccess() {
             render: (text, record) => (
                 <div className={cx('product-info')}>
                     <img
-                        src={`${import.meta.env.VITE_URL_IMAGE_API}/${record.image}`}
+                        src={uploadUrl(record.image)}
                         alt={text}
                         className={cx('product-image')}
                     />
@@ -142,20 +187,19 @@ function PaymentSuccess() {
             <main className={cx('payment-success-container')}>
                 <div className={cx('success-content')}>
                     <Result
-                        status="success"
-                        icon={<CheckCircleFilled className={cx('success-icon')} />}
-                        title={<Title level={2}>Đặt hàng thành công!</Title>}
+                        status={resultStatus}
+                        title={<Title level={2}>{resultTitle}</Title>}
                         subTitle={
                             <Space direction="vertical">
                                 <Text>
                                     Mã đơn hàng: <strong>{paymentInfo.orderId}</strong>
                                 </Text>
-                                <Text>Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi.</Text>
                             </Space>
                         }
                     />
 
                     <Card className={cx('order-info')} title="Thông tin đơn hàng">
+                        <ShippingInfo shipping={paymentInfo.shipping} shipment={paymentInfo.shipment} />
                         <Descriptions bordered layout="horizontal" column={1} labelStyle={{ width: '150px' }}>
                             <Descriptions.Item label="Người nhận">{paymentInfo.fullName}</Descriptions.Item>
                             <Descriptions.Item label="Số điện thoại">{paymentInfo.phone}</Descriptions.Item>
@@ -169,6 +213,10 @@ function PaymentSuccess() {
                             <Descriptions.Item label="Phương thức thanh toán">
                                 {getPaymentMethodText(paymentInfo.paymentMethod)}
                             </Descriptions.Item>
+                            <Descriptions.Item label="Trạng thái thanh toán">
+                                {paymentLabels[paymentInfo.paymentStatus] || 'Cần xác minh'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Tổng tiền">{formatCurrency(paymentInfo.totalPrice)}</Descriptions.Item>
                         </Descriptions>
                     </Card>
 
@@ -183,6 +231,9 @@ function PaymentSuccess() {
                     </Card>
 
                     <div className={cx('action-buttons')}>
+                        {online && paymentInfo.status === 'pending' && ['pending', 'failed', 'expired'].includes(paymentInfo.paymentStatus) && (
+                            <Button icon={<ReloadOutlined />} loading={retrying} onClick={retryPayment}>Thanh toán lại</Button>
+                        )}
                         <Button type="primary" size="large" icon={<ShoppingOutlined />} onClick={() => navigate('/')}>
                             Về trang chủ
                         </Button>

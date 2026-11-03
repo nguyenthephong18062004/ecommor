@@ -1,10 +1,15 @@
 {
     "name": "server",
     "version": "1.0.0",
+    "engines": {
+        "node": ">=22.12.0"
+    },
     "main": "index.js",
     "scripts": {
+        "start": "node src/server.js",
         "dev": "nodemon src/server.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "node --test",
+        "mail:check": "node scripts/mail-check.js"
     },
     "keywords": [],
     "author": "",
@@ -14,6 +19,7 @@
         "@google/generative-ai": "^0.24.1",
         "axios": "^1.8.3",
         "bcrypt": "^5.1.1",
+        "bcryptjs": "^3.0.3",
         "body-parser": "^1.20.3",
         "cloudinary": "^2.6.0",
         "config": "^3.3.12",
@@ -35,6 +41,7 @@
         "nodemon": "^3.1.9",
         "otp-generator": "^4.0.1",
         "querystring": "^0.2.1",
+        "sanitize-html": "2.18.1",
         "socket.io": "^4.8.1",
         "vnpay": "^2.2.0"
     },

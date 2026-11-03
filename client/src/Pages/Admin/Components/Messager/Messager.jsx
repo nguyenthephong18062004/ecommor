@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import ChatWindow from './components/ChatWindow';
 import UserSidebar from './components/UserSidebar';
 import {
-    requestCreateMessage,
     requestGetAllMessage,
     requestGetMessage,
     requestReadMessage,

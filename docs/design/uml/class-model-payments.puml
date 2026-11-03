@@ -1,0 +1,60 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "payments" as M_payments <<Model>> {
+  userId : Schema.Types.ObjectId {require=true; ref='users'}
+  product : Array<subdocument>
+  product[].productId : Schema.Types.ObjectId {ref='product'}
+  product[].quantity : Number {require=true}
+  product[].unitPrice : Number {min=0}
+  product[].nameProduct : String
+  product[].images : String
+  fullName : String {require=true}
+  phone : String {require=true}
+  address : String {require=true}
+  note : String {require=true}
+  status : M_payments_Enum11 {require=true}
+  totalPrice : Number {require=true}
+  paymentMethod : M_payments_Enum13 {require=true}
+  transactionRef : String {unique=true; sparse=true}
+  checkoutKey : String {unique=true; sparse=true}
+  paymentStatus : M_payments_Enum16 {default='unpaid'}
+  inventoryReserved : Boolean
+  couponReserved : Boolean
+  expiresAt : Date
+  subtotal : Number
+  couponDiscount : Number
+  shippingFee : Number {default=0}
+  nameCoupon : String {require=true}
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+enum "Enum11" as M_payments_Enum11 <<enumeration>> {
+  pending
+  confirmed
+  shipped
+  delivered
+  cancelled
+}
+M_payments --> M_payments_Enum11
+enum "Enum13" as M_payments_Enum13 <<enumeration>> {
+  COD
+  VNPAY
+  MOMO
+}
+M_payments --> M_payments_Enum13
+enum "Enum16" as M_payments_Enum16 <<enumeration>> {
+  unpaid
+  pending
+  paid
+  failed
+  expired
+  refund_required
+}
+M_payments --> M_payments_Enum16
+@enduml

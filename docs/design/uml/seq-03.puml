@@ -1,0 +1,42 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách vãng lai" as U
+participant "Register.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+participant "Gmail" as E
+U -> UI : Chọn gửi lại sau countdown
+UI -> A : requestResendVerification(email)
+A -> R : POST /api/resend-verification
+R -> W : otpSendLimiter
+W -> C : resendVerification()
+C -> S : hasPendingRegistration(email)
+S -> DB : otp.findOne(email, verifyAccount)
+alt Không có pending
+C --> A : 202 thông báo chung
+else Có pending
+C -> S : issue(email, verifyAccount)
+S -> DB : Kiểm cooldown/window; thay mã, giữ registration
+alt Cooldown/rate limit
+S --> A : 429
+else Được cấp mã
+C -> E : Gửi OTP qua Gmail OAuth2
+alt Lỗi mail
+E --> A : 503
+else Chấp nhận
+C --> A : 202 thông báo chung
+end
+end
+end
+A --> UI : Thành công: countdown=60; lỗi: message.error
+note over W,S : Limiter IP và record email/type là hai tầng khác nhau
+@enduml

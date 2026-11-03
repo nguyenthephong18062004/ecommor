@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+participant "PaymentSuccess.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+participant "VNPay" as E
+UI -> A : requestReconcileVnpay(idOrder)
+A -> R : POST /api/reconcile-payment-vnpay
+R -> W : authUser
+W -> C : reconcileVnpay()
+C -> S : reconcile(idOrder,userId)
+S -> DB : Find order đúng owner/VNPAY
+alt ID sai / không có đơn
+S --> A : 400 / 404
+else Không ở pending/expired/failed
+S --> A : 200 summary hiện tại
+else Cần query
+S -> DB : findOneAndUpdate lease nextQueryAt +5 phút
+alt Đang lease hoặc đã nhận confirmation
+S --> A : 200 trạng thái cũ + lịch query
+else Lấy được lease
+S -> E : queryAttempt HMAC querydr, timeout 10s, redirect=error
+alt Mạng/provider lỗi hoặc response không verified
+S --> A : 200 summary cũ + lịch query
+else verified và responseCode=00, transactionStatus=00/02
+S -> DB : settle transaction (giống IPN), source=querydr
+S -> DB : Đọc paymentStatus mới
+S --> A : 200 summary
+else Response khác
+S -> DB : Đọc lại trạng thái, không settle
+S --> A : 200 summary
+end
+end
+end
+A --> UI : paymentStatus và nextCheckAt
+@enduml

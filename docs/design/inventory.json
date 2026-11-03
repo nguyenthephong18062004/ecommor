@@ -1,0 +1,1550 @@
+{
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/api/blog/upload-image",
+      "handler": "inline",
+      "controller": "server/src/routes/blog.routes.js",
+      "auth": "Công khai",
+      "middleware": [
+        "upload.single(image)"
+      ],
+      "source": "server/src/routes/blog.routes.js",
+      "line": 22
+    },
+    {
+      "method": "POST",
+      "path": "/api/blog/create",
+      "handler": "controllerBlog.createBlog",
+      "controller": "server/src/controllers/blog.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin"
+      ],
+      "source": "server/src/routes/blog.routes.js",
+      "line": 23
+    },
+    {
+      "method": "GET",
+      "path": "/api/blog/get-all",
+      "handler": "controllerBlog.getAllBlog",
+      "controller": "server/src/controllers/blog.controller.js",
+      "auth": "Công khai",
+      "middleware": [],
+      "source": "server/src/routes/blog.routes.js",
+      "line": 24
+    },
+    {
+      "method": "POST",
+      "path": "/api/blog/update",
+      "handler": "controllerBlog.updateBlog",
+      "controller": "server/src/controllers/blog.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin"
+      ],
+      "source": "server/src/routes/blog.routes.js",
+      "line": 25
+    },
+    {
+      "method": "POST",
+      "path": "/api/blog/delete",
+      "handler": "controllerBlog.deleteBlog",
+      "controller": "server/src/controllers/blog.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin"
+      ],
+      "source": "server/src/routes/blog.routes.js",
+      "line": 26
+    },
+    {
+      "method": "GET",
+      "path": "/api/blog/get-by-id",
+      "handler": "controllerBlog.getBlogById",
+      "controller": "server/src/controllers/blog.controller.js",
+      "auth": "Công khai",
+      "middleware": [],
+      "source": "server/src/routes/blog.routes.js",
+      "line": 27
+    },
+    {
+      "method": "GET",
+      "path": "/api/brands",
+      "handler": "service.list",
+      "controller": "server/src/services/brand.service.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/brand.routes.js",
+      "line": 8
+    },
+    {
+      "method": "POST",
+      "path": "/api/create-cart",
+      "handler": "controllerCartUser.addToCart",
+      "controller": "server/src/controllers/cartUser.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/cartUser.routes.js",
+      "line": 8
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-cart",
+      "handler": "controllerCartUser.getCart",
+      "controller": "server/src/controllers/cartUser.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/cartUser.routes.js",
+      "line": 9
+    },
+    {
+      "method": "POST",
+      "path": "/api/delete-product-cart",
+      "handler": "controllerCartUser.deleteProductCart",
+      "controller": "server/src/controllers/cartUser.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/cartUser.routes.js",
+      "line": 10
+    },
+    {
+      "method": "POST",
+      "path": "/api/update-product-cart",
+      "handler": "controllerCartUser.updateProductCart",
+      "controller": "server/src/controllers/cartUser.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/cartUser.routes.js",
+      "line": 11
+    },
+    {
+      "method": "POST",
+      "path": "/api/update-info-cart",
+      "handler": "controllerCartUser.updateInfoCart",
+      "controller": "server/src/controllers/cartUser.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/cartUser.routes.js",
+      "line": 12
+    },
+    {
+      "method": "POST",
+      "path": "/api/create-category",
+      "handler": "controllerCategory.createCategory",
+      "controller": "server/src/controllers/category.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/category.routes.js",
+      "line": 8
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-all-category",
+      "handler": "controllerCategory.getAllCategory",
+      "controller": "server/src/controllers/category.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/category.routes.js",
+      "line": 9
+    },
+    {
+      "method": "POST",
+      "path": "/api/update-category",
+      "handler": "controllerCategory.updateCategory",
+      "controller": "server/src/controllers/category.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/category.routes.js",
+      "line": 10
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/delete-category",
+      "handler": "controllerCategory.deleteCategory",
+      "controller": "server/src/controllers/category.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/category.routes.js",
+      "line": 11
+    },
+    {
+      "method": "POST",
+      "path": "/api/create-coupon",
+      "handler": "controllerCoupon.createCoupon",
+      "controller": "server/src/controllers/coupon.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/coupon.routes.js",
+      "line": 8
+    },
+    {
+      "method": "GET",
+      "path": "/api/coupon",
+      "handler": "controllerCoupon.getCoupons",
+      "controller": "server/src/controllers/coupon.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/coupon.routes.js",
+      "line": 9
+    },
+    {
+      "method": "GET",
+      "path": "/api/coupons",
+      "handler": "controllerCoupon.getAllCoupon",
+      "controller": "server/src/controllers/coupon.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/coupon.routes.js",
+      "line": 10
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/delete-coupon",
+      "handler": "controllerCoupon.deleteCoupon",
+      "controller": "server/src/controllers/coupon.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/coupon.routes.js",
+      "line": 11
+    },
+    {
+      "method": "POST",
+      "path": "/api/update-coupon",
+      "handler": "controllerCoupon.updateCoupon",
+      "controller": "server/src/controllers/coupon.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/coupon.routes.js",
+      "line": 12
+    },
+    {
+      "method": "POST",
+      "path": "/api/message/create",
+      "handler": "messageController.createMessage",
+      "controller": "server/src/controllers/message.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/message.routes.js",
+      "line": 8
+    },
+    {
+      "method": "POST",
+      "path": "/api/message/create-admin",
+      "handler": "messageController.createMessageAdmin",
+      "controller": "server/src/controllers/message.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/message.routes.js",
+      "line": 9
+    },
+    {
+      "method": "GET",
+      "path": "/api/message/all",
+      "handler": "messageController.getAllUserMessage",
+      "controller": "server/src/controllers/message.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/message.routes.js",
+      "line": 11
+    },
+    {
+      "method": "GET",
+      "path": "/api/message/get-message",
+      "handler": "messageController.getMessage",
+      "controller": "server/src/controllers/message.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/message.routes.js",
+      "line": 12
+    },
+    {
+      "method": "GET",
+      "path": "/api/message/get-message-user",
+      "handler": "messageController.getMessageUser",
+      "controller": "server/src/controllers/message.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/message.routes.js",
+      "line": 13
+    },
+    {
+      "method": "GET",
+      "path": "/api/message/read-message",
+      "handler": "messageController.readMessage",
+      "controller": "server/src/controllers/message.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/message.routes.js",
+      "line": 14
+    },
+    {
+      "method": "POST",
+      "path": "/api/create-payment",
+      "handler": "controllerPayments.createPayment",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 7
+    },
+    {
+      "method": "GET",
+      "path": "/api/check-payment-vnpay",
+      "handler": "controllerPayments.checkPaymentVnpay",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 8
+    },
+    {
+      "method": "GET",
+      "path": "/api/vnpay-return",
+      "handler": "controllerPayments.checkPaymentVnpay",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 9
+    },
+    {
+      "method": "GET",
+      "path": "/api/vnpay-ipn",
+      "handler": "controllerPayments.ipnVnpay",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "Công khai",
+      "middleware": [],
+      "source": "server/src/routes/payments.route.js",
+      "line": 10
+    },
+    {
+      "method": "POST",
+      "path": "/api/retry-payment-vnpay",
+      "handler": "controllerPayments.retryVnpay",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 11
+    },
+    {
+      "method": "POST",
+      "path": "/api/reconcile-payment-vnpay",
+      "handler": "controllerPayments.reconcileVnpay",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 12
+    },
+    {
+      "method": "GET",
+      "path": "/api/check-payment-momo",
+      "handler": "controllerPayments.checkPaymentMomo",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 13
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-payment-success",
+      "handler": "controllerPayments.getPaymentSuccess",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 14
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-order-user",
+      "handler": "controllerPayments.getOrderUser",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 15
+    },
+    {
+      "method": "POST",
+      "path": "/api/cancel-order",
+      "handler": "controllerPayments.cancelOrder",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 16
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-order-admin",
+      "handler": "controllerPayments.getOrderAdmin",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 17
+    },
+    {
+      "method": "POST",
+      "path": "/api/update-order-status",
+      "handler": "controllerPayments.updateOrderStatus",
+      "controller": "server/src/controllers/payments.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/payments.route.js",
+      "line": 18
+    },
+    {
+      "method": "POST",
+      "path": "/api/create-preview-product",
+      "handler": "controllerPreviewProduct.createPreviewProduct",
+      "controller": "server/src/controllers/previewProduct.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/previewProduct.routes.js",
+      "line": 8
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-preview-product-home",
+      "handler": "controllerPreviewProduct.getPreviewProductHome",
+      "controller": "server/src/controllers/previewProduct.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/previewProduct.routes.js",
+      "line": 9
+    },
+    {
+      "method": "POST",
+      "path": "/api/create-product",
+      "handler": "controllerProducts.createProduct",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 8
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-product-new",
+      "handler": "controllerProducts.getProductNew",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 9
+    },
+    {
+      "method": "GET",
+      "path": "/api/product-catalog",
+      "handler": "controllerProducts.getProductCatalog",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 10
+    },
+    {
+      "method": "GET",
+      "path": "/api/catalog-options",
+      "handler": "controllerProducts.getCatalogOptions",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 11
+    },
+    {
+      "method": "GET",
+      "path": "/api/catalog-browse",
+      "handler": "controllerProducts.browseProducts",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 12
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-product-by-id",
+      "handler": "controllerProducts.getProductById",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 13
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-product-by-category",
+      "handler": "controllerProducts.getProductByCategory",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 14
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-product-manufactured",
+      "handler": "controllerProducts.getProductManufactured",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 15
+    },
+    {
+      "method": "GET",
+      "path": "/api/search",
+      "handler": "controllerProducts.searchProduct",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 16
+    },
+    {
+      "method": "GET",
+      "path": "/api/get-all-product",
+      "handler": "controllerProducts.getAllProduct",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 18
+    },
+    {
+      "method": "POST",
+      "path": "/api/update-product",
+      "handler": "controllerProducts.updateProduct",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 19
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/delete-product",
+      "handler": "controllerProducts.deleteProduct",
+      "controller": "server/src/controllers/products.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/products.routes.js",
+      "line": 20
+    },
+    {
+      "method": "POST",
+      "path": "/api/register",
+      "handler": "controllerUser.register",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "otpSendLimiter",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 12
+    },
+    {
+      "method": "POST",
+      "path": "/api/verify-email",
+      "handler": "controllerUser.verifyEmail",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "otpVerifyLimiter",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 13
+    },
+    {
+      "method": "POST",
+      "path": "/api/resend-verification",
+      "handler": "controllerUser.resendVerification",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "otpSendLimiter",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 14
+    },
+    {
+      "method": "POST",
+      "path": "/api/login",
+      "handler": "controllerUser.login",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 15
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth",
+      "handler": "controllerUser.authUser",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 16
+    },
+    {
+      "method": "GET",
+      "path": "/api/refresh-token",
+      "handler": "controllerUser.refreshToken",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 17
+    },
+    {
+      "method": "GET",
+      "path": "/api/logout",
+      "handler": "controllerUser.logout",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 18
+    },
+    {
+      "method": "POST",
+      "path": "/api/login-google",
+      "handler": "controllerUser.loginGoogle",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 19
+    },
+    {
+      "method": "POST",
+      "path": "/api/update-user",
+      "handler": "controllerUser.updateUser",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "authUser",
+      "middleware": [
+        "authUser",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 20
+    },
+    {
+      "method": "POST",
+      "path": "/api/forgot-password",
+      "handler": "controllerUser.forgotPassword",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "otpSendLimiter",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 22
+    },
+    {
+      "method": "POST",
+      "path": "/api/verify-reset-password",
+      "handler": "controllerUser.verifyPasswordReset",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "otpVerifyLimiter",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 23
+    },
+    {
+      "method": "POST",
+      "path": "/api/reset-password",
+      "handler": "controllerUser.resetPassword",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "Công khai",
+      "middleware": [
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 24
+    },
+    {
+      "method": "GET",
+      "path": "/api/statistical",
+      "handler": "controllerUser.getStatistical",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 26
+    },
+    {
+      "method": "GET",
+      "path": "/api/users",
+      "handler": "controllerUser.findAllUser",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 27
+    },
+    {
+      "method": "POST",
+      "path": "/api/update-user-admin",
+      "handler": "controllerUser.updateUserAdmin",
+      "controller": "server/src/controllers/users.controller.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "asyncHandler"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 28
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin",
+      "handler": "inline",
+      "controller": "server/src/routes/users.routes.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authUser",
+        "authAdmin"
+      ],
+      "source": "server/src/routes/users.routes.js",
+      "line": 30
+    },
+    {
+      "method": "POST",
+      "path": "/api/chatbot",
+      "handler": "askQuestion",
+      "controller": "server/src/server.js",
+      "auth": "Công khai",
+      "middleware": [
+        "chatbotRateLimit"
+      ],
+      "source": "server/src/server.js",
+      "line": 64
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload-image",
+      "handler": "inline upload",
+      "controller": "server/src/routes/index.js",
+      "auth": "authAdmin",
+      "middleware": [
+        "authAdmin",
+        "upload.array(images)"
+      ],
+      "source": "server/src/routes/index.js",
+      "line": 103
+    }
+  ],
+  "requests": [
+    {
+      "name": "requestGetAllProduct",
+      "method": "GET",
+      "path": "/api/get-all-product",
+      "client": "request",
+      "line": 12,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx"
+      ]
+    },
+    {
+      "name": "requestChatbot",
+      "method": "POST",
+      "path": "/api/chatbot",
+      "client": "request",
+      "line": 17,
+      "users": [
+        "client/src/utils/Chatbot/Chatbot.jsx"
+      ]
+    },
+    {
+      "name": "requestSearch",
+      "method": "GET",
+      "path": "/api/search",
+      "client": "request",
+      "line": 22,
+      "users": [
+        "client/src/Components/Header/Header.jsx"
+      ]
+    },
+    {
+      "name": "requestUploadImage",
+      "method": "POST",
+      "path": "/api/upload-image",
+      "client": "apiClient",
+      "line": 27,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx"
+      ]
+    },
+    {
+      "name": "requestForgotPassword",
+      "method": "POST",
+      "path": "/api/forgot-password",
+      "client": "request",
+      "line": 34,
+      "users": [
+        "client/src/Pages/ForgotPassword/ForgotPassword.jsx"
+      ]
+    },
+    {
+      "name": "requestVerifyResetPassword",
+      "method": "POST",
+      "path": "/api/verify-reset-password",
+      "client": "request",
+      "line": 39,
+      "users": [
+        "client/src/Pages/ForgotPassword/ForgotPassword.jsx"
+      ]
+    },
+    {
+      "name": "requestResetPassword",
+      "method": "POST",
+      "path": "/api/reset-password",
+      "client": "request",
+      "line": 44,
+      "users": [
+        "client/src/Pages/ForgotPassword/ForgotPassword.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateCategory",
+      "method": "POST",
+      "path": "/api/update-category",
+      "client": "apiClient",
+      "line": 49,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerCategory/ManagerCategory.jsx"
+      ]
+    },
+    {
+      "name": "requestDeleteCategory",
+      "method": "DELETE",
+      "path": "/api/delete-category",
+      "client": "apiClient",
+      "line": 54,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerCategory/ManagerCategory.jsx"
+      ]
+    },
+    {
+      "name": "requestStatistical",
+      "method": "GET",
+      "path": "/api/statistical",
+      "client": "apiClient",
+      "line": 59,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerStatistical/ManagerStatistical.jsx"
+      ]
+    },
+    {
+      "name": "requestAdmin",
+      "method": "GET",
+      "path": "/api/admin",
+      "client": "apiClient",
+      "line": 64,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerStatistical/ManagerStatistical.jsx",
+        "client/src/Routes/index.jsx"
+      ]
+    },
+    {
+      "name": "requestRegister",
+      "method": "POST",
+      "path": "/api/register",
+      "client": "request",
+      "line": 69,
+      "users": [
+        "client/src/Pages/Register/Register.jsx"
+      ]
+    },
+    {
+      "name": "requestVerifyEmail",
+      "method": "POST",
+      "path": "/api/verify-email",
+      "client": "request",
+      "line": 74,
+      "users": [
+        "client/src/Pages/Register/Register.jsx"
+      ]
+    },
+    {
+      "name": "requestResendVerification",
+      "method": "POST",
+      "path": "/api/resend-verification",
+      "client": "request",
+      "line": 79,
+      "users": [
+        "client/src/Pages/Register/Register.jsx"
+      ]
+    },
+    {
+      "name": "requestLoginGoogle",
+      "method": "POST",
+      "path": "/api/login-google",
+      "client": "request",
+      "line": 84,
+      "users": [
+        "client/src/Pages/LoginUser/LoginUser.jsx"
+      ]
+    },
+    {
+      "name": "requestLogin",
+      "method": "POST",
+      "path": "/api/login",
+      "client": "request",
+      "line": 89,
+      "users": [
+        "client/src/Pages/LoginUser/LoginUser.jsx"
+      ]
+    },
+    {
+      "name": "requestAuth",
+      "method": "GET",
+      "path": "/api/auth",
+      "client": "apiClient",
+      "line": 94,
+      "users": [
+        "client/src/Pages/LoginUser/LoginUser.jsx",
+        "client/src/store/Provider.jsx"
+      ]
+    },
+    {
+      "name": "requestLogout",
+      "method": "GET",
+      "path": "/api/logout",
+      "client": "apiClient",
+      "line": 99,
+      "users": [
+        "client/src/Components/Header/Header.jsx",
+        "client/src/Pages/Admin/index.jsx"
+      ]
+    },
+    {
+      "name": "requestRefreshToken",
+      "method": "GET",
+      "path": "/api/refresh-token",
+      "client": "apiClient",
+      "line": 104,
+      "users": []
+    },
+    {
+      "name": "requestCreateCategory",
+      "method": "POST",
+      "path": "/api/create-category",
+      "client": "apiClient",
+      "line": 109,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerCategory/ManagerCategory.jsx"
+      ]
+    },
+    {
+      "name": "requestGetAllCategory",
+      "method": "GET",
+      "path": "/api/get-all-category",
+      "client": "request",
+      "line": 114,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerCategory/ManagerCategory.jsx",
+        "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx",
+        "client/src/store/Provider.jsx"
+      ]
+    },
+    {
+      "name": "requestGetBrands",
+      "method": "GET",
+      "path": "/api/brands",
+      "client": "apiClient",
+      "line": 119,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx"
+      ]
+    },
+    {
+      "name": "requestCreateCart",
+      "method": "POST",
+      "path": "/api/create-cart",
+      "client": "request",
+      "line": 121,
+      "users": [
+        "client/src/Pages/DetailProduct/DetailProduct.jsx"
+      ]
+    },
+    {
+      "name": "requestGetCart",
+      "method": "GET",
+      "path": "/api/get-cart",
+      "client": "apiClient",
+      "line": 126,
+      "users": [
+        "client/src/store/Provider.jsx"
+      ]
+    },
+    {
+      "name": "requestDeleteProductCart",
+      "method": "POST",
+      "path": "/api/delete-product-cart",
+      "client": "apiClient",
+      "line": 131,
+      "users": [
+        "client/src/Pages/Cart/CartUser.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateProductCart",
+      "method": "POST",
+      "path": "/api/update-product-cart",
+      "client": "apiClient",
+      "line": 136,
+      "users": [
+        "client/src/Pages/Cart/CartUser.jsx"
+      ]
+    },
+    {
+      "name": "requestCreatePayment",
+      "method": "POST",
+      "path": "/api/create-payment",
+      "client": "apiClient",
+      "line": 141,
+      "users": [
+        "client/src/Pages/CheckOut/CheckOut.jsx"
+      ]
+    },
+    {
+      "name": "requestRetryVnpay",
+      "method": "POST",
+      "path": "/api/retry-payment-vnpay",
+      "client": "apiClient",
+      "line": 146,
+      "users": [
+        "client/src/Pages/PaymentSuccess/PaymentSuccess.jsx"
+      ]
+    },
+    {
+      "name": "requestReconcileVnpay",
+      "method": "POST",
+      "path": "/api/reconcile-payment-vnpay",
+      "client": "apiClient",
+      "line": 151,
+      "users": [
+        "client/src/Pages/PaymentSuccess/PaymentSuccess.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateInfoCart",
+      "method": "POST",
+      "path": "/api/update-info-cart",
+      "client": "apiClient",
+      "line": 156,
+      "users": [
+        "client/src/Pages/CheckOut/CheckOut.jsx"
+      ]
+    },
+    {
+      "name": "requestGetPaymentSuccess",
+      "method": "GET",
+      "path": "/api/get-payment-success",
+      "client": "apiClient",
+      "line": 161,
+      "users": [
+        "client/src/Pages/PaymentSuccess/PaymentSuccess.jsx"
+      ]
+    },
+    {
+      "name": "requestGetOrderUser",
+      "method": "GET",
+      "path": "/api/get-order-user",
+      "client": "apiClient",
+      "line": 168,
+      "users": [
+        "client/src/Pages/InfoUser/OrderUser/OrderUser.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateUser",
+      "method": "POST",
+      "path": "/api/update-user",
+      "client": "apiClient",
+      "line": 173,
+      "users": [
+        "client/src/Pages/InfoUser/InfoUser.jsx"
+      ]
+    },
+    {
+      "name": "requestCancelOrder",
+      "method": "POST",
+      "path": "/api/cancel-order",
+      "client": "apiClient",
+      "line": 178,
+      "users": [
+        "client/src/Pages/InfoUser/OrderUser/OrderUser.jsx"
+      ]
+    },
+    {
+      "name": "requestCreateProduct",
+      "method": "POST",
+      "path": "/api/create-product",
+      "client": "apiClient",
+      "line": 183,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateProduct",
+      "method": "POST",
+      "path": "/api/update-product",
+      "client": "apiClient",
+      "line": 188,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx"
+      ]
+    },
+    {
+      "name": "requestDeleteProduct",
+      "method": "DELETE",
+      "path": "/api/delete-product",
+      "client": "apiClient",
+      "line": 193,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx"
+      ]
+    },
+    {
+      "name": "requestGetAllUser",
+      "method": "GET",
+      "path": "/api/users",
+      "client": "apiClient",
+      "line": 198,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerUser/ManagerUser.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateUserAdmin",
+      "method": "POST",
+      "path": "/api/update-user-admin",
+      "client": "apiClient",
+      "line": 203,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerUser/ManagerUser.jsx"
+      ]
+    },
+    {
+      "name": "requestGetOrderAdmin",
+      "method": "GET",
+      "path": "/api/get-order-admin",
+      "client": "apiClient",
+      "line": 208,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerOrder/ManagerOrder.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateOrderStatus",
+      "method": "POST",
+      "path": "/api/update-order-status",
+      "client": "apiClient",
+      "line": 213,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerOrder/ManagerOrder.jsx"
+      ]
+    },
+    {
+      "name": "requestGetProductManufactured",
+      "method": "GET",
+      "path": "/api/get-product-manufactured",
+      "client": "request",
+      "line": 218,
+      "users": []
+    },
+    {
+      "name": "requestCreatePreviewProduct",
+      "method": "POST",
+      "path": "/api/create-preview-product",
+      "client": "apiClient",
+      "line": 223,
+      "users": [
+        "client/src/Pages/InfoUser/OrderUser/OrderUser.jsx"
+      ]
+    },
+    {
+      "name": "requestGetPreviewProductHome",
+      "method": "GET",
+      "path": "/api/get-preview-product-home",
+      "client": "apiClient",
+      "line": 228,
+      "users": []
+    },
+    {
+      "name": "requestGetAllCoupon",
+      "method": "GET",
+      "path": "/api/coupons",
+      "client": "apiClient",
+      "line": 234,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerCoupon/CouponManagement.jsx"
+      ]
+    },
+    {
+      "name": "requestCreateCoupon",
+      "method": "POST",
+      "path": "/api/create-coupon",
+      "client": "apiClient",
+      "line": 239,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerCoupon/CouponManagement.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateCoupon",
+      "method": "POST",
+      "path": "/api/update-coupon",
+      "client": "apiClient",
+      "line": 244,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerCoupon/CouponManagement.jsx"
+      ]
+    },
+    {
+      "name": "requestDeleteCoupon",
+      "method": "DELETE",
+      "path": "/api/delete-coupon",
+      "client": "apiClient",
+      "line": 249,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerCoupon/CouponManagement.jsx"
+      ]
+    },
+    {
+      "name": "requestCreateMessage",
+      "method": "POST",
+      "path": "/api/message/create",
+      "client": "apiClient",
+      "line": 260,
+      "users": [
+        "client/src/Components/Messger/Messger.jsx"
+      ]
+    },
+    {
+      "name": "requestCreateMessageAdmin",
+      "method": "POST",
+      "path": "/api/message/create-admin",
+      "client": "apiClient",
+      "line": 265,
+      "users": [
+        "client/src/Pages/Admin/Components/Messager/components/ChatWindow.jsx"
+      ]
+    },
+    {
+      "name": "requestGetAllMessage",
+      "method": "GET",
+      "path": "/api/message/all",
+      "client": "apiClient",
+      "line": 270,
+      "users": [
+        "client/src/Pages/Admin/Components/Messager/Messager.jsx"
+      ]
+    },
+    {
+      "name": "requestGetMessage",
+      "method": "GET",
+      "path": "/api/message/get-message",
+      "client": "apiClient",
+      "line": 275,
+      "users": [
+        "client/src/Pages/Admin/Components/Messager/Messager.jsx"
+      ]
+    },
+    {
+      "name": "requestGetMessageUser",
+      "method": "GET",
+      "path": "/api/message/get-message-user",
+      "client": "apiClient",
+      "line": 285,
+      "users": [
+        "client/src/Components/Messger/Messger.jsx"
+      ]
+    },
+    {
+      "name": "requestReadMessage",
+      "method": "GET",
+      "path": "/api/message/read-message",
+      "client": "apiClient",
+      "line": 294,
+      "users": [
+        "client/src/Pages/Admin/Components/Messager/Messager.jsx"
+      ]
+    },
+    {
+      "name": "requestCreateBlog",
+      "method": "POST",
+      "path": "/api/blog/create",
+      "client": "apiClient",
+      "line": 306,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerBlog/BlogAdmin.jsx"
+      ]
+    },
+    {
+      "name": "requestUploadImageBlog",
+      "method": "POST",
+      "path": "/api/blog/upload-image",
+      "client": "apiClient",
+      "line": 311,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerBlog/BlogAdmin.jsx"
+      ]
+    },
+    {
+      "name": "requestGetAllBlog",
+      "method": "GET",
+      "path": "/api/blog/get-all",
+      "client": "apiClient",
+      "line": 316,
+      "users": [
+        "client/src/Components/HomePage/Blog/Blog.jsx",
+        "client/src/Pages/Admin/Components/ManagerBlog/BlogAdmin.jsx",
+        "client/src/Pages/Blogs/Blogs.jsx",
+        "client/src/Pages/DetailBlog/DetailBlog.jsx"
+      ]
+    },
+    {
+      "name": "requestUpdateBlog",
+      "method": "POST",
+      "path": "/api/blog/update",
+      "client": "apiClient",
+      "line": 321,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerBlog/BlogAdmin.jsx"
+      ]
+    },
+    {
+      "name": "requestDeleteBlog",
+      "method": "POST",
+      "path": "/api/blog/delete",
+      "client": "apiClient",
+      "line": 326,
+      "users": [
+        "client/src/Pages/Admin/Components/ManagerBlog/BlogAdmin.jsx"
+      ]
+    },
+    {
+      "name": "requestGetBlogById",
+      "method": "GET",
+      "path": "/api/blog/get-by-id",
+      "client": "request",
+      "line": 331,
+      "users": [
+        "client/src/Pages/DetailBlog/DetailBlog.jsx"
+      ]
+    }
+  ],
+  "models": [
+    {
+      "name": "apikey",
+      "source": "server/src/models/apiKey.model.js"
+    },
+    {
+      "name": "blog",
+      "source": "server/src/models/blog.model.js"
+    },
+    {
+      "name": "brand",
+      "source": "server/src/models/brand.model.js"
+    },
+    {
+      "name": "cartUser",
+      "source": "server/src/models/cartUser.model.js"
+    },
+    {
+      "name": "category",
+      "source": "server/src/models/category.model.js"
+    },
+    {
+      "name": "coupon",
+      "source": "server/src/models/coupon.model.js"
+    },
+    {
+      "name": "Message",
+      "source": "server/src/models/message.model.js"
+    },
+    {
+      "name": "otp",
+      "source": "server/src/models/otp.model.js"
+    },
+    {
+      "name": "paymentAttempts",
+      "source": "server/src/models/paymentAttempt.model.js"
+    },
+    {
+      "name": "payments",
+      "source": "server/src/models/payments.model.js"
+    },
+    {
+      "name": "previewProduct",
+      "source": "server/src/models/previewProduct.model.js"
+    },
+    {
+      "name": "products",
+      "source": "server/src/models/products.model.js"
+    },
+    {
+      "name": "user",
+      "source": "server/src/models/users.model.js"
+    }
+  ]
+}

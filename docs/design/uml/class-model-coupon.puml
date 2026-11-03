@@ -1,0 +1,19 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "coupon" as M_coupon <<Model>> {
+  nameCoupon : String {required=true}
+  discount : Number {required=true}
+  quantity : Number {required=true}
+  startDate : Date {required=true}
+  endDate : Date {required=true}
+  minPrice : Number {required=true}
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+@enduml

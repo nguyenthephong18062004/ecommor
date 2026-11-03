@@ -1,0 +1,21 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách hàng đã đăng nhập" as A0
+actor "Quản trị viên" as A1
+actor "Khách vãng lai" as A2
+actor "Gemini" as A3
+rectangle "Chat" {
+usecase "UC-29\nChat với quản trị viên" as UC29
+usecase "UC-30\nQuản trị hội thoại" as UC30
+usecase "UC-31\nTư vấn bằng chatbot Gemini" as UC31
+}
+A0 --> UC29
+A1 --> UC30
+A2 --> UC31
+A3 --> UC31
+@enduml

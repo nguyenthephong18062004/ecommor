@@ -1,0 +1,38 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "App / HomePage" as App <<Page>>
+class "Header / Footer" as Layout <<Component>>
+class "ProductNew / CatalogSection" as New <<Component>>
+class "CardBody" as Card <<Component>>
+class "Category" as Cat <<Page>>
+class "DetailProduct" as Detail <<Page>>
+class "CartUser / CheckOut" as Cart <<Page>>
+class "PaymentSuccess / OrderUser" as Order <<Page>>
+class "LoginUser / Register / ForgotPassword / InfoUser" as Account <<Page>>
+class "Blogs / DetailBlog" as Blog <<Page>>
+class "Contact" as Contact <<Page>>
+class "Messger / Chatbot" as Chat <<Component>>
+class "request.jsx / ApiClient" as Req <<API>>
+class "useStore / useFetch / useDebounce / useProductCatalog" as Hooks <<Hook>>
+App --> Layout
+App --> New
+App --> Chat
+New --> Card
+New --> Hooks
+Cat --> Card
+Cat --> Hooks
+Cat --> Req
+Detail --> Hooks
+Detail --> Req
+Cart --> Hooks
+Cart --> Req
+Order --> Req
+Account --> Req
+Blog --> Req
+Chat --> Req
+Layout --> Req
+@enduml

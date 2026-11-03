@@ -1,0 +1,60 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+class "checkAuth" as Auth <<Middleware>> {
+  authUser()
+  authAdmin()
+  asyncHandler()
+}
+class "users.routes.js" as R0 <<Router>>
+class "users.controller.js" as C0 <<Controller>> {
+  register()
+  loginGoogle()
+  login()
+  authUser()
+  refreshToken()
+  logout()
+  updateUser()
+  getStatistical()
+  findAllUser()
+  updateUserAdmin()
+  forgotPassword()
+  resetPassword()
+  registerWithVerification()
+  verifyEmail()
+  resendVerification()
+  requestPasswordResetOtp()
+  verifyPasswordReset()
+  resetPasswordAfterVerification()
+}
+R0 --> Auth
+R0 --> C0
+class "users.model" as M0_0 <<Model>>
+C0 --> M0_0
+class "apiKey.model" as M0_1 <<Model>>
+C0 --> M0_1
+class "products.model" as M0_2 <<Model>>
+C0 --> M0_2
+class "payments.model" as M0_3 <<Model>>
+C0 --> M0_3
+class "previewProduct.model" as M0_4 <<Model>>
+C0 --> M0_4
+class "otp.model" as M0_5 <<Model>>
+C0 --> M0_5
+class "tokenSevices" as S0 <<Service>> {
+  createApiKey / createToken / createRefreshToken / verifyToken()
+}
+C0 --> S0
+class "otp.service" as S1 <<Service>> {
+  issue / consume / hasPendingRegistration()
+}
+C0 --> S1
+class "mail.service" as S2 <<Service>> {
+  sendOtpEmail / sendCheckEmail()
+}
+C0 --> S2
+@enduml

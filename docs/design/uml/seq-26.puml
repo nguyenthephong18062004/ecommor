@@ -1,0 +1,31 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách hàng đã đăng nhập" as U
+participant "OrderUser.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+database "Model / MongoDB" as DB
+U -> UI : Mở lịch sử /payments/:id
+UI -> A : requestGetOrderUser hoặc requestGetPaymentSuccess
+A -> R : GET /api/get-order-user hoặc get-payment-success
+R -> W : authUser
+W -> C : getOrderUser / getPaymentSuccess
+C -> DB : Find orders với userId JWT, thêm _id nếu detail
+alt Detail không thấy đơn thuộc user
+C --> A : 403 Không tìm thấy đơn hàng
+else Có dữ liệu
+loop Mỗi item của mỗi đơn
+C -> DB : Đọc product hiện tại cho legacy fallback
+C -> C : Ưu tiên snapshot unitPrice/nameProduct/images
+end
+C --> A : 200 thông tin đơn và paymentStatus
+A --> UI : Hiển thị bảng/chi tiết
+end
+@enduml

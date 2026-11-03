@@ -1,0 +1,43 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "paymentAttempts" as M_paymentAttempts <<Model>> {
+  orderId : mongoose.Schema.Types.ObjectId {required=true; ref='payments'}
+  transactionRef : String {required=true; unique=true}
+  amount : Number {required=true; min=1}
+  status : M_paymentAttempts_Enum3 {default='pending'}
+  expiresAt : Date {required=true}
+  paymentUrl : String {required=true; select=false}
+  createDate : String {required=true}
+  transactionNo : String
+  bankCode : String
+  responseCode : String
+  transactionStatus : String
+  payDate : String
+  receivedAt : Date
+  reconciledAt : Date
+  nextQueryAt : Date
+  confirmationSource : M_paymentAttempts_Enum15
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+enum "Enum3" as M_paymentAttempts_Enum3 <<enumeration>> {
+  pending
+  paid
+  failed
+  expired
+  cancelled
+  refund_required
+}
+M_paymentAttempts --> M_paymentAttempts_Enum3
+enum "Enum15" as M_paymentAttempts_Enum15 <<enumeration>> {
+  ipn
+  querydr
+}
+M_paymentAttempts --> M_paymentAttempts_Enum15
+@enduml

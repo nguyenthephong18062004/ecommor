@@ -1,0 +1,25 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+state "Chờ xác nhận (pending)" as Pending
+state "Đã xác nhận (confirmed)" as Confirmed
+state "Đang giao (shipped)" as Shipped
+state "Đã giao (delivered)" as Delivered
+state "Đã hủy (cancelled)" as Cancelled
+[*] --> Pending : checkout
+Pending --> Confirmed : admin; VNPAY phải paid
+Pending --> Cancelled : user sở hữu hoặc admin; đủ điều kiện hủy
+Confirmed --> Shipped : admin; VNPAY phải paid
+Confirmed --> Cancelled : admin; chặn online paid/refund_required
+Shipped --> Delivered : admin / soldCount tăng; COD paid
+Delivered --> [*]
+Cancelled --> [*]
+note right of Pending
+Status không đổi: no-op.
+VNPAY refund_required chặn chuyển trạng thái.
+Không có confirmed -> pending hoặc shipped -> cancelled.
+end note
+@enduml

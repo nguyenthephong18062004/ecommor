@@ -1,0 +1,32 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách hàng đã đăng nhập" as A0
+actor "VNPay" as A1
+actor "MoMo" as A2
+rectangle "Thanh toán" {
+usecase "UC-19\nĐặt hàng COD" as UC19
+usecase "UC-20\nKhởi tạo thanh toán VNPay" as UC20
+usecase "UC-21\nHiển thị kết quả Return VNPay" as UC21
+usecase "UC-22\nXác nhận IPN VNPay" as UC22
+usecase "UC-23\nThanh toán lại VNPay" as UC23
+usecase "UC-24\nĐối soát trạng thái VNPay" as UC24
+usecase "UC-25\nThanh toán MoMo" as UC25
+}
+A0 --> UC19
+A0 --> UC20
+A1 --> UC20
+A0 --> UC21
+A1 --> UC21
+A1 --> UC22
+A0 --> UC23
+A1 --> UC23
+A0 --> UC24
+A1 --> UC24
+A0 --> UC25
+A2 --> UC25
+@enduml

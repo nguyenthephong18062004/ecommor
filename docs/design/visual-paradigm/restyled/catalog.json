@@ -1,0 +1,332 @@
+[
+  {
+    "name": "UC — Tổng quan ECOMMOR",
+    "type": "UseCaseDiagram",
+    "id": "REST0000000019c3"
+  },
+  {
+    "name": "uc-module-01",
+    "type": "UseCaseDiagram",
+    "id": "REST000000001851"
+  },
+  {
+    "name": "uc-module-02",
+    "type": "UseCaseDiagram",
+    "id": "REST0000000018a5"
+  },
+  {
+    "name": "uc-module-03",
+    "type": "UseCaseDiagram",
+    "id": "REST0000000018c5"
+  },
+  {
+    "name": "uc-module-04",
+    "type": "UseCaseDiagram",
+    "id": "REST0000000018ef"
+  },
+  {
+    "name": "uc-module-05",
+    "type": "UseCaseDiagram",
+    "id": "REST000000001937"
+  },
+  {
+    "name": "uc-module-06",
+    "type": "UseCaseDiagram",
+    "id": "REST000000001949"
+  },
+  {
+    "name": "uc-module-07",
+    "type": "UseCaseDiagram",
+    "id": "REST000000001961"
+  },
+  {
+    "name": "uc-module-08",
+    "type": "UseCaseDiagram",
+    "id": "REST000000001983"
+  },
+  {
+    "name": "Class — Tổng thể ECOMMOR",
+    "type": "ClassDiagram",
+    "id": "REST0000000021f8"
+  },
+  {
+    "name": "act-01 — Đăng ký và xác minh email",
+    "type": "ActivityDiagram",
+    "id": "REST000000000002"
+  },
+  {
+    "name": "act-02 — Đăng nhập và phân quyền",
+    "type": "ActivityDiagram",
+    "id": "REST0000000000aa"
+  },
+  {
+    "name": "act-03 — Khôi phục mật khẩu",
+    "type": "ActivityDiagram",
+    "id": "REST000000000140"
+  },
+  {
+    "name": "act-04 — Mua hàng",
+    "type": "ActivityDiagram",
+    "id": "REST0000000001e6"
+  },
+  {
+    "name": "act-05 — VNPay Return và xác nhận",
+    "type": "ActivityDiagram",
+    "id": "REST000000000275"
+  },
+  {
+    "name": "act-06 — VNPay hết hạn và đối soát",
+    "type": "ActivityDiagram",
+    "id": "REST000000000327"
+  },
+  {
+    "name": "act-07 — Xử lý đơn hàng",
+    "type": "ActivityDiagram",
+    "id": "REST0000000003db"
+  },
+  {
+    "name": "act-08 — Quản lý catalog",
+    "type": "ActivityDiagram",
+    "id": "REST000000000472"
+  },
+  {
+    "name": "act-09 — Chat realtime",
+    "type": "ActivityDiagram",
+    "id": "REST0000000004fb"
+  },
+  {
+    "name": "act-10 — Chatbot Gemini",
+    "type": "ActivityDiagram",
+    "id": "REST000000000575"
+  },
+  {
+    "name": "act-11 — Thống kê và người dùng",
+    "type": "ActivityDiagram",
+    "id": "REST00000000060b"
+  },
+  {
+    "name": "act-12 — Blog",
+    "type": "ActivityDiagram",
+    "id": "REST00000000068e"
+  },
+  {
+    "name": "act-13 — MoMo legacy",
+    "type": "ActivityDiagram",
+    "id": "REST0000000006de"
+  },
+  {
+    "name": "act-state-order",
+    "type": "StateDiagram",
+    "id": "REST000000000758"
+  },
+  {
+    "name": "act-state-payment",
+    "type": "StateDiagram",
+    "id": "REST00000000077a"
+  },
+  {
+    "name": "seq-01 — Đăng ký tài khoản",
+    "type": "InteractionDiagram",
+    "id": "REST0000000007a6"
+  },
+  {
+    "name": "seq-02 — Xác minh email đăng ký",
+    "type": "InteractionDiagram",
+    "id": "REST000000000831"
+  },
+  {
+    "name": "seq-03 — Gửi lại mã xác minh đăng ký",
+    "type": "InteractionDiagram",
+    "id": "REST0000000008b8"
+  },
+  {
+    "name": "seq-04 — Đăng nhập email",
+    "type": "InteractionDiagram",
+    "id": "REST000000000929"
+  },
+  {
+    "name": "seq-05 — Đăng nhập Google",
+    "type": "InteractionDiagram",
+    "id": "REST00000000097e"
+  },
+  {
+    "name": "seq-06 — Kiểm tra và gia hạn phiên",
+    "type": "InteractionDiagram",
+    "id": "REST0000000009e7"
+  },
+  {
+    "name": "seq-07 — Đăng xuất",
+    "type": "InteractionDiagram",
+    "id": "REST000000000a6c"
+  },
+  {
+    "name": "seq-08 — Khôi phục mật khẩu bằng OTP",
+    "type": "InteractionDiagram",
+    "id": "REST000000000ab7"
+  },
+  {
+    "name": "seq-09 — Xem và cập nhật hồ sơ",
+    "type": "InteractionDiagram",
+    "id": "REST000000000b72"
+  },
+  {
+    "name": "seq-10 — Xem catalog trang chủ",
+    "type": "InteractionDiagram",
+    "id": "REST000000000bb3"
+  },
+  {
+    "name": "seq-11 — Tìm kiếm và lọc sản phẩm",
+    "type": "InteractionDiagram",
+    "id": "REST000000000c12"
+  },
+  {
+    "name": "seq-12 — Xem chi tiết sản phẩm và đánh giá",
+    "type": "InteractionDiagram",
+    "id": "REST000000000c77"
+  },
+  {
+    "name": "seq-13 — Tạo đánh giá sản phẩm",
+    "type": "InteractionDiagram",
+    "id": "REST000000000cda"
+  },
+  {
+    "name": "seq-14 — Xem giỏ hàng",
+    "type": "InteractionDiagram",
+    "id": "REST000000000d1d"
+  },
+  {
+    "name": "seq-15 — Thêm sản phẩm vào giỏ",
+    "type": "InteractionDiagram",
+    "id": "REST000000000d74"
+  },
+  {
+    "name": "seq-16 — Sửa số lượng giỏ",
+    "type": "InteractionDiagram",
+    "id": "REST000000000ddd"
+  },
+  {
+    "name": "seq-17 — Xóa sản phẩm khỏi giỏ",
+    "type": "InteractionDiagram",
+    "id": "REST000000000e36"
+  },
+  {
+    "name": "seq-18 — Chọn coupon và thông tin giao hàng",
+    "type": "InteractionDiagram",
+    "id": "REST000000000e7d"
+  },
+  {
+    "name": "seq-19 — Đặt hàng COD",
+    "type": "InteractionDiagram",
+    "id": "REST000000000ee4"
+  },
+  {
+    "name": "seq-20 — Khởi tạo thanh toán VNPay",
+    "type": "InteractionDiagram",
+    "id": "REST000000000f71"
+  },
+  {
+    "name": "seq-21 — Hiển thị kết quả Return VNPay",
+    "type": "InteractionDiagram",
+    "id": "REST000000000fdc"
+  },
+  {
+    "name": "seq-22 — Xác nhận IPN VNPay",
+    "type": "InteractionDiagram",
+    "id": "REST000000001035"
+  },
+  {
+    "name": "seq-23 — Thanh toán lại VNPay",
+    "type": "InteractionDiagram",
+    "id": "REST0000000010ae"
+  },
+  {
+    "name": "seq-24 — Đối soát trạng thái VNPay",
+    "type": "InteractionDiagram",
+    "id": "REST000000001137"
+  },
+  {
+    "name": "seq-25 — Thanh toán MoMo",
+    "type": "InteractionDiagram",
+    "id": "REST0000000011b8"
+  },
+  {
+    "name": "seq-26 — Xem đơn hàng của mình",
+    "type": "InteractionDiagram",
+    "id": "REST000000001245"
+  },
+  {
+    "name": "seq-27 — Hủy đơn hàng của mình",
+    "type": "InteractionDiagram",
+    "id": "REST000000001292"
+  },
+  {
+    "name": "seq-28 — Đọc blog",
+    "type": "InteractionDiagram",
+    "id": "REST0000000012ef"
+  },
+  {
+    "name": "seq-29 — Chat với quản trị viên",
+    "type": "InteractionDiagram",
+    "id": "REST000000001328"
+  },
+  {
+    "name": "seq-30 — Quản trị hội thoại",
+    "type": "InteractionDiagram",
+    "id": "REST000000001399"
+  },
+  {
+    "name": "seq-31 — Tư vấn bằng chatbot Gemini",
+    "type": "InteractionDiagram",
+    "id": "REST00000000140a"
+  },
+  {
+    "name": "seq-32 — Quản lý sản phẩm",
+    "type": "InteractionDiagram",
+    "id": "REST00000000149b"
+  },
+  {
+    "name": "seq-33 — Quản lý danh mục",
+    "type": "InteractionDiagram",
+    "id": "REST00000000151e"
+  },
+  {
+    "name": "seq-34 — Quản lý coupon",
+    "type": "InteractionDiagram",
+    "id": "REST000000001593"
+  },
+  {
+    "name": "seq-35 — Quản lý bài viết",
+    "type": "InteractionDiagram",
+    "id": "REST000000001600"
+  },
+  {
+    "name": "seq-36 — Xem người dùng và đổi quyền",
+    "type": "InteractionDiagram",
+    "id": "REST000000001669"
+  },
+  {
+    "name": "seq-37 — Xử lý đơn hàng phía quản trị",
+    "type": "InteractionDiagram",
+    "id": "REST0000000016b8"
+  },
+  {
+    "name": "seq-38 — Xem thống kê",
+    "type": "InteractionDiagram",
+    "id": "REST00000000172f"
+  },
+  {
+    "name": "seq-39 — Tải ảnh sản phẩm hoặc blog",
+    "type": "InteractionDiagram",
+    "id": "REST000000001782"
+  },
+  {
+    "name": "seq-40 — Xem danh sách thương hiệu",
+    "type": "InteractionDiagram",
+    "id": "REST0000000017d7"
+  },
+  {
+    "name": "seq-41 — Xem thông tin liên hệ",
+    "type": "InteractionDiagram",
+    "id": "REST000000001822"
+  }
+]

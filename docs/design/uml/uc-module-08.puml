@@ -1,0 +1,31 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Quản trị viên" as A0
+rectangle "Quản trị" {
+usecase "UC-32\nQuản lý sản phẩm" as UC32
+usecase "UC-33\nQuản lý danh mục" as UC33
+usecase "UC-34\nQuản lý coupon" as UC34
+usecase "UC-35\nQuản lý bài viết" as UC35
+usecase "UC-36\nXem người dùng và đổi quyền" as UC36
+usecase "UC-37\nXử lý đơn hàng phía quản trị" as UC37
+usecase "UC-38\nXem thống kê" as UC38
+usecase "UC-39\nTải ảnh sản phẩm hoặc blog" as UC39
+usecase "UC-40\nXem danh sách thương hiệu" as UC40
+}
+A0 --> UC32
+A0 --> UC33
+A0 --> UC34
+A0 --> UC35
+A0 --> UC36
+A0 --> UC37
+A0 --> UC38
+A0 --> UC39
+A0 --> UC40
+UC39 ..> UC32 : <<extend>>
+UC39 ..> UC35 : <<extend>>
+@enduml

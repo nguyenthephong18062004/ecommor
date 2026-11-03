@@ -1,87 +1,25 @@
 const modelProduct = require('../models/products.model');
 const modelCategory = require('../models/category.model');
-const modelPreviewProduct = require('../models/previewProduct.model');
-const modelUser = require('../models/users.model');
-const modelCoupon = require('../models/coupon.model');
+const productCatalog = require('../services/product-catalog.service');
+const catalogBrowse = require('../services/catalog-browse.service');
 
 const { BadRequestError } = require('../core/error.response');
 const { Created, OK } = require('../core/success.response');
 
-const dayjs = require('dayjs');
+const mongoose = require('mongoose');
+const { productInput, validateVerification, visibleFilter, cardFields, searchable, searchFilter } = require('../services/product-data.service');
+const { richText } = require('../utils/richText');
+const clean = product => ({ ...product, description: richText(product.description) });
 
 class controllerProducts {
     async uploadImages(req, res) {}
 
     async createProduct(req, res) {
-        const {
-            nameProduct,
-            modelNumber,
-            brand,
-            collection,
-            origin,
-            gender,
-            glassMaterial,
-            category,
-            movement,
-            powerReserve,
-            warrantyGlobal,
-            dialDiameter,
-            caseThickness,
-            bezelMaterial,
-            strapMaterial,
-            faceColor,
-            waterResistance,
-            price,
-            discount,
-            description = '1234',
-            images,
-            stock,
-        } = req.body;
-
-        // Kiểm tra các trường bắt buộc
-        if (
-            !nameProduct ||
-            !modelNumber ||
-            !brand ||
-            !origin ||
-            !gender ||
-            !glassMaterial ||
-            !movement ||
-            !dialDiameter ||
-            !strapMaterial ||
-            !waterResistance ||
-            !price ||
-            !description ||
-            !images ||
-            !stock
-        ) {
-            throw new BadRequestError('Vui lòng nhập đầy đủ thông tin bắt buộc');
-        }
-
-        const product = await modelProduct.create({
-            nameProduct,
-            modelNumber,
-            brand,
-            category,
-            collection,
-            origin,
-            gender,
-            glassMaterial,
-            movement,
-            powerReserve,
-            warrantyGlobal,
-            dialDiameter,
-            caseThickness,
-            bezelMaterial,
-            strapMaterial,
-            faceColor,
-            waterResistance,
-            price,
-            discount,
-            description,
-            images,
-            stock,
-        });
+        const data = productInput(req.body, true);
+        data.description = richText(data.description);
+        data.searchText = searchable(data);
+        validateVerification(data);
+        const product = await modelProduct.create(data);
 
         new Created({
             message: 'Tạo sản phẩm thành công',
@@ -91,51 +29,45 @@ class controllerProducts {
     }
 
     async getProductNew(req, res) {
-        // Lấy sản phẩm tạo trong 3 ngày trước
-
-        const product = await modelProduct.find({});
-
-        const data = product.map((p) => ({
-            ...p.toObject(),
-            isNew: true,
-        }));
-
         new OK({
-            message: 'Lấy sản phẩm tạo trong 3 ngày gần đây',
+            message: 'Lấy 10 sản phẩm mới nhất còn hàng',
             statusCode: 200,
-            metadata: data,
+            metadata: await productCatalog.latest(),
         }).send(res);
+    }
+
+    async getProductCatalog(req, res) {
+        new OK({
+            message: 'Lấy danh sách sản phẩm theo trang',
+            metadata: await productCatalog.catalog(req.query),
+        }).send(res);
+    }
+
+    async getCatalogOptions(req, res) {
+        new OK({ message: 'Danh mục và thương hiệu', metadata: await catalogBrowse.options() }).send(res);
+    }
+
+    async browseProducts(req, res) {
+        new OK({ message: 'Danh sách sản phẩm', metadata: await catalogBrowse.browse(req.query) }).send(res);
     }
 
     async getProductById(req, res) {
         const { id } = req.query;
-        const product = await modelProduct.findById(id);
-        const relatedProducts = await modelProduct.find({
-            category: product.category,
-            _id: { $ne: id },
-        });
-
-        const previewProduct = await modelPreviewProduct.find({ productId: id });
-        const dataPreviewProduct = await Promise.all(
-            previewProduct.map(async (item) => {
-                const user = await modelUser.findById(item.userId);
-                return { ...item.toObject(), user: user.fullName };
-            }),
-        );
-        new OK({
-            message: 'Lấy sản phẩm thành công',
-            statusCode: 200,
-            metadata: { product, relatedProducts, previewProduct: dataPreviewProduct },
-        }).send(res);
+        if (!mongoose.isValidObjectId(id)) throw new BadRequestError('Mã sản phẩm không hợp lệ.', 400);
+        const product = await modelProduct.findOne({ _id: id, ...visibleFilter }).lean();
+        if (!product) throw new BadRequestError('Không tìm thấy sản phẩm.', 404);
+        const relatedProducts = await modelProduct.find({ category: product.category, _id: { $ne: id }, ...visibleFilter })
+            .sort({ createdAt: -1, _id: -1 }).limit(8).select(cardFields).lean();
+        new OK({ message: 'Thông tin sản phẩm', metadata: { product: clean(product), relatedProducts } }).send(res);
     }
 
     async getProductByCategory(req, res) {
         const { category, price, discount } = req.query;
 
-        let query = { category };
+        let query = { category, ...visibleFilter };
 
         if (category === 'all') {
-            query = {};
+            query = { ...visibleFilter };
         }
 
         // Add discount filter
@@ -171,32 +103,27 @@ class controllerProducts {
         new OK({
             message: 'Lấy sản phẩm thành công',
             statusCode: 200,
-            metadata: products,
+            metadata: products.map(product => clean(product.toObject())),
         }).send(res);
     }
 
     async getAllProduct(req, res) {
-        const products = await modelProduct.find();
-        const data = await Promise.all(
-            products.map(async (product) => {
-                const category = await modelCategory.findById(product.category);
-                return { ...product.toObject(), category: category.name, categoryId: category._id };
-            }),
-        );
-        new OK({
-            message: 'Lấy tất cả sản phẩm thành công',
-            statusCode: 200,
-            metadata: data,
-        }).send(res);
+        const [products, categories] = await Promise.all([modelProduct.find().lean(), modelCategory.find().lean()]);
+        const names = new Map(categories.map(category => [String(category._id), category.name]));
+        new OK({ message: 'Danh sách sản phẩm', metadata: products.map(product => ({ ...clean(product),
+            categoryId: product.category, category: names.get(String(product.category)) || 'Chưa phân loại' })) }).send(res);
     }
 
     async updateProduct(req, res) {
-        const { id, name, price, discount, description, category, size, stock, images } = req.body;
-        const product = await modelProduct.findByIdAndUpdate(
-            id,
-            { name, price, discount, description, category, size, stock, images },
-            { new: true },
-        );
+        const { id } = req.body;
+        if (!mongoose.isValidObjectId(id)) throw new BadRequestError('Mã sản phẩm không hợp lệ.', 400);
+        const current = await modelProduct.findById(id).lean();
+        if (!current) throw new BadRequestError('Không tìm thấy sản phẩm.', 404);
+        const data = productInput(req.body);
+        if (Object.hasOwn(data, 'description')) data.description = richText(data.description);
+        data.searchText = searchable({ ...current, ...data });
+        validateVerification({ ...current, ...data });
+        const product = await modelProduct.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
         new OK({
             message: 'Cập nhật sản phẩm thành công',
             statusCode: 200,
@@ -218,7 +145,7 @@ class controllerProducts {
     }
 
     async getProductManufactured(req, res) {
-        const product = await modelProduct.find({ discount: { $gte: 10 } });
+        const product = await modelProduct.find({ discount: { $gte: 10 }, ...visibleFilter }).select(cardFields).limit(20);
         new OK({
             message: 'Lấy sản phẩm sản xuất thành công',
             statusCode: 200,
@@ -227,17 +154,13 @@ class controllerProducts {
     }
 
     async searchProduct(req, res, next) {
-        const { valueSearch } = req.query;
-
-        const data = await modelProduct.find({
-            nameProduct: { $regex: valueSearch, $options: 'i' }, // Thêm $options: "i"
-        });
-
-        new OK({
-            message: 'Lấy sản phẩm tìm kiếm',
-            statusCode: 200,
-            metadata: data,
-        }).send(res);
+        const valueSearch = req.query.valueSearch;
+        if (typeof valueSearch !== 'string' || !valueSearch.trim() || valueSearch.length > 100) {
+            throw new BadRequestError('Từ khóa tìm kiếm không hợp lệ.', 400);
+        }
+        const data = await modelProduct.find({ ...visibleFilter, ...searchFilter(valueSearch.trim()) })
+            .select(cardFields).sort({ createdAt: -1, _id: -1 }).limit(8).lean();
+        new OK({ message: 'Kết quả tìm kiếm', metadata: data }).send(res);
     }
 }
 

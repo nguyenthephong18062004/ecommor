@@ -1,0 +1,40 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách vãng lai" as Guest
+actor "Khách hàng đã đăng nhập" as Customer
+actor "Quản trị viên" as Admin
+actor "Google" as Google
+actor "Gmail" as Gmail
+actor "VNPay" as VNPay
+actor "MoMo" as MoMo
+actor "Gemini" as Gemini
+actor "Goong" as Goong
+Customer --|> Guest
+Admin --|> Customer
+rectangle "ECOMMOR" {
+usecase "Tài khoản và phiên" as Account
+usecase "Tra cứu catalog và blog" as Catalog
+usecase "Giỏ hàng và giao hàng" as Cart
+usecase "Đặt hàng và thanh toán" as Payment
+usecase "Hỗ trợ trực tuyến" as Chat
+usecase "Quản trị và thống kê" as Management
+}
+Guest --> Account
+Guest --> Catalog
+Guest --> Chat
+Customer --> Cart
+Customer --> Payment
+Customer --> Chat
+Admin --> Management
+Google --> Account
+Gmail --> Account
+VNPay --> Payment
+MoMo --> Payment
+Gemini --> Chat
+Goong --> Cart
+@enduml

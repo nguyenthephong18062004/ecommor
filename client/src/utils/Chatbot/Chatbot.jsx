@@ -1,15 +1,26 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, RotateCcw } from 'lucide-react';
 import { requestChatbot } from '../../config/request';
+import useRequireAuth from '../../hooks/useRequireAuth';
 
 const Chatbot = () => {
+    const requireAuth = useRequireAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { text: 'Xin chĂ o! TĂ´i lĂ  trá»£ lĂ½ bĂ¡n hĂ ng. TĂ´i cĂ³ thá»ƒ giĂºp gĂ¬ cho báº¡n?', sender: 'bot', timestamp: new Date() },
+        { text: 'Xin chào! Tôi là trợ lý bán hàng. Tôi có thể giúp gì cho bạn?', sender: 'bot', timestamp: new Date() },
     ]);
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
+
+    const sanitizeText = (value) =>
+        Array.from(String(value ?? ''))
+            .filter((character) => {
+                const code = character.charCodeAt(0);
+                return code >= 32 || character === '\n' || character === '\r' || character === '\t';
+            })
+            .join('')
+            .slice(0, 4000);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -19,30 +30,45 @@ const Chatbot = () => {
         scrollToBottom();
     }, [messages]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (inputMessage.trim() && !isLoading) {
-            const userMessage = inputMessage.trim();
-            setMessages((prev) => [...prev, { text: userMessage, sender: 'user', timestamp: new Date() }]);
-            setInputMessage('');
-            setIsLoading(true);
+    const sendMessage = async (userMessage, appendUserMessage = true) => {
+        if (isLoading) return;
+        if (!requireAuth('sử dụng trợ lý tư vấn')) return;
 
-            try {
-                const res = await requestChatbot({ question: userMessage });
-                setMessages((prev) => [...prev, { text: res, sender: 'bot', timestamp: new Date() }]);
-            } catch (error) {
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        text: 'Không kết nối được trợ lý AI. Bạn kiểm tra backend đã chạy chưa nhé.',
-                        sender: 'bot',
-                        timestamp: new Date(),
-                    },
-                ]);
-            } finally {
-                setIsLoading(false);
-            }
+        if (appendUserMessage) {
+            setMessages((prev) => [...prev, { text: userMessage, sender: 'user', timestamp: new Date() }]);
         }
+        setInputMessage('');
+        setIsLoading(true);
+
+        try {
+            const res = await requestChatbot({ question: userMessage });
+            setMessages((prev) => [
+                ...prev,
+                { text: sanitizeText(res), sender: 'bot', timestamp: new Date() },
+            ]);
+        } catch (error) {
+            const errorMessage = sanitizeText(
+                error.response?.data?.message || 'Không kết nối được trợ lý AI. Vui lòng thử lại sau.',
+            );
+            setMessages((prev) => [
+                ...prev,
+                {
+                    text: errorMessage,
+                    sender: 'bot',
+                    timestamp: new Date(),
+                    isError: true,
+                    retryQuestion: userMessage,
+                },
+            ]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const userMessage = inputMessage.trim();
+        if (userMessage) sendMessage(userMessage);
     };
 
     const TypingIndicator = () => (
@@ -50,7 +76,7 @@ const Chatbot = () => {
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
             <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-            <span className="ml-2 text-gray-500 text-sm">Äang nháº­p...</span>
+            <span className="ml-2 text-gray-500 text-sm">Đang nhập...</span>
         </div>
     );
 
@@ -58,11 +84,11 @@ const Chatbot = () => {
         <>
             {/* Chat Button */}
             <button
-                onClick={() => setIsOpen(true)}
+                onClick={() => { if (requireAuth('sử dụng trợ lý tư vấn')) setIsOpen(true); }}
                 className={`fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 z-50 flex items-center justify-center group ${
                     isOpen ? 'scale-0' : 'scale-100'
                 }`}
-                aria-label="Má»Ÿ chat"
+                aria-label="Mở chat"
             >
                 <MessageCircle size={24} className="group-hover:animate-pulse" />
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
@@ -79,14 +105,14 @@ const Chatbot = () => {
                                 <Bot size={20} />
                             </div>
                             <div>
-                                <h2 className="font-semibold text-lg">Há»— trá»£ khĂ¡ch hĂ ng</h2>
-                                <p className="text-xs text-blue-100">Trá»±c tuyáº¿n</p>
+                                <h2 className="font-semibold text-lg">Hỗ trợ khách hàng</h2>
+                                <p className="text-xs text-blue-100">Trực tuyến</p>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
                             className="w-8 h-8 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors duration-200"
-                            aria-label="ÄĂ³ng chat"
+                            aria-label="Đóng chat"
                         >
                             <X size={20} />
                         </button>
@@ -124,6 +150,17 @@ const Chatbot = () => {
                                         }`}
                                     >
                                         <p className="text-sm leading-relaxed">{message.text}</p>
+                                        {message.isError && (
+                                            <button
+                                                type="button"
+                                                onClick={() => sendMessage(message.retryQuestion, false)}
+                                                disabled={isLoading}
+                                                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                                            >
+                                                <RotateCcw size={14} />
+                                                Thử lại
+                                            </button>
+                                        )}
                                         <p
                                             className={`text-xs mt-1 ${
                                                 message.sender === 'user' ? 'text-green-100' : 'text-gray-500'
@@ -162,15 +199,18 @@ const Chatbot = () => {
                                 type="text"
                                 value={inputMessage}
                                 onChange={(e) => setInputMessage(e.target.value)}
-                                placeholder="Nháº­p tin nháº¯n cá»§a báº¡n..."
+                                maxLength={1000}
+                                placeholder="Nhập tin nhắn của bạn..."
                                 className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
                                 disabled={isLoading}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
                             />
                             <button
+                                type="button"
                                 onClick={handleSubmit}
                                 disabled={isLoading || !inputMessage.trim()}
                                 className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
+                                aria-label="Gửi tin nhắn"
                             >
                                 <Send size={18} className={isLoading ? 'animate-pulse' : ''} />
                             </button>

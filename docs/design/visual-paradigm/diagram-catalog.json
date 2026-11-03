@@ -1,0 +1,524 @@
+[
+  {
+    "source": "act-01.puml",
+    "name": "act-01 — Đăng ký và xác minh email",
+    "type": "ActivityDiagram",
+    "id": "ECOM000000000002"
+  },
+  {
+    "source": "act-02.puml",
+    "name": "act-02 — Đăng nhập và phân quyền",
+    "type": "ActivityDiagram",
+    "id": "ECOM0000000000aa"
+  },
+  {
+    "source": "act-03.puml",
+    "name": "act-03 — Khôi phục mật khẩu",
+    "type": "ActivityDiagram",
+    "id": "ECOM000000000140"
+  },
+  {
+    "source": "act-04.puml",
+    "name": "act-04 — Mua hàng",
+    "type": "ActivityDiagram",
+    "id": "ECOM0000000001e6"
+  },
+  {
+    "source": "act-05.puml",
+    "name": "act-05 — VNPay Return và xác nhận",
+    "type": "ActivityDiagram",
+    "id": "ECOM000000000275"
+  },
+  {
+    "source": "act-06.puml",
+    "name": "act-06 — VNPay hết hạn và đối soát",
+    "type": "ActivityDiagram",
+    "id": "ECOM000000000327"
+  },
+  {
+    "source": "act-07.puml",
+    "name": "act-07 — Xử lý đơn hàng",
+    "type": "ActivityDiagram",
+    "id": "ECOM0000000003db"
+  },
+  {
+    "source": "act-08.puml",
+    "name": "act-08 — Quản lý catalog",
+    "type": "ActivityDiagram",
+    "id": "ECOM000000000472"
+  },
+  {
+    "source": "act-09.puml",
+    "name": "act-09 — Chat realtime",
+    "type": "ActivityDiagram",
+    "id": "ECOM0000000004fb"
+  },
+  {
+    "source": "act-10.puml",
+    "name": "act-10 — Chatbot Gemini",
+    "type": "ActivityDiagram",
+    "id": "ECOM000000000575"
+  },
+  {
+    "source": "act-11.puml",
+    "name": "act-11 — Thống kê và người dùng",
+    "type": "ActivityDiagram",
+    "id": "ECOM00000000060b"
+  },
+  {
+    "source": "act-12.puml",
+    "name": "act-12 — Blog",
+    "type": "ActivityDiagram",
+    "id": "ECOM00000000068e"
+  },
+  {
+    "source": "act-13.puml",
+    "name": "act-13 — MoMo legacy",
+    "type": "ActivityDiagram",
+    "id": "ECOM0000000006de"
+  },
+  {
+    "source": "act-state-order.puml",
+    "name": "act-state-order",
+    "type": "StateDiagram",
+    "id": "ECOM000000000758"
+  },
+  {
+    "source": "act-state-payment.puml",
+    "name": "act-state-payment",
+    "type": "StateDiagram",
+    "id": "ECOM00000000077a"
+  },
+  {
+    "source": "class-architecture.puml",
+    "name": "class-architecture",
+    "type": "ComponentDiagram",
+    "id": "ECOM0000000007a6"
+  },
+  {
+    "source": "class-backend-account.puml",
+    "name": "class-backend-account",
+    "type": "ClassDiagram",
+    "id": "ECOM00000000080e"
+  },
+  {
+    "source": "class-backend-commerce.puml",
+    "name": "class-backend-commerce",
+    "type": "ClassDiagram",
+    "id": "ECOM00000000086c"
+  },
+  {
+    "source": "class-backend-content.puml",
+    "name": "class-backend-content",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000976"
+  },
+  {
+    "source": "class-client-admin.puml",
+    "name": "class-client-admin",
+    "type": "ClassDiagram",
+    "id": "ECOM0000000009e8"
+  },
+  {
+    "source": "class-client-core.puml",
+    "name": "class-client-core",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000a4e"
+  },
+  {
+    "source": "class-client-storefront.puml",
+    "name": "class-client-storefront",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000a99"
+  },
+  {
+    "source": "class-model-apikey.puml",
+    "name": "class-model-apikey",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000afb"
+  },
+  {
+    "source": "class-model-blog.puml",
+    "name": "class-model-blog",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b06"
+  },
+  {
+    "source": "class-model-brand.puml",
+    "name": "class-model-brand",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b11"
+  },
+  {
+    "source": "class-model-cartuser.puml",
+    "name": "class-model-cartuser",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b1b"
+  },
+  {
+    "source": "class-model-category.puml",
+    "name": "class-model-category",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b2d"
+  },
+  {
+    "source": "class-model-coupon.puml",
+    "name": "class-model-coupon",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b36"
+  },
+  {
+    "source": "class-model-message.puml",
+    "name": "class-model-message",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b44"
+  },
+  {
+    "source": "class-model-otp.puml",
+    "name": "class-model-otp",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b50"
+  },
+  {
+    "source": "class-model-paymentattempts.puml",
+    "name": "class-model-paymentattempts",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b6e"
+  },
+  {
+    "source": "class-model-payments.puml",
+    "name": "class-model-payments",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000b9c"
+  },
+  {
+    "source": "class-model-previewproduct.puml",
+    "name": "class-model-previewproduct",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000bdf"
+  },
+  {
+    "source": "class-model-products.puml",
+    "name": "class-model-products",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000beb"
+  },
+  {
+    "source": "class-model-user.puml",
+    "name": "class-model-user",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000c0a"
+  },
+  {
+    "source": "class-relations-account.puml",
+    "name": "class-relations-account",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000c24"
+  },
+  {
+    "source": "class-relations-commerce.puml",
+    "name": "class-relations-commerce",
+    "type": "ClassDiagram",
+    "id": "ECOM000000000c50"
+  },
+  {
+    "source": "seq-01.puml",
+    "name": "seq-01 — Đăng ký tài khoản",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000000c8a"
+  },
+  {
+    "source": "seq-02.puml",
+    "name": "seq-02 — Xác minh email đăng ký",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000000d15"
+  },
+  {
+    "source": "seq-03.puml",
+    "name": "seq-03 — Gửi lại mã xác minh đăng ký",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000000d9c"
+  },
+  {
+    "source": "seq-04.puml",
+    "name": "seq-04 — Đăng nhập email",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000000e0d"
+  },
+  {
+    "source": "seq-05.puml",
+    "name": "seq-05 — Đăng nhập Google",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000000e62"
+  },
+  {
+    "source": "seq-06.puml",
+    "name": "seq-06 — Kiểm tra và gia hạn phiên",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000000ecb"
+  },
+  {
+    "source": "seq-07.puml",
+    "name": "seq-07 — Đăng xuất",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000000f50"
+  },
+  {
+    "source": "seq-08.puml",
+    "name": "seq-08 — Khôi phục mật khẩu bằng OTP",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000000f9b"
+  },
+  {
+    "source": "seq-09.puml",
+    "name": "seq-09 — Xem và cập nhật hồ sơ",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001056"
+  },
+  {
+    "source": "seq-10.puml",
+    "name": "seq-10 — Xem catalog trang chủ",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001097"
+  },
+  {
+    "source": "seq-11.puml",
+    "name": "seq-11 — Tìm kiếm và lọc sản phẩm",
+    "type": "InteractionDiagram",
+    "id": "ECOM0000000010f6"
+  },
+  {
+    "source": "seq-12.puml",
+    "name": "seq-12 — Xem chi tiết sản phẩm và đánh giá",
+    "type": "InteractionDiagram",
+    "id": "ECOM00000000115b"
+  },
+  {
+    "source": "seq-13.puml",
+    "name": "seq-13 — Tạo đánh giá sản phẩm",
+    "type": "InteractionDiagram",
+    "id": "ECOM0000000011be"
+  },
+  {
+    "source": "seq-14.puml",
+    "name": "seq-14 — Xem giỏ hàng",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001201"
+  },
+  {
+    "source": "seq-15.puml",
+    "name": "seq-15 — Thêm sản phẩm vào giỏ",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001258"
+  },
+  {
+    "source": "seq-16.puml",
+    "name": "seq-16 — Sửa số lượng giỏ",
+    "type": "InteractionDiagram",
+    "id": "ECOM0000000012c1"
+  },
+  {
+    "source": "seq-17.puml",
+    "name": "seq-17 — Xóa sản phẩm khỏi giỏ",
+    "type": "InteractionDiagram",
+    "id": "ECOM00000000131a"
+  },
+  {
+    "source": "seq-18.puml",
+    "name": "seq-18 — Chọn coupon và thông tin giao hàng",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001361"
+  },
+  {
+    "source": "seq-19.puml",
+    "name": "seq-19 — Đặt hàng COD",
+    "type": "InteractionDiagram",
+    "id": "ECOM0000000013c8"
+  },
+  {
+    "source": "seq-20.puml",
+    "name": "seq-20 — Khởi tạo thanh toán VNPay",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001455"
+  },
+  {
+    "source": "seq-21.puml",
+    "name": "seq-21 — Hiển thị kết quả Return VNPay",
+    "type": "InteractionDiagram",
+    "id": "ECOM0000000014c0"
+  },
+  {
+    "source": "seq-22.puml",
+    "name": "seq-22 — Xác nhận IPN VNPay",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001519"
+  },
+  {
+    "source": "seq-23.puml",
+    "name": "seq-23 — Thanh toán lại VNPay",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001592"
+  },
+  {
+    "source": "seq-24.puml",
+    "name": "seq-24 — Đối soát trạng thái VNPay",
+    "type": "InteractionDiagram",
+    "id": "ECOM00000000161b"
+  },
+  {
+    "source": "seq-25.puml",
+    "name": "seq-25 — Thanh toán MoMo",
+    "type": "InteractionDiagram",
+    "id": "ECOM00000000169c"
+  },
+  {
+    "source": "seq-26.puml",
+    "name": "seq-26 — Xem đơn hàng của mình",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001729"
+  },
+  {
+    "source": "seq-27.puml",
+    "name": "seq-27 — Hủy đơn hàng của mình",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001776"
+  },
+  {
+    "source": "seq-28.puml",
+    "name": "seq-28 — Đọc blog",
+    "type": "InteractionDiagram",
+    "id": "ECOM0000000017d3"
+  },
+  {
+    "source": "seq-29.puml",
+    "name": "seq-29 — Chat với quản trị viên",
+    "type": "InteractionDiagram",
+    "id": "ECOM00000000180c"
+  },
+  {
+    "source": "seq-30.puml",
+    "name": "seq-30 — Quản trị hội thoại",
+    "type": "InteractionDiagram",
+    "id": "ECOM00000000187d"
+  },
+  {
+    "source": "seq-31.puml",
+    "name": "seq-31 — Tư vấn bằng chatbot Gemini",
+    "type": "InteractionDiagram",
+    "id": "ECOM0000000018ee"
+  },
+  {
+    "source": "seq-32.puml",
+    "name": "seq-32 — Quản lý sản phẩm",
+    "type": "InteractionDiagram",
+    "id": "ECOM00000000197f"
+  },
+  {
+    "source": "seq-33.puml",
+    "name": "seq-33 — Quản lý danh mục",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001a02"
+  },
+  {
+    "source": "seq-34.puml",
+    "name": "seq-34 — Quản lý coupon",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001a77"
+  },
+  {
+    "source": "seq-35.puml",
+    "name": "seq-35 — Quản lý bài viết",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001ae4"
+  },
+  {
+    "source": "seq-36.puml",
+    "name": "seq-36 — Xem người dùng và đổi quyền",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001b4d"
+  },
+  {
+    "source": "seq-37.puml",
+    "name": "seq-37 — Xử lý đơn hàng phía quản trị",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001b9c"
+  },
+  {
+    "source": "seq-38.puml",
+    "name": "seq-38 — Xem thống kê",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001c13"
+  },
+  {
+    "source": "seq-39.puml",
+    "name": "seq-39 — Tải ảnh sản phẩm hoặc blog",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001c66"
+  },
+  {
+    "source": "seq-40.puml",
+    "name": "seq-40 — Xem danh sách thương hiệu",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001cbb"
+  },
+  {
+    "source": "seq-41.puml",
+    "name": "seq-41 — Xem thông tin liên hệ",
+    "type": "InteractionDiagram",
+    "id": "ECOM000000001d06"
+  },
+  {
+    "source": "uc-module-01.puml",
+    "name": "uc-module-01",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001d35"
+  },
+  {
+    "source": "uc-module-02.puml",
+    "name": "uc-module-02",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001d89"
+  },
+  {
+    "source": "uc-module-03.puml",
+    "name": "uc-module-03",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001da9"
+  },
+  {
+    "source": "uc-module-04.puml",
+    "name": "uc-module-04",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001dd3"
+  },
+  {
+    "source": "uc-module-05.puml",
+    "name": "uc-module-05",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001e1b"
+  },
+  {
+    "source": "uc-module-06.puml",
+    "name": "uc-module-06",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001e2d"
+  },
+  {
+    "source": "uc-module-07.puml",
+    "name": "uc-module-07",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001e45"
+  },
+  {
+    "source": "uc-module-08.puml",
+    "name": "uc-module-08",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001e67"
+  },
+  {
+    "source": "uc-overview.puml",
+    "name": "uc-overview",
+    "type": "UseCaseDiagram",
+    "id": "ECOM000000001ea7"
+  }
+]

@@ -11,10 +11,9 @@ import {
     BarChartOutlined,
     RiseOutlined,
     ArrowUpOutlined,
-    PieChartOutlined,
     CalendarOutlined,
 } from '@ant-design/icons';
-import { Line, Pie, Column } from '@ant-design/plots';
+import { Column } from '@ant-design/plots';
 
 import { requestAdmin, requestStatistical } from '../../../../config/request';
 import { useNavigate } from 'react-router-dom';
@@ -50,12 +49,12 @@ function ManagerStatistical() {
             try {
                 await requestAdmin();
                 return;
-            } catch (error) {
+            } catch {
                 navigate('/');
             }
         };
         fetchData();
-    }, []);
+    }, [navigate]);
 
     if (loading) {
         return (
@@ -68,12 +67,6 @@ function ManagerStatistical() {
     if (!statistical) {
         return <Empty description="Không có dữ liệu thống kê" />;
     }
-
-    // Format revenue data for Line chart
-    const revenueData = statistical.revenue.byMonth.map((item) => ({
-        month: `Tháng ${item._id}`,
-        revenue: item.revenue,
-    }));
 
     // Top selling products columns
     const topProductColumns = [
@@ -95,18 +88,6 @@ function ManagerStatistical() {
             sorter: (a, b) => a.soldCount - b.soldCount,
         },
     ];
-
-    // Format category data for pie chart
-    const categoryData = statistical.products.byCategory.map((item) => ({
-        type: item._id,
-        value: item.count,
-    }));
-
-    // Format status data for pie chart
-    const orderStatusData = statistical.orders.byStatus.map((item) => ({
-        type: formatStatus(item._id),
-        value: item.count,
-    }));
 
     // Best rated products
     const bestRatedColumns = [
@@ -133,12 +114,6 @@ function ManagerStatistical() {
             key: 'reviewCount',
         },
     ];
-
-    // Format payment method data for pie chart
-    const paymentMethodData = statistical.orders.byPaymentMethod.map((item) => ({
-        type: formatPaymentMethod(item._id),
-        value: item.count,
-    }));
 
     // Ensure we always have 7 days of data
     const ensureSevenDaysData = () => {
@@ -390,37 +365,6 @@ function ManagerStatistical() {
             </Tabs>
         </div>
     );
-}
-
-// Helper functions
-function formatStatus(status) {
-    switch (status) {
-        case 'pending':
-            return 'Chờ xác nhận';
-        case 'confirmed':
-            return 'Đã xác nhận';
-        case 'shipped':
-            return 'Đang giao hàng';
-        case 'delivered':
-            return 'Đã giao hàng';
-        case 'cancelled':
-            return 'Đã hủy';
-        default:
-            return status;
-    }
-}
-
-function formatPaymentMethod(method) {
-    switch (method) {
-        case 'COD':
-            return 'Tiền mặt';
-        case 'VNPAY':
-            return 'VNPay';
-        case 'MOMO':
-            return 'MoMo';
-        default:
-            return method;
-    }
 }
 
 export default ManagerStatistical;

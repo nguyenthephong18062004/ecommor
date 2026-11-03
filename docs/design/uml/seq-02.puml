@@ -1,0 +1,47 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách vãng lai" as U
+participant "Register.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+U -> UI : Nhập OTP
+UI -> A : requestVerifyEmail(email, otp)
+A -> R : POST /api/verify-email
+R -> W : otpVerifyLimiter
+alt IP vượt hạn
+W --> A : 429
+else Cho phép
+W -> C : verifyEmail()
+C -> C : assertOtpInput()
+C -> S : consume(verifyAccount)
+S -> DB : findOne(email, type)
+alt Hết hạn / attempts >=5 / không có record
+opt Có record
+S -> DB : deleteOne()
+end
+S --> A : 400 Verification code is invalid or expired.
+else Sai mã
+S -> DB : attempts +=1
+S --> A : 400 Verification code is invalid or expired.
+else Đúng mã
+S -> DB : findOneAndDelete(_id, otp)
+alt Record đã bị consume hoặc thiếu registration/user đã có
+C --> A : 400
+else Có registration hợp lệ
+C -> DB : user.create(passwordHash, typeLogin=email)
+C --> A : 200 Email verification completed...
+end
+end
+end
+A --> UI : Kết quả
+UI -> UI : Thành công chuyển /login
+@enduml

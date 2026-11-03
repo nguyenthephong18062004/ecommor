@@ -511,3 +511,8 @@
         border-bottom: none;
     }
 }
+.thumbnail-item { padding: 0; background: #fff; overflow: hidden; }
+.product-description { min-width: 0; overflow-wrap: anywhere; }
+.product-description img { max-width: 100%; height: auto; }
+.product-description table { width: 100%; table-layout: fixed; }
+.specs-table th { text-align: left; font-weight: 600; padding: 12px; border-bottom: 1px solid #eee; }

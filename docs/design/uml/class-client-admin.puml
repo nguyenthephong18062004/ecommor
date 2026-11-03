@@ -1,0 +1,38 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "AdminLayout" as Admin <<Page>>
+class "ManagerProduct" as Product <<Component>>
+class "ManagerCategory" as Category <<Component>>
+class "CouponManagement" as Coupon <<Component>>
+class "BlogAdmin" as Blog <<Component>>
+class "ManagerUser" as User <<Component>>
+class "ManagerOrder" as Order <<Component>>
+class "ManagerStatistical" as Stats <<Component>>
+class "Messager" as Chat <<Component>>
+class "UserSidebar" as Sidebar <<Component>>
+class "ChatWindow" as Window <<Component>>
+class "request.jsx" as Req <<API>>
+Admin --> Product
+Admin --> Category
+Admin --> Coupon
+Admin --> Blog
+Admin --> User
+Admin --> Order
+Admin --> Stats
+Admin --> Chat
+Chat *-- Sidebar
+Chat *-- Window
+Product --> Req
+Category --> Req
+Coupon --> Req
+Blog --> Req
+User --> Req
+Order --> Req
+Stats --> Req
+Chat --> Req
+Window --> Req
+@enduml

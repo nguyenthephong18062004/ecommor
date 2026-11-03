@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const { verifyToken } = require('./services/tokenSevices');
 const modelUser = require('./models/users.model');
+const { getCorsOptions } = require('./config/cors');
 
 require('dotenv').config();
 
@@ -10,10 +11,7 @@ const connectedUsers = new Map();
 
 async function initSocket(server) {
     io = new Server(server, {
-        cors: {
-            origin: process.env.DOMAIN_URL,
-            credentials: true,
-        },
+        cors: getCorsOptions(),
     });
 
     io.on('connection', async (socket) => {
@@ -31,28 +29,32 @@ async function initSocket(server) {
 
         const token = tokenCookie.split('=')[1];
 
-        const { id } = await verifyToken(token);
+        let id;
+        try {
+            ({ id } = await verifyToken(token));
+            await modelUser.updateOne({ _id: id }, { lastLoginAt: new Date(), isOnline: true });
+        } catch {
+            socket.disconnect(true);
+            return;
+        }
 
+        if (!socket.connected) return;
         socket.userId = id;
-
-        connectedUsers.set(socket.userId, socket.id);
-
-        await modelUser.updateOne({ _id: socket.userId }, { lastLoginAt: new Date(), isOnline: true });
+        connectedUsers.set(id, socket.id);
 
         socket.on('userConnected', async (userId) => {
             console.log(`User ${userId} connected with socket ID: ${socket.id}`);
         });
 
         socket.on('disconnect', async () => {
-            const findUser = await modelUser.findOne({ _id: socket.userId });
-            if (findUser) {
-                await modelUser.updateOne({ _id: socket.userId }, { lastLoginAt: new Date(), isOnline: false });
-                console.log('Đã cập nhật');
-            } else {
-                console.log('User not found');
+            if (connectedUsers.get(id) !== socket.id) return;
+            connectedUsers.delete(id);
+            try {
+                await modelUser.updateOne({ _id: id }, { lastLoginAt: new Date(), isOnline: false });
+            } catch {
+                console.error('Socket disconnect status update failed');
             }
             console.log('User disconnected:', socket.id);
-            connectedUsers.delete(socket.userId);
         });
     });
 

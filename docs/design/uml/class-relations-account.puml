@@ -1,0 +1,25 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "user" as U <<Model>>
+class "apikey" as K <<Model>>
+class "otp" as OTP <<Model>>
+class "Registration" as Reg <<Embedded>>
+class "previewProduct" as Rev <<Model>>
+class "products" as Prod <<Model>>
+class "Message" as Msg <<Model>>
+class "blog" as Blog <<Model>>
+U "0..1" <-- "0..1" K : userId unique String ref=user
+OTP "1" *-- "0..1" Reg : registration
+OTP "0..*" ..> "0..1" U : email String ref=user (không phải _id)
+Rev "0..*" --> "0..1" U : userId ref=users
+Rev "0..*" --> "0..1" Prod : productId ref=products
+Msg "0..*" --> "0..1" U : senderId ref=User
+Msg "0..*" --> "0..1" U : receiverId ref=User
+note bottom of Blog
+Không có authorId, không thêm quan hệ User-Blog.
+end note
+@enduml

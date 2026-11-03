@@ -1,0 +1,61 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách vãng lai" as U
+participant "ForgotPassword.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+participant "Gmail" as E
+U -> UI : Gửi email
+UI -> A : requestForgotPassword()
+A -> R : POST /api/forgot-password
+R -> W : otpSendLimiter
+W -> C : requestPasswordResetOtp()
+C -> DB : user.findOne(email chuẩn hóa, typeLogin=email)
+opt Email đủ điều kiện
+C -> S : issue(forgotPassword)
+S -> DB : OTP hash + TTL/attempts/window
+alt Cooldown
+C --> A : 429
+else Được issue
+C -> E : Gmail gửi OTP
+opt Mail lỗi
+C -> C : Log mã lỗi; vẫn trả response chung
+end
+end
+end
+C --> A : 202 thông báo chung (trừ cooldown)
+U -> UI : Nhập OTP
+UI -> A : requestVerifyResetPassword(email,otp)
+A -> R : POST /api/verify-reset-password
+R -> W : otpVerifyLimiter
+W -> C : verifyPasswordReset()
+C -> S : consume(forgotPassword)
+S -> DB : Kiểm hạn/attempts, compare và xóa OTP
+alt Mã sai/hết hạn
+C --> A : 400
+else Mã đúng và user email tồn tại
+C --> A : 200 + cookie tokenResetPassword purpose=passwordReset, 5m
+U -> UI : Nhập password/confirmPassword
+UI -> A : requestResetPassword()
+A -> R : POST /api/reset-password
+R -> C : resetPasswordAfterVerification()
+alt Thiếu cookie / password không khớp / purpose sai
+C --> A : 400 Password reset request is invalid
+else Proof hết hạn/sai chữ ký
+C --> A : 401 Password reset session has expired...
+else Proof và user hợp lệ
+C -> DB : bcrypt password rồi user.save()
+C --> A : 200 + clear proof cookie
+A --> UI : Chuyển /login
+end
+end
+@enduml

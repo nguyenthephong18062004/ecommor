@@ -1,0 +1,36 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "products" as M_products <<Model>> {
+  nameProduct : String {required=true}
+  modelNumber : String {required=true}
+  brand : String {required=true}
+  collection : String
+  category : String
+  origin : String {required=true}
+  gender : String {required=true}
+  glassMaterial : String {required=true}
+  movement : String {required=true}
+  powerReserve : String
+  warrantyGlobal : String
+  dialDiameter : Number {required=true}
+  caseThickness : Number
+  bezelMaterial : String
+  strapMaterial : String {required=true}
+  faceColor : String
+  waterResistance : String {required=true}
+  price : Number {required=true}
+  discount : Number {default=0}
+  description : String {required=true}
+  images : String {required=true}
+  stock : Number {required=true}
+  soldCount : Number {default=0}
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+@enduml

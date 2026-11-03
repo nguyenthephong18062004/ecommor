@@ -1,47 +1,45 @@
 import Context from './Context';
 import cookies from 'js-cookie';
-import CryptoJS from 'crypto-js';
-import { requestAuth, requestGetAllCategory, requestGetCart } from '../config/request';
+import { requestAuth, requestGetCart } from '../config/request';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { API_BASE_URL } from '../config/runtimeUrls';
+import useShoppingLists from '../hooks/useShoppingLists';
+import useFetch from '../hooks/useFetch';
 
 export function Provider({ children }) {
     const [dataUser, setDataUser] = useState({});
     const [dataCart, setDataCart] = useState({});
     const [newMessageAdmin, setNewMessageAdmin] = useState({});
     const [newMessageUser, setNewMessageUser] = useState({});
-    const [category, setCategory] = useState([]);
+    const { data: catalogOptions, loading: catalogOptionsLoading, error: catalogOptionsError, reFetch: reloadCatalogOptions } = useFetch('/api/catalog-options');
+    const category = catalogOptions?.categories || [];
+    const [authLoading, setAuthLoading] = useState(true);
+    const shoppingLists = useShoppingLists(dataUser._id);
 
     const token = cookies.get('logged');
 
-    const getAuthUser = async () => {
+    const getAuthUser = useCallback(async () => {
         const res = await requestAuth();
-        const bytes = CryptoJS.AES.decrypt(res.metadata.auth, import.meta.env.VITE_SECRET_CRYPTO);
-        const originalText = bytes.toString(CryptoJS.enc.Utf8);
-        const user = JSON.parse(originalText);
-        setDataUser(user);
-    };
+        setDataUser(res.metadata.auth);
+    }, []);
 
-    const getCart = async () => {
+    const getCart = useCallback(async () => {
         const res = await requestGetCart();
         setDataCart(res.metadata);
-    };
+    }, []);
 
-    const fetchCategory = async () => {
-        try {
-            const res = await requestGetAllCategory();
-            setCategory(Array.isArray(res.metadata) ? res.metadata : []);
-        } catch (error) {
-            setCategory([]);
-            console.error('Failed to fetch categories:', error);
-        }
-    };
+    const clearAuth = useCallback(() => {
+        setDataUser({});
+        setDataCart({});
+    }, []);
+
 
     useEffect(() => {
         if (!dataUser._id) return;
 
-        const socket = io(import.meta.env.VITE_URL_API, {
+        const socket = io(API_BASE_URL || window.location.origin, {
             withCredentials: true, // Cho phép gửi cookie
         });
 
@@ -49,9 +47,6 @@ export function Provider({ children }) {
             setNewMessageAdmin(message);
         });
 
-        socket.on('allUserOnline', (users) => {
-            console.log(users);
-        });
 
         socket.on('newMessageUser', (message) => {
             setNewMessageUser(message);
@@ -60,30 +55,49 @@ export function Provider({ children }) {
         return () => {
             socket.disconnect();
         };
-    }, [dataUser, dataUser._id]);
+    }, [dataUser._id]);
 
     useEffect(() => {
-        if (token !== '1') return;
+        if (token !== '1') {
+            setDataUser({});
+            setDataCart({});
+            setAuthLoading(false);
+            return;
+        }
 
         const fetchData = async () => {
+            setAuthLoading(true);
             try {
                 await getAuthUser();
                 await getCart();
             } catch (error) {
                 console.log(error);
+                setDataUser({});
+                setDataCart({});
+            } finally {
+                setAuthLoading(false);
             }
         };
 
         fetchData();
-    }, [token]);
+    }, [getAuthUser, getCart, token]);
 
-    useEffect(() => {
-        fetchCategory();
-    }, []);
 
     return (
         <Context.Provider
-            value={{ dataUser, getAuthUser, dataCart, getCart, newMessageAdmin, newMessageUser, category }}
+            value={{
+                dataUser,
+                getAuthUser,
+                dataCart,
+                getCart,
+                clearAuth,
+                newMessageAdmin,
+                newMessageUser,
+                category,
+                catalogOptions, catalogOptionsLoading, catalogOptionsError, reloadCatalogOptions,
+                authLoading,
+                ...shoppingLists,
+            }}
         >
             {children}
         </Context.Provider>

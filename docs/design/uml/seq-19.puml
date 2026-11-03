@@ -1,0 +1,49 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách hàng đã đăng nhập" as U
+participant "CheckOut.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+U -> UI : Chọn COD và đặt hàng
+UI -> A : requestCreatePayment(cartId,shipping,typePayment=COD)
+A -> R : POST /api/create-payment
+R -> W : authUser
+W -> C : createPayment()
+C -> S : checkout(req)
+S -> DB : init unique indexes; start transaction
+alt checkoutKey của user đã có
+S -> DB : Đọc order có sẵn
+alt Khác method hoặc cancelled
+S --> A : 409 Cart already checked out
+else Cùng COD còn hiệu lực
+S --> A : 201 order cũ
+end
+else Chưa checkout
+S -> DB : Cart theo cartId + userId; đọc products và coupon
+S -> S : snapshot giá làm tròn VND; shippingFee=0
+loop Mỗi item
+S -> DB : update stock với stock >= quantity
+end
+opt Có coupon
+S -> DB : Update quantity với điều kiện date/minPrice/quantity
+end
+alt Dữ liệu/kho/coupon không hợp lệ
+S -> DB : Abort transaction
+S --> A : 400 hoặc 503 nếu không có replica set
+else Hợp lệ
+S -> DB : save pending/unpaid order; delete cart; commit
+S --> A : 201 metadata order
+UI -> UI : Navigate /payments/:id
+UI -> A : getCart()
+end
+end
+@enduml

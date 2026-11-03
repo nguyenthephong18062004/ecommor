@@ -4,11 +4,14 @@ import styles from './Header.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
-import logo from '../../assets/images/logo.webp';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, Dropdown } from 'antd';
+import { apiClient } from '../../config/axiosClient';
+import { money, salePrice } from '../../utils/format';
+import { ChevronDown } from 'lucide-react';
 
-import { requestLogout, requestSearch } from '../../config/request';
+import { requestLogout } from '../../config/request';
+import { uploadUrl } from '../../config/runtimeUrls';
 
 import { UserOutlined, ShoppingOutlined, LogoutOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 
@@ -19,23 +22,23 @@ import useDebounce from '../../hooks/useDebounce';
 
 const cx = classNames.bind(styles);
 function Header() {
-    const { dataUser, dataCart, category } = useStore();
-
-    const [idCategory, setIdCategory] = useState('all');
-    const [nameCategory, setNameCategory] = useState('Tất cả sản phẩm');
+    const { dataUser, dataCart, clearAuth, wishlist, compare, catalogOptions } = useStore();
 
     const [valueSearch, setValueSearch] = useState('');
     const [dataSearch, setDataSearch] = useState([]);
+    const [searchState, setSearchState] = useState('');
 
-    const debound = useDebounce(valueSearch, 800);
+    const debound = useDebounce(valueSearch, 300);
 
     useEffect(() => {
-        const fetchSearch = async () => {
-            const res = await requestSearch(debound);
-            setDataSearch(res.metadata);
-        };
-        if (debound === '') return;
-        fetchSearch();
+        const controller = new AbortController();
+        setDataSearch([]);
+        if (!debound.trim()) { setSearchState(''); return () => controller.abort(); }
+        setSearchState('Đang tìm kiếm...');
+        apiClient.get('/api/search', { params: { valueSearch: debound.trim() }, signal: controller.signal, timeout: 10000 })
+            .then(({ data }) => { if (!controller.signal.aborted) { setDataSearch(data.metadata); setSearchState(''); } })
+            .catch(() => { if (!controller.signal.aborted) setSearchState('Chưa tìm kiếm được. Bạn có thể bấm Enter để thử lại.'); });
+        return () => controller.abort();
     }, [debound]);
 
     const navigate = useNavigate();
@@ -58,75 +61,81 @@ function Header() {
             danger: true,
             onClick: async () => {
                 await requestLogout();
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
+                clearAuth();
                 navigate('/');
             },
         },
     ];
 
-    const onNavigate = () => {
-        localStorage.setItem('nameCategory', nameCategory);
-        navigate(`/category/${idCategory}`);
+    const watchItems = [
+        { key: 'all', label: <Link to="/category/all">Tất cả đồng hồ</Link> },
+        { type: 'group', label: 'Danh mục', children: (catalogOptions?.categories || []).map(item => ({
+            key: `category:${item._id}`, label: <Link to={`/category/${item._id}`}>{item.name}</Link>,
+        })) },
+        { type: 'group', label: 'Thương hiệu', children: (catalogOptions?.brands || []).map(brand => ({
+            key: `brand:${brand}`, label: <Link to={`/category/brand/${encodeURIComponent(brand)}`}>{brand}</Link>,
+        })) },
+    ];
+
+    const submitSearch = event => {
+        event.preventDefault();
+        navigate(valueSearch.trim() ? `/category/all?search=${encodeURIComponent(valueSearch.trim())}` : '/category/all');
+        setValueSearch('');
     };
 
     return (
         <div className={cx('wrapper')}>
             <div className={cx('inner')}>
                 <div>
-                    <Link to="/">
-                        <img src={logo} alt="logo" />
-                    </Link>
+                    <Link to="/" className="brand-name" aria-label="ECOMMOR — Trang chủ">ECOMMOR</Link>
                 </div>
 
-                <div className={cx('search-box')}>
-                    <select
-                        name=""
-                        id=""
-                        onChange={(e) => {
-                            setIdCategory(e.target.value);
-                            setNameCategory(e.target.options[e.target.selectedIndex].text);
-                        }}
-                    >
-                        <option value="all">Tất cả sản phẩm</option>
-                        {category.map((item) => (
-                            <option key={item._id} value={item._id}>
-                                {item.name}
-                            </option>
-                        ))}
-                    </select>
-                    <input type="text" placeholder="Tìm kiếm" onChange={(e) => setValueSearch(e.target.value)} />
+                <form className={cx('search-box')} onSubmit={submitSearch}>
+                    <input type="search" value={valueSearch} placeholder="Tìm thương hiệu, tên hoặc mã sản phẩm" aria-label="Tìm đồng hồ"
+                        onChange={(e) => setValueSearch(e.target.value)} />
                     {valueSearch && (
                         <div className={cx('search-result-wrapper')}>
                             {dataSearch.length > 0 ? (
                                 <div className={cx('search-result')}>
                                     {dataSearch.map((item) => (
-                                        <Link id={cx('search-result-item')} to={`/product/${item._id}`} key={item.id}>
+                                        <Link id={cx('search-result-item')} to={`/product/${item._id}`} key={item._id} onClick={() => setValueSearch('')}>
                                             <div className={cx('search-result-item')}>
                                                 <img
-                                                    src={`${import.meta.env.VITE_URL_IMAGE_API}/${
-                                                        item.images.split(',')[0]
-                                                    }`}
+                                                    src={uploadUrl(item.images.split(',')[0])}
                                                     alt=""
                                                 />
                                                 <div className={cx('search-result-item-info')}>
                                                     <h3>{item.nameProduct}</h3>
-                                                    <p>{item.price.toLocaleString('vi-VN')}đ</p>
+                                                    <p>{money(salePrice(item))}</p>
                                                 </div>
                                             </div>
                                         </Link>
                                     ))}
                                 </div>
                             ) : (
-                                <div className={cx('search-result-empty')}>Không tìm thấy kết quả</div>
+                                <div className={cx('search-result-empty')} role="status">{searchState || 'Không tìm thấy kết quả'}</div>
                             )}
                         </div>
                     )}
-                    <button onClick={onNavigate}>
+                    <button type="submit" aria-label="Tìm sản phẩm">
                         <FontAwesomeIcon icon={faSearch} />
                     </button>
-                </div>
+                </form>
+
+                <Dropdown menu={{ items: watchItems }} trigger={['hover', 'click']} placement="bottomLeft"
+                    overlayClassName={cx('watch-dropdown')}>
+                    <div className={cx('watch-nav')}>
+                        <Link className={cx('watch-link')} to="/category/all">Đồng hồ</Link>
+                        <button className={cx('watch-trigger')} type="button" aria-label="Danh mục và thương hiệu"
+                            title="Danh mục và thương hiệu"><ChevronDown size={16} /></button>
+                    </div>
+                </Dropdown>
+
+                <Link className={cx('contact-link')} to="/blogs">Tin tức</Link>
+                <Link className={cx('contact-link')} to="/thuong-hieu">Thương hiệu</Link>
+                <Link className={cx('contact-link')} to="/yeu-thich">Yêu thích ({wishlist.length})</Link>
+                <Link className={cx('contact-link')} to="/so-sanh">So sánh ({compare.length})</Link>
+                <Link className={cx('contact-link')} to="/contact">Liên hệ</Link>
 
                 <div className={cx('auth-box')}>
                     {!dataUser._id ? (

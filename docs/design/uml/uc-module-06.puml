@@ -1,0 +1,17 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách vãng lai" as A0
+actor "Google Maps và các kênh liên hệ" as A1
+rectangle "Nội dung" {
+usecase "UC-28\nĐọc blog" as UC28
+usecase "UC-41\nXem thông tin liên hệ" as UC41
+}
+A0 --> UC28
+A0 --> UC41
+A1 --> UC41
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Khách vãng lai|
+start
+if (Chọn Google?) then (Có)
+ |Google|
+ :Popup trả credential;
+ |Frontend|
+ :POST login-google;
+ |Backend|
+ :Verify ID token/audience/email_verified;
+ if (Hợp lệ?) then (Không)
+  :Trả 403;
+  stop
+ endif
+ :Tìm email, tạo user google nếu mới;
+else (Email)
+ |Frontend|
+ :POST login email/password;
+ |Backend|
+ :Tìm user và bcrypt compare;
+ if (Sai hoặc typeLogin google?) then (Có)
+  :Trả 403;
+  stop
+ endif
+endif
+|Backend|
+:Rotate RSA; ký access 15m/refresh 7d;
+:Set cookie token/refreshToken/logged;
+|Frontend|
+:GET auth, nạp Provider và cart;
+if (isAdmin=true?) then (Có)
+ :Điều hướng /admin;
+ :AdminRoute GET /api/admin;
+ |Backend|
+ :Verify token; đọc DB isAdmin;
+ if (Đủ quyền?) then (Có)
+  |Frontend|
+  :Hiển thị AdminLayout;
+ else (Không)
+  |Frontend|
+  :Chuyển login;
+ endif
+else (Không)
+ |Frontend|
+ :Điều hướng trang chủ;
+endif
+stop
+@enduml

@@ -10,18 +10,41 @@ const sendMailForgotPassword = require('../utils/SendMail/sendMailForgotPassword
 
 const bcrypt = require('bcrypt');
 
-const CryptoJS = require('crypto-js');
+const { google } = require('googleapis');
 
 const { BadRequestError } = require('../core/error.response');
 const { Created, OK } = require('../core/success.response');
 
 const { createApiKey, createRefreshToken, createToken, verifyToken } = require('../services/tokenSevices');
+const { createOtpService, normalizeEmail, OtpError } = require('../services/otp.service');
+const { mailService, MailDeliveryError } = require('../services/mail.service');
 
-const { jwtDecode } = require('jwt-decode');
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 
 require('dotenv').config();
+
+const googleOAuthClient = new google.auth.OAuth2();
+const otpService = createOtpService({ Otp: modelOtp });
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function assertOtpInput(email, otp) {
+    if (!EMAIL_PATTERN.test(normalizeEmail(email)) || !/^\d{6}$/.test(String(otp || ''))) {
+        throw new BadRequestError('Email hoặc mã xác minh không hợp lệ.', 400);
+    }
+}
+
+async function sendOtp({ email, type, registration }) {
+    const { code } = await otpService.issue({ email, type, registration });
+    await mailService.sendOtpEmail({ to: email, code, purpose: type });
+    console.info(`[mail] OTP accepted by provider: ${type}`);
+}
+
+function mapOtpError(error) {
+    if (error instanceof OtpError) throw new BadRequestError(error.message, ['COOLDOWN', 'RATE_LIMIT'].includes(error.code) ? 429 : 400);
+    if (error instanceof MailDeliveryError) throw new BadRequestError(error.message, 503);
+    throw error;
+}
 
 const getCookieOptions = (maxAge, { httpOnly = true, isLogged = false } = {}) => ({
     httpOnly,
@@ -34,6 +57,7 @@ const getCookieOptions = (maxAge, { httpOnly = true, isLogged = false } = {}) =>
 
 class controllerUser {
     async register(req, res) {
+        return this.registerWithVerification(req, res);
         const { fullName, email, password, phone, address } = req.body;
 
         if (!fullName || !email || !password || !phone) {
@@ -67,7 +91,25 @@ class controllerUser {
 
     async loginGoogle(req, res) {
         const { credential } = req.body;
-        const dataToken = jwtDecode(credential);
+        if (!credential || !process.env.GOOGLE_CLIENT) {
+            throw new BadRequestError('Không thể xác thực Google');
+        }
+
+        let dataToken;
+        try {
+            const ticket = await googleOAuthClient.verifyIdToken({
+                idToken: credential,
+                audience: process.env.GOOGLE_CLIENT,
+            });
+            dataToken = ticket.getPayload();
+        } catch (error) {
+            throw new BadRequestError('Google credential không hợp lệ');
+        }
+
+        if (!dataToken?.email || !dataToken.email_verified) {
+            throw new BadRequestError('Email Google chưa được xác minh');
+        }
+
         const user = await modelUser.findOne({ email: dataToken.email });
         if (user) {
             await createApiKey(user._id);
@@ -127,17 +169,30 @@ class controllerUser {
         if (!findUser) {
             throw new BadRequestError('Tài khoản hoặc mật khẩu không chính xác');
         }
-        const userString = JSON.stringify(findUser);
-        const auth = CryptoJS.AES.encrypt(userString, process.env.SECRET_CRYPTO).toString();
+        const auth = {
+            _id: findUser._id,
+            fullName: findUser.fullName,
+            email: findUser.email,
+            phone: findUser.phone,
+            address: findUser.address,
+            isAdmin: findUser.isAdmin,
+            typeLogin: findUser.typeLogin,
+        };
         new OK({ message: 'success', metadata: { auth } }).send(res);
     }
 
     async refreshToken(req, res) {
         const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            throw new BadRequestError('Vui lòng đăng nhập lại');
+        }
 
         const decoded = await verifyToken(refreshToken);
 
         const user = await modelUser.findById(decoded.id);
+        if (!user) {
+            throw new BadRequestError('Tài khoản không tồn tại');
+        }
         const token = await createToken({ id: user._id });
         res.cookie('token', token, getCookieOptions(15 * 60 * 1000, { httpOnly: true }));
         res.cookie('logged', 1, getCookieOptions(7 * 24 * 60 * 60 * 1000, { httpOnly: false }));
@@ -146,11 +201,16 @@ class controllerUser {
     }
 
     async logout(req, res) {
-        const { id } = req.user;
-        await modelApiKey.deleteOne({ userId: id });
-        res.clearCookie('token', { path: '/' });
-        res.clearCookie('refreshToken', { path: '/' });
-        res.clearCookie('logged', { path: '/' });
+        const token = req.cookies.token;
+        if (token) {
+            try {
+                const { id } = await verifyToken(token);
+                await modelApiKey.deleteMany({ userId: id.toString() });
+            } catch {}
+        }
+        res.clearCookie('token', getCookieOptions(undefined));
+        res.clearCookie('refreshToken', getCookieOptions(undefined));
+        res.clearCookie('logged', getCookieOptions(undefined, { httpOnly: false }));
 
         new OK({ message: 'Đăng xuất thành công' }).send(res);
     }
@@ -351,6 +411,7 @@ class controllerUser {
     }
 
     async forgotPassword(req, res) {
+        return this.requestPasswordResetOtp(req, res);
         const { email } = req.body;
         if (!email) {
             throw new BadRequestError('Vui lòng nhập email');
@@ -393,6 +454,7 @@ class controllerUser {
     }
 
     async resetPassword(req, res) {
+        return this.resetPasswordAfterVerification(req, res);
         const token = req.cookies.tokenResetPassword;
         const { otp, password } = req.body;
 
@@ -434,6 +496,111 @@ class controllerUser {
         await modelOtp.deleteOne({ email: decode.email });
         res.clearCookie('tokenResetPassword');
         return new OK({ message: 'Đặt lại mật khẩu thành công' }).send(res);
+    }
+    async registerWithVerification(req, res) {
+        const { fullName, password, phone, address } = req.body;
+        const email = normalizeEmail(req.body.email);
+        if (!fullName || !password || !phone || !address || !EMAIL_PATTERN.test(email)) {
+            throw new BadRequestError('Thông tin đăng ký không hợp lệ.', 400);
+        }
+        if (await modelUser.findOne({ email })) {
+            return new OK({ message: 'Nếu email đủ điều kiện, mã xác minh sẽ được gửi đến bạn.', statusCode: 202 }).send(res);
+        }
+        try {
+            await sendOtp({
+                email,
+                type: 'verifyAccount',
+                registration: { fullName, passwordHash: await bcrypt.hash(password, 10), phone, address },
+            });
+        } catch (error) {
+            console.error(`[mail] registration OTP delivery failed: ${error.code || 'UNKNOWN'}`);
+            mapOtpError(error);
+        }
+        new Created({ message: 'Đã tiếp nhận đăng ký. Vui lòng kiểm tra email để xác minh tài khoản.' }).send(res);
+    }
+
+    async verifyEmail(req, res) {
+        const { email, otp } = req.body;
+        assertOtpInput(email, otp);
+        let consumed;
+        try {
+            consumed = await otpService.consume({ email, type: 'verifyAccount', code: otp });
+        } catch (error) {
+            mapOtpError(error);
+        }
+        const registration = consumed.registration;
+        if (!registration || (await modelUser.findOne({ email: normalizeEmail(email) }))) {
+            throw new BadRequestError('Mã xác minh không đúng hoặc đã hết hạn.', 400);
+        }
+        await modelUser.create({ email: normalizeEmail(email), password: registration.passwordHash, typeLogin: 'email', fullName: registration.fullName, phone: registration.phone, address: registration.address });
+        new OK({ message: 'Đã xác minh email. Bạn có thể đăng nhập.' }).send(res);
+    }
+
+    async resendVerification(req, res) {
+        const email = normalizeEmail(req.body.email);
+        if (!(await otpService.hasPendingRegistration(email))) {
+            return new OK({ message: 'Nếu email đủ điều kiện, mã xác minh sẽ được gửi đến bạn.', statusCode: 202 }).send(res);
+        }
+        try {
+            await sendOtp({ email, type: 'verifyAccount' });
+        } catch (error) {
+            mapOtpError(error);
+        }
+        new OK({ message: 'Nếu email đủ điều kiện, mã xác minh sẽ được gửi đến bạn.', statusCode: 202 }).send(res);
+    }
+
+    async requestPasswordResetOtp(req, res) {
+        const email = normalizeEmail(req.body.email);
+        if (EMAIL_PATTERN.test(email)) {
+            const user = await modelUser.findOne({ email, typeLogin: 'email' });
+            if (user) {
+                try {
+                    await sendOtp({ email, type: 'forgotPassword' });
+                } catch (error) {
+                    if (error instanceof OtpError && error.code === 'COOLDOWN') {
+                        throw new BadRequestError(error.message, 429);
+                    }
+                    console.error(`[mail] password-reset OTP delivery failed: ${error.code || 'UNKNOWN'}`);
+                }
+            }
+        }
+        new OK({ message: 'Nếu email đủ điều kiện, mã xác minh sẽ được gửi đến bạn.', statusCode: 202 }).send(res);
+    }
+
+    async verifyPasswordReset(req, res) {
+        const { email, otp } = req.body;
+        assertOtpInput(email, otp);
+        try {
+            await otpService.consume({ email, type: 'forgotPassword', code: otp });
+        } catch (error) {
+            mapOtpError(error);
+        }
+        const user = await modelUser.findOne({ email: normalizeEmail(email), typeLogin: 'email' });
+        if (!user) throw new BadRequestError('Mã xác minh không đúng hoặc đã hết hạn.', 400);
+        const proof = jwt.sign({ id: user._id, purpose: 'passwordReset' }, process.env.JWT_SECRET, { expiresIn: '5m' });
+        res.cookie('tokenResetPassword', proof, getCookieOptions(5 * 60 * 1000, { httpOnly: true }));
+        new OK({ message: 'Mã xác minh hợp lệ. Vui lòng đặt mật khẩu mới.' }).send(res);
+    }
+
+    async resetPasswordAfterVerification(req, res) {
+        const token = req.cookies.tokenResetPassword;
+        const { password, confirmPassword } = req.body;
+        if (!token || !password || password !== confirmPassword) {
+            throw new BadRequestError('Yêu cầu đặt lại mật khẩu không hợp lệ.', 400);
+        }
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch {
+            throw new BadRequestError('Phiên đặt lại mật khẩu đã hết hạn. Vui lòng xác minh mã lại.', 401);
+        }
+        if (decoded.purpose !== 'passwordReset') throw new BadRequestError('Yêu cầu đặt lại mật khẩu không hợp lệ.', 400);
+        const user = await modelUser.findById(decoded.id);
+        if (!user || user.typeLogin !== 'email') throw new BadRequestError('Yêu cầu đặt lại mật khẩu không hợp lệ.', 400);
+        user.password = await bcrypt.hash(password, 10);
+        await user.save();
+        res.clearCookie('tokenResetPassword', getCookieOptions(0, { httpOnly: true }));
+        new OK({ message: 'Đã đặt lại mật khẩu.' }).send(res);
     }
 }
 

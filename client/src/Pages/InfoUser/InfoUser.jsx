@@ -15,7 +15,10 @@ import style from './InfoUser.module.scss';
 import classNames from 'classnames/bind';
 import { useStore } from '../../hooks/userStore';
 import OrderUser from './OrderUser/OrderUser';
-import { requestUpdateUser } from '../../config/request';
+import { requestUpdateUser, requestLogout } from '../../config/request';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import AddressBook from '../../Components/AddressBook';
+import PreorderHistory from '../../Components/PreorderHistory';
 
 const cx = classNames.bind(style);
 
@@ -23,9 +26,13 @@ const { Content, Sider } = Layout;
 const { Title } = Typography;
 
 function InfoUser() {
-    const [selectedKey, setSelectedKey] = useState('1');
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const tabs = { info: '1', orders: '2', addresses: '3', preorders: '5' };
+    const selectedKey = tabs[searchParams.get('tab')] || (location.pathname === '/orders' ? '2' : '1');
     const [isEditing, setIsEditing] = useState(false);
-    const { dataUser, getAuthUser } = useStore();
+    const { dataUser, getAuthUser, clearAuth } = useStore();
     const [form] = Form.useForm();
 
     const handleEdit = () => {
@@ -49,7 +56,6 @@ function InfoUser() {
 
                 await requestUpdateUser(data);
                 await getAuthUser();
-                console.log('Edited values:', values);
                 // Here you would typically call an API to update the user information
                 message.success('Cập nhật thông tin thành công!');
                 setIsEditing(false);
@@ -160,18 +166,22 @@ function InfoUser() {
                         <OrderUser />
                     </Card>
                 );
+            case '3': return <Card><AddressBook /></Card>;
+            case '5': return <Card><PreorderHistory /></Card>;
 
             default:
                 return <div>Chọn một mục từ menu</div>;
         }
     };
 
-    const handleMenuClick = (e) => {
-        setSelectedKey(e.key);
+    const handleMenuClick = async (e) => {
         if (e.key === '4') {
-            // Xử lý đăng xuất ở đây
-            console.log('Đăng xuất');
+            try { await requestLogout(); clearAuth(); navigate('/'); }
+            catch { message.error('Không thể đăng xuất. Vui lòng thử lại.'); }
+            return;
         }
+        const tab = Object.entries(tabs).find(([, key]) => key === e.key)?.[0];
+        if (tab) setSearchParams({ tab });
     };
 
     return (
@@ -190,6 +200,15 @@ function InfoUser() {
                             selectedKeys={[selectedKey]}
                             onClick={handleMenuClick}
                             items={[
+                                {
+                                    key: '3', icon: <UserOutlined />, label: 'Sổ địa chỉ',
+                                },
+                                {
+                                    key: '5', icon: <ShoppingOutlined />, label: 'Yêu cầu đặt hàng',
+                                },
+                                {
+                                    key: '6', icon: <HeartOutlined />, label: <Link to="/yeu-thich">Sản phẩm yêu thích</Link>,
+                                },
                                 {
                                     key: '1',
                                     icon: <UserOutlined />,

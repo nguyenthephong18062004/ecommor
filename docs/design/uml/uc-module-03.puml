@@ -1,0 +1,23 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách hàng đã đăng nhập" as A0
+actor "Goong" as A1
+rectangle "Giỏ hàng" {
+usecase "UC-14\nXem giỏ hàng" as UC14
+usecase "UC-15\nThêm sản phẩm vào giỏ" as UC15
+usecase "UC-16\nSửa số lượng giỏ" as UC16
+usecase "UC-17\nXóa sản phẩm khỏi giỏ" as UC17
+usecase "UC-18\nChọn coupon và thông tin giao hàng" as UC18
+}
+A0 --> UC14
+A0 --> UC15
+A0 --> UC16
+A0 --> UC17
+A0 --> UC18
+A1 --> UC18
+@enduml

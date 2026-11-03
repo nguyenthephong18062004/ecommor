@@ -1,0 +1,27 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "user" as M_user <<Model>> {
+  fullName : String {require=true}
+  phone : String {require=true}
+  email : String {require=true}
+  password : String {require=true}
+  isAdmin : Boolean {default=false}
+  address : String {require=true}
+  typeLogin : M_user_Enum6 {require=true}
+  lastLoginAt : Date {default=Date.now}
+  isOnline : Boolean {default=true}
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+enum "Enum6" as M_user_Enum6 <<enumeration>> {
+  email
+  google
+}
+M_user --> M_user_Enum6
+@enduml

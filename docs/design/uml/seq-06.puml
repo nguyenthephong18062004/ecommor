@@ -1,0 +1,46 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+participant "Provider.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+UI -> A : requestAuth() / requestAdmin()
+A -> R : GET /api/auth hoặc /api/admin
+R -> W : authUser; admin thêm authAdmin
+W -> S : verifyToken(cookie token)
+S -> DB : apikey.findOne(userId decode)
+alt JWT hợp lệ và quyền đủ
+opt Admin
+W -> DB : user.findById; isAdmin === true
+end
+W -> C : Handler
+C -> DB : authUser đọc hồ sơ được chọn
+C --> A : 200 metadata.auth hoặc message=true
+else Token/quyền không hợp lệ
+W --> A : 401
+alt ApiClient và logged=1
+A -> R : GET /api/refresh-token bằng axios trực tiếp
+R -> C : refreshToken()
+C -> S : verifyToken(refreshCookie)
+S -> DB : publicKey theo userId
+alt Refresh hợp lệ, user tồn tại
+C -> S : createToken()
+C --> A : 200 + access cookie
+A -> R : Retry original request; giải phóng queue
+else Refresh thất bại
+A -> R : GET /api/logout
+A -> UI : Xóa logged, chuyển /login
+end
+else Không logged / instance khác
+A --> UI : Lỗi hoặc interceptor request.jsx (xem Phát hiện)
+end
+end
+@enduml

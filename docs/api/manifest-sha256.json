@@ -1,0 +1,15 @@
+{
+  "build.py": "9e4b61fe465999f4ee13aaf3f45389f80a1eba0047efc9b0b3f6571ddc69e13f",
+  "conventions.md": "27d55161c0b94df09b2fd924a55fbfb272a0a9557cf4053e98d5e39c30e2eec2",
+  "limitations.md": "2377deee44f435de93ca0ba0a8286951e18b6b3b162b400461b05e7674336354",
+  "openapi.json": "16d7b79f2e44f4780250455a54851a618f1f5717e11f2c02d18ff6ac8e232bcb",
+  "postman_collection.json": "ddcda34e49c85d6a311888f176d8d46e3f88ef7d918ebebf0f3162b4158b7098",
+  "postman_environment.json": "9613b0171d29c721606011897cdaac8527af58ec259f1f4ed8b3b0013be59651",
+  "README.md": "afac317a98fbb5e16837858fb25dab323394d24b006cd8c97eae553bc1e748a4",
+  "realtime.md": "c4150afaa775969f73f0286fa2dda0838cc26998e416b978b86687f83dd1ad8d",
+  "reference.md": "d4937f41ee63bcb9ad043c64cf8f3dab10fdfba7001e8ad8c3b68f5713df56c9",
+  "source-map.json": "8db921326b3dac833e0fb64ae64572af29270607fa67031201ab2ace39b04f99",
+  "validate.cjs": "dd335c27f92ba457211f0d81ade0b64893917a9c7d8bd0ef810faa8fdc5761ec",
+  "validation.md": "7935f30bb666bd746f87ca421c106d4c3244556bb5f251094fd7f3b5f0674f84",
+  "workflows.md": "ebde9fefe84155398f46128267acf8011322acd3de9e9a6cdda7e47854594675"
+}

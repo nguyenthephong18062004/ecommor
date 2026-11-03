@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Button, Table, Modal, Form, Input, InputNumber, Select, Space, Popconfirm, Upload, message } from 'antd';
+import { AutoComplete, Button, Table, Modal, Form, Input, InputNumber, Select, Space, Popconfirm, Switch, Tag, Upload, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
 import { Editor } from '@tinymce/tinymce-react';
+import { useStore } from '../../../../hooks/userStore';
+import { dateInput, productSpecs } from '../../../../utils/format';
 import {
     requestCreateProduct,
     requestDeleteProduct,
     requestGetAllCategory,
+    requestGetBrands,
     requestGetAllProduct,
     requestUpdateProduct,
     requestUploadImage,
 } from '../../../../config/request';
 
 function ManagerProduct() {
+    const { reloadCatalogOptions } = useStore();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
@@ -20,6 +24,7 @@ function ManagerProduct() {
     const [fileList, setFileList] = useState([]);
     const [editorContent, setEditorContent] = useState('');
     const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -27,16 +32,21 @@ function ManagerProduct() {
             setCategories(response.metadata);
         };
         fetchCategories();
+        requestGetBrands().then(response => setBrands(response.metadata))
+            .catch(() => message.error('Không thể tải thương hiệu'));
     }, []);
 
     // Fetch all products
     const fetchProducts = async () => {
+        setLoading(true);
         try {
             const response = await requestGetAllProduct();
             setProducts(response.metadata);
         } catch (error) {
             message.error('Lỗi khi tải dữ liệu sản phẩm');
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -46,7 +56,7 @@ function ManagerProduct() {
 
     // Handle form submission
     const handleSubmit = async (values) => {
-        form.validateFields();
+        setLoading(true);
         try {
             let imageUrls = [];
 
@@ -72,6 +82,7 @@ function ManagerProduct() {
                 images: imageUrls.join(','),
                 description: editorContent,
             };
+            if (!Object.values(values.shippingPackage || {}).some(value => value != null)) delete formData.shippingPackage;
 
             if (editingId) {
                 // Update existing product
@@ -89,37 +100,44 @@ function ManagerProduct() {
             form.resetFields();
             setFileList([]);
             setEditingId(null);
-            fetchProducts();
+            await fetchProducts();
+            reloadCatalogOptions();
         } catch (error) {
             message.error(error.response?.data?.message || 'Có lỗi xảy ra');
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
     // Delete a product
     const handleDelete = async (id) => {
+        setLoading(true);
         try {
             await requestDeleteProduct(id);
             message.success('Xóa sản phẩm thành công');
-            fetchProducts();
+            await fetchProducts();
         } catch (error) {
             message.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa');
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
     // Edit a product
     const handleEdit = (record) => {
         setEditingId(record._id);
+        form.resetFields();
         form.setFieldsValue({
-            name: record.name,
-            price: record.price,
-            discount: record.discount,
-            description: record.description,
+            ...record,
             category: record.categoryId,
-            size: record.size,
-            stock: record.stock,
+            publicationStatus: record.publicationStatus || 'preview',
+            verificationStatus: record.verificationStatus || 'unverified',
+            expectedRestockAt: dateInput(record.expectedRestockAt),
         });
+        setEditorContent(record.description || '');
+        setFileList([]);
 
         // Set image files
         if (record.images && record.images.length > 0) {
@@ -139,6 +157,8 @@ function ManagerProduct() {
     const handleAdd = () => {
         setEditingId(null);
         form.resetFields();
+        form.setFieldsValue({ publicationStatus: 'preview', verificationStatus: 'unverified', allowPreorder: false, condition: 'new', discount: 0, stock: 0 });
+        setEditorContent('');
         setFileList([]);
         setModalVisible(true);
     };
@@ -152,7 +172,7 @@ function ManagerProduct() {
             newFileList.splice(index, 1);
             setFileList(newFileList);
         },
-        beforeUpload: (file) => {
+        beforeUpload: () => {
             return false; // Prevent auto upload
         },
         onChange: (info) => {
@@ -168,6 +188,12 @@ function ManagerProduct() {
             title: 'Tên sản phẩm',
             dataIndex: 'nameProduct',
             key: 'nameProduct',
+        },
+        {
+            title: 'Thương hiệu',
+            dataIndex: 'brand',
+            key: 'brand',
+            render: (brand) => brand || '-',
         },
         {
             title: 'Giá (VND)',
@@ -189,6 +215,10 @@ function ManagerProduct() {
             title: 'Tồn kho',
             dataIndex: 'stock',
             key: 'stock',
+        },
+        {
+            title: 'Duyệt bán', dataIndex: 'verificationStatus', key: 'verificationStatus',
+            render: value => <Tag color={value === 'verified' ? 'green' : 'default'}>{({ verified: 'Đã xác minh', demo: 'Dữ liệu demo' })[value] || 'Chưa xác minh'}</Tag>,
         },
         {
             title: 'Hành động',
@@ -242,115 +272,68 @@ function ManagerProduct() {
                 width={800}
             >
                 <Form form={form} layout="vertical" onFinish={handleSubmit}>
-                    <Form.Item name="nameProduct" label="Tên sản phẩm" rules={[{ required: true }]}>
-                        <Input />
+                    <Form.Item name="category" label="Danh mục" rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}>
+                        <Select options={categories.map(category => ({ value: category._id, label: category.name }))} />
                     </Form.Item>
-
-                    <Form.Item
-                        name="category"
-                        label="Danh mục"
-                        rules={[{ required: true, message: 'Vui lòng chọn danh mục' }]}
-                    >
-                        <Select>
-                            {categories.map((category) => (
-                                <Select.Option value={category._id}>{category.name}</Select.Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item name="modelNumber" label="Số hiệu sản phẩm" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-
                     <Form.Item name="brand" label="Thương hiệu" rules={[{ required: true }]}>
-                        <Input />
+                        <AutoComplete options={brands.map(brand => ({ value: brand.name }))}
+                            filterOption={(input, option) => option.value.toLocaleLowerCase('vi').includes(input.toLocaleLowerCase('vi'))} />
                     </Form.Item>
-
-                    <Form.Item name="collection" label="Bộ sưu tập">
-                        <Input />
+                    {[['nameProduct', 'Tên sản phẩm'], ...productSpecs].filter(([key]) => !['brand', 'boxPapers'].includes(key)).map(([key, label]) => (
+                        <Form.Item key={key} name={key} label={label} rules={['nameProduct', 'modelNumber', 'origin', 'gender', 'glassMaterial', 'movement',
+                            'strapMaterial', 'waterResistance', 'dialDiameter'].includes(key) ? [{ required: true, message: `Vui lòng nhập ${label.toLowerCase()}` }] : []}>
+                            {['dialDiameter', 'caseThickness'].includes(key) ? <InputNumber min={0} max={200} style={{ width: '100%' }} />
+                                : key === 'gender' ? <Select options={[{ value: 'Nam', label: 'Nam' }, { value: 'Nữ', label: 'Nữ' }, { value: 'Unisex', label: 'Nam và nữ (Unisex)' }]} />
+                                    : <Input maxLength={2000} />}
+                        </Form.Item>
+                    ))}
+                    <Space wrap align="start">
+                        {[['price', 'Giá (VND)', 1, 90000000000000], ['discount', 'Giảm giá (%)', 0, 100], ['stock', 'Tồn kho', 0, 1000000]].map(([key, label, min, max]) => (
+                            <Form.Item key={key} name={key} label={label} rules={[{ required: key !== 'discount' }]}>
+                                <InputNumber min={min} max={max} precision={key === 'discount' ? 2 : 0} />
+                            </Form.Item>
+                        ))}
+                    </Space>
+                    <Space wrap align="start">
+                        <Form.Item name="publicationStatus" label="Hiển thị và bán hàng">
+                            <Select style={{ width: 180 }} options={[{ value: 'preview', label: 'Thông tin tham khảo' }, { value: 'published', label: 'Đã duyệt đăng bán' }, { value: 'archived', label: 'Ngừng hiển thị' }]} />
+                        </Form.Item>
+                        <Form.Item name="verificationStatus" label="Xác minh dữ liệu">
+                            <Select style={{ width: 180 }} options={[{ value: 'unverified', label: 'Chưa xác minh' }, { value: 'demo', label: 'Dữ liệu demo' }, { value: 'verified', label: 'Đã đối chiếu thực tế' }]} />
+                        </Form.Item>
+                        <Form.Item name="condition" label="Tình trạng sản phẩm">
+                            <Select style={{ width: 160 }} options={[{ value: 'new', label: 'Mới' }, { value: 'preowned', label: 'Đã qua sử dụng' }]} />
+                        </Form.Item>
+                    </Space>
+                    <Form.Item name="verificationNote" label="Căn cứ xác minh (hiển thị cho khách)" extra="Chỉ duyệt xác minh khi đã đối chiếu giá, tồn kho, thông số và nguồn hàng. Không ghi thông tin cá nhân hoặc tài liệu nội bộ.">
+                        <Input.TextArea maxLength={2000} rows={2} />
                     </Form.Item>
+                    <Form.Item name="boxPapers" label="Hộp và giấy tờ đi kèm"><Input maxLength={2000} /></Form.Item>
+                    <Space wrap>
+                        <Form.Item name="allowPreorder" label="Nhận đặt khi hết hàng" valuePropName="checked"><Switch /></Form.Item>
+                        <Form.Item name="expectedRestockAt" label="Ngày dự kiến có hàng"><Input type="date" /></Form.Item>
+                    </Space>
 
-                    <Form.Item name="origin" label="Xuất xứ" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item name="gender" label="Giới tính" rules={[{ required: true }]}>
-                        <Select>
-                            <Select.Option value="Nam">Nam</Select.Option>
-                            <Select.Option value="Nữ">Nữ</Select.Option>
-                            <Select.Option value="Unisex">Unisex</Select.Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item name="glassMaterial" label="Kính" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item name="movement" label="Loại máy" rules={[{ required: true }]}>
-                        <Select>
-                            <Select.Option value="Quartz">Quartz</Select.Option>
-                            <Select.Option value="Automatic">Automatic</Select.Option>
-                            <Select.Option value="Eco-Drive">Eco-Drive</Select.Option>
-                            <Select.Option value="Kinetic">Kinetic</Select.Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item name="powerReserve" label="Trữ cót">
-                        <Input placeholder="VD: 40 giờ" />
-                    </Form.Item>
-
-                    <Form.Item name="warrantyGlobal" label="Bảo hành quốc tế">
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item name="dialDiameter" label="Đường kính mặt số (mm)" rules={[{ required: true }]}>
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
-
-                    <Form.Item name="caseThickness" label="Bề dày mặt số (mm)">
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
-
-                    <Form.Item name="bezelMaterial" label="Niềng">
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item name="strapMaterial" label="Dây đeo" rules={[{ required: true }]}>
-                        <Select>
-                            <Select.Option value="Thép không gỉ">Thép không gỉ</Select.Option>
-                            <Select.Option value="Da">Da</Select.Option>
-                            <Select.Option value="Silicon">Silicon</Select.Option>
-                            <Select.Option value="Vải">Vải</Select.Option>
-                        </Select>
-                    </Form.Item>
-
-                    <Form.Item name="faceColor" label="Màu mặt số">
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item name="waterResistance" label="Chống nước" rules={[{ required: true }]}>
-                        <Input placeholder="VD: 5ATM" />
-                    </Form.Item>
-
-                    <Form.Item name="price" label="Giá (VND)" rules={[{ required: true }]}>
-                        <InputNumber style={{ width: '100%' }} />
-                    </Form.Item>
-
-                    <Form.Item name="discount" label="Giảm giá (%)">
-                        <InputNumber min={0} max={100} style={{ width: '100%' }} />
-                    </Form.Item>
-
-                    <Form.Item name="stock" label="Tồn kho" rules={[{ required: true }]}>
-                        <InputNumber min={0} style={{ width: '100%' }} />
-                    </Form.Item>
-
+                    <p>Kiện vận chuyển thực tế (gồm hộp bảo vệ). Để trống cả 4 ô để dùng ước tính theo loại đồng hồ.</p>
+                    <Space wrap align="start">
+                        {[
+                            ['weight', 'Cân nặng (gram)', 19999], ['length', 'Dài (cm)', 200],
+                            ['width', 'Rộng (cm)', 200], ['height', 'Cao (cm)', 200],
+                        ].map(([key, label, max]) => (
+                            <Form.Item key={key} name={['shippingPackage', key]} label={label}>
+                                <InputNumber min={1} max={max} precision={0} />
+                            </Form.Item>
+                        ))}
+                    </Space>
                     <Form.Item name="description" label="Mô tả" rules={[{ required: true }]}>
                         <Editor
-                            apiKey="n4hxnmi16uwk9dmdgfx6nscsf8oc30528dlcub1mzsk8deqy"
+                            apiKey={import.meta.env.VITE_TINYMCE_API_KEY?.trim() || 'n4hxnmi16uwk9dmdgfx6nscsf8oc30528dlcub1mzsk8deqy'}
                             init={{
+                                language: 'vi',
+                                language_url: '/langs/vi.js',
                                 plugins:
-                                    'anchor autolink charmap codesample emoticons image link lists media table visualblocks wordcount',
-                                toolbar: 'undo redo | bold italic underline | link image media | align numlist bullist',
+                                    'anchor autolink charmap codesample emoticons image link lists table visualblocks wordcount',
+                                toolbar: 'undo redo | bold italic underline | link image | align numlist bullist',
                             }}
                             value={editorContent}
                             onEditorChange={(content) => {

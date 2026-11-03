@@ -1,0 +1,20 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách vãng lai" as A0
+actor "Quản trị viên" as A1
+rectangle "Catalog" {
+usecase "UC-10\nXem catalog trang chủ" as UC10
+usecase "UC-11\nTìm kiếm và lọc sản phẩm" as UC11
+usecase "UC-12\nXem chi tiết sản phẩm và đánh giá" as UC12
+usecase "UC-13\nTạo đánh giá sản phẩm" as UC13
+}
+A0 --> UC10
+A0 --> UC11
+A0 --> UC12
+A1 --> UC13
+@enduml

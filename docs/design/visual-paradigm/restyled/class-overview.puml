@@ -1,0 +1,335 @@
+@startuml
+class "apikey" {
+userId : String
+publicKey : String
+privateKey : String
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "blog" {
+title : String
+content : String
+image : String
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "brand" {
+name : String
+key : String
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "cartUser" {
+userId : String
+product : Array<subdocument>
+product[].productId : ObjectId
+product[].quantity : Number
+fullName : String
+phone : String
+address : String
+note : String
+totalPrice : Number
+nameCoupon : String
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "category" {
+name : String
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "coupon" {
+nameCoupon : String
+discount : Number
+quantity : Number
+startDate : Date
+endDate : Date
+minPrice : Number
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "Message" {
+senderId : ObjectId
+receiverId : ObjectId
+conversationId : String
+text : String
+isRead : Boolean
+createdAt : Date
+_id : ObjectId
+__v : Number
+}
+class "otp" {
+email : String
+otp : String
+time : Date
+type : String
+attempts : Number
+resendAvailableAt : Date
+sendWindowStartedAt : Date
+sendCount : Number
+registration : Object nhúng
+registration.fullName : String
+registration.passwordHash : String
+registration.phone : String
+registration.address : String
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "paymentAttempts" {
+orderId : ObjectId
+transactionRef : String
+amount : Number
+status : String
+expiresAt : Date
+paymentUrl : String
+createDate : String
+transactionNo : String
+bankCode : String
+responseCode : String
+transactionStatus : String
+payDate : String
+receivedAt : Date
+reconciledAt : Date
+nextQueryAt : Date
+confirmationSource : String
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "payments" {
+userId : ObjectId
+product : Array<subdocument>
+product[].productId : ObjectId
+product[].quantity : Number
+product[].unitPrice : Number
+product[].nameProduct : String
+product[].images : String
+fullName : String
+phone : String
+address : String
+note : String
+status : String
+totalPrice : Number
+paymentMethod : String
+transactionRef : String
+checkoutKey : String
+paymentStatus : String
+inventoryReserved : Boolean
+couponReserved : Boolean
+expiresAt : Date
+subtotal : Number
+couponDiscount : Number
+shippingFee : Number
+nameCoupon : String
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "previewProduct" {
+userId : ObjectId
+productId : ObjectId
+content : String
+rating : Number
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "products" {
+nameProduct : String
+modelNumber : String
+brand : String
+collection : String
+category : String
+origin : String
+gender : String
+glassMaterial : String
+movement : String
+powerReserve : String
+warrantyGlobal : String
+dialDiameter : Number
+caseThickness : Number
+bezelMaterial : String
+strapMaterial : String
+faceColor : String
+waterResistance : String
+price : Number
+discount : Number
+description : String
+images : String
+stock : Number
+soldCount : Number
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "user" {
+fullName : String
+phone : String
+email : String
+password : String
+isAdmin : Boolean
+address : String
+typeLogin : String
+lastLoginAt : Date
+isOnline : Boolean
+_id : ObjectId
+__v : Number
+createdAt : Date
+updatedAt : Date
+}
+class "CartItem" {
+productId : ObjectId
+quantity : Number
+}
+class "OrderItem" {
+productId : ObjectId
+quantity : Number
+unitPrice : Number
+nameProduct : String
+images : String
+}
+class "Registration" {
+fullName : String
+passwordHash : String
+phone : String
+address : String
+}
+class "checkAuth" {
+authUser()
+authAdmin()
+asyncHandler()
+}
+class "users.controller.js" {
+register()
+loginGoogle()
+login()
+authUser()
+refreshToken()
+logout()
+updateUser()
+getStatistical()
+findAllUser()
+updateUserAdmin()
+forgotPassword()
+resetPassword()
+registerWithVerification()
+verifyEmail()
+resendVerification()
+requestPasswordResetOtp()
+verifyPasswordReset()
+resetPasswordAfterVerification()
+}
+class "tokenSevices" {
+createApiKey / createToken / createRefreshToken / verifyToken()
+}
+class "otp.service" {
+issue / consume / hasPendingRegistration()
+}
+class "mail.service" {
+sendOtpEmail / sendCheckEmail()
+}
+class "products.controller.js" {
+uploadImages()
+createProduct()
+getProductNew()
+getProductCatalog()
+getCatalogOptions()
+browseProducts()
+getProductById()
+getProductByCategory()
+getAllProduct()
+updateProduct()
+deleteProduct()
+getProductManufactured()
+searchProduct()
+}
+class "cartUser.controller.js" {
+addToCart()
+getCart()
+deleteProductCart()
+updateProductCart()
+updateInfoCart()
+}
+class "payments.controller.js" {
+createPayment()
+checkPaymentVnpay()
+ipnVnpay()
+retryVnpay()
+reconcileVnpay()
+checkPaymentMomo()
+getPaymentSuccess()
+getOrderUser()
+cancelOrder()
+getOrderAdmin()
+updateOrderStatus()
+}
+class "category.controller.js" {
+createCategory()
+getAllCategory()
+updateCategory()
+deleteCategory()
+}
+class "coupon.controller.js" {
+createCoupon()
+getCoupons()
+getAllCoupon()
+deleteCoupon()
+updateCoupon()
+}
+class "vnpay.service" {
+checkout()
+retry()
+ipn()
+reconcile()
+expirePending()
+changeStatus()
+}
+class "vnpay-query.service" {
+queryAttempt()
+}
+class "blog.controller.js" {
+uploadImage()
+createBlog()
+getAllBlog()
+updateBlog()
+deleteBlog()
+getBlogById()
+}
+class "message.controller.js" {
+createMessage()
+createMessageAdmin()
+getAllUserMessage()
+getMessage()
+getMessageUser()
+readMessage()
+}
+class "previewProduct.controller.js" {
+createPreviewProduct()
+getPreviewProductHome()
+}
+class "socket" {
+initSocket()
+getIO()
+}
+class "chatbot" {
+askQuestion()
+}
+@enduml

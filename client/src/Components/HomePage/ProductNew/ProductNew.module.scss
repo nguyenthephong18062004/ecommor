@@ -1,5 +1,96 @@
+.catalog {
+    width: 100%;
+}
+
+.section {
+    padding: 36px 0 42px;
+    border-bottom: 1px solid #dededc;
+    scroll-margin-top: 100px;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid #222;
+
+    h2 {
+        margin: 4px 0 0;
+        font-size: 24px;
+        font-weight: 650;
+        line-height: 1.25;
+        color: #1f1f1f;
+        text-transform: uppercase;
+        overflow-wrap: anywhere;
+    }
+}
+
+.eyebrow {
+    color: #906e39;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.count {
+    color: #666;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
 .product-list {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 20px 16px;
+    align-items: start;
+    min-height: 360px;
+}
+
+.placeholder {
+    height: 360px;
+    padding: 260px 12px 12px;
+    background: #f7f7f5;
+    overflow: hidden;
+}
+
+.empty {
+    min-height: 360px;
+    display: grid;
+    place-items: center;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+
+    :global(.ant-pagination) {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        row-gap: 8px;
+    }
+
+    :global(.ant-pagination-item-active) {
+        border-color: #272727;
+        a { color: #272727; }
+    }
+}
+
+@media (max-width: 1100px) {
+    .product-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+    .product-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .section-heading h2 { font-size: 20px; }
+}
+
+@media (max-width: 480px) {
+    .product-list { grid-template-columns: minmax(0, 1fr); }
+    .section-heading { align-items: start; }
+    .count { white-space: normal; text-align: right; }
 }

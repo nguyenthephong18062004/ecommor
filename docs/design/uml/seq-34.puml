@@ -1,0 +1,39 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Quản trị viên" as U
+participant "CouponManagement.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+database "Model / MongoDB" as DB
+U -> UI : Mở bảng / tạo-sửa-xóa coupon
+UI -> A : requestGetAllCoupon hoặc mutation
+A -> R : GET /api/coupons; POST create/update; DELETE delete
+alt List public
+R -> C : getAllCoupon()
+C -> DB : coupon.find()
+C --> A : 200 {success,coupons}
+else Write admin
+R -> W : authAdmin
+W -> C : Handler
+alt Create thiếu field truthy
+C --> A : 400 thông báo thiếu thông tin
+else Create hợp lệ
+C -> DB : new coupon + save
+C --> A : 201 thông báo tạo
+else Update
+C -> DB : findByIdAndUpdate(_id, fields)
+C --> A : 200 thông báo cập nhật
+else Delete
+C -> DB : findByIdAndDelete(id)
+C --> A : 200 hoặc 500 message=error
+end
+end
+A --> UI : Cập nhật bảng/thông báo
+@enduml

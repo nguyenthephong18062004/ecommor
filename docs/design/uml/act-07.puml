@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Quản trị viên|
+start
+:Mở tab đơn, xem snapshot và attempts;
+:Chọn trạng thái do UI cho phép;
+|Frontend|
+:POST update-order-status;
+|Backend|
+:authAdmin, validate id/status;
+:Transaction tìm order;
+if (Không thấy?) then (Có)
+ :404;
+ stop
+endif
+if (Trạng thái không đổi?) then (Có)
+ :200 không tác dụng phụ;
+ stop
+endif
+if (Transition hợp lệ và điều kiện payment đủ?) then (Không)
+ :409;
+ stop
+endif
+if (Hủy?) then (Có)
+ if (Online đã paid hoặc cần refund?) then (Có)
+  :409 cần workflow hoàn tiền;
+  stop
+ endif
+ :Release stock/coupon; cancel attempt pending;
+ :VNPay paymentStatus=failed;
+else (Không)
+ if (Delivered?) then (Có)
+  :soldCount += quantity;
+  :COD paymentStatus=paid;
+ endif
+endif
+:Save status, commit;
+|Frontend|
+:Reload bảng/modal;
+stop
+@enduml

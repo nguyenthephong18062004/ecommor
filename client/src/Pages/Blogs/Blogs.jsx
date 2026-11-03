@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 const { Title, Paragraph, Text } = Typography;
 const { Search } = Input;
 const { Option } = Select;
-const URL_IMAGE = import.meta.env.VITE_URL_IMAGE_API;
+import { uploadUrl } from '../../config/runtimeUrls';
 
 function Blogs() {
     const [blogs, setBlogs] = useState([]);
@@ -72,6 +72,7 @@ function Blogs() {
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -82,11 +83,11 @@ function Blogs() {
         <Card
             hoverable
             className="group overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full"
-            bodyStyle={{ padding: 0 }}
+            styles={{ body: { padding: 0 } }}
         >
             <div className="relative overflow-hidden">
                 <img
-                    src={`${URL_IMAGE}${blog.image}`}
+                    src={uploadUrl(blog.image)}
                     alt={blog.title}
                     className="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110"
                 />

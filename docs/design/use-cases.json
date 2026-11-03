@@ -1,0 +1,1217 @@
+[
+  {
+    "id": "UC-01",
+    "name": "Đăng ký tài khoản",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/register"
+    ],
+    "models": [
+      "user",
+      "otp"
+    ],
+    "page": "client/src/Pages/Register/Register.jsx",
+    "handler": "server/src/controllers/users.controller.js:registerWithVerification",
+    "steps": [
+      "Khách nhập họ tên, email, phone, address và password rồi submit.",
+      "Frontend gọi requestRegister và chuyển sang bước nhập OTP khi request thành công.",
+      "Backend normalize email, kiểm tra dữ liệu và email đã tồn tại.",
+      "Backend bcrypt password, ghi pending registration vào otp rồi gửi email."
+    ],
+    "rules": "Server kiểm tra truthy các trường và regex email; bcrypt cost 10. UI password tối thiểu 6 và confirm khớp nhưng server chưa kiểm tra độ dài/confirm. Limiter gửi chung 5/giờ/IP, cooldown email/type 60s.",
+    "errors": "400 Registration information is invalid; 429 COOLDOWN/RATE_LIMIT; 503 Email delivery is unavailable.",
+    "external": "Gmail",
+    "alt": "Email đã tồn tại trả 202 thông báo chung; email đủ điều kiện trả 201. Chưa tạo user trước verify.",
+    "post": "OTP pending được tạo/thay thế; user chỉ được tạo ở UC-02. Thất bại gửi mail có thể vẫn còn record OTP.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-02",
+    "name": "Xác minh email đăng ký",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/verify-email"
+    ],
+    "models": [
+      "otp",
+      "user"
+    ],
+    "page": "client/src/Pages/Register/Register.jsx",
+    "handler": "server/src/controllers/users.controller.js:verifyEmail",
+    "steps": [
+      "Khách nhập mã 6 chữ số.",
+      "UI gửi email và otp.",
+      "Backend consume OTP verifyAccount, xóa atomically khi khớp.",
+      "Backend lấy registration, kiểm tra email chưa có rồi tạo user email.",
+      "UI báo hoàn tất và chuyển /login."
+    ],
+    "rules": "TTL 10 phút được kiểm tra bằng code và TTL index; tối đa 5 lần sai; limiter verify chung 15/15 phút/IP. Không tự đăng nhập.",
+    "errors": "400 Email or verification code is invalid; 400 Verification code is invalid or expired (có biến thể dấu chấm từ service).",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "200 và user được tạo; lỗi sau consume có thể đã mất OTP.",
+    "pre": "Có registration pending chưa hết hạn.",
+    "relation": "UC-03 extend quá trình xác minh khi cần gửi lại.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-03",
+    "name": "Gửi lại mã xác minh đăng ký",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/resend-verification"
+    ],
+    "models": [
+      "otp"
+    ],
+    "page": "client/src/Pages/Register/Register.jsx",
+    "handler": "server/src/controllers/users.controller.js:resendVerification",
+    "steps": [
+      "Khách chọn gửi lại sau countdown.",
+      "UI gửi email.",
+      "Backend kiểm tra pending registration, issue lại mã và giữ registration.",
+      "Gmail nhận yêu cầu gửi; UI đặt lại 60s."
+    ],
+    "rules": "5/giờ/IP chung với register/forgot; issue kiểm tra 60s và 5 lần/email/type trong cửa sổ lưu ở record.",
+    "errors": "429 Please wait before requesting a new code.; 503 Email delivery is unavailable.",
+    "external": "Gmail",
+    "alt": "Không có pending cũng trả 202 thông báo chung.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "extend UC-02 tại bước chờ mã.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-04",
+    "name": "Đăng nhập email",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/login"
+    ],
+    "models": [
+      "user",
+      "apikey"
+    ],
+    "page": "client/src/Pages/LoginUser/LoginUser.jsx",
+    "handler": "server/src/controllers/users.controller.js:login",
+    "steps": [
+      "Khách nhập email/password.",
+      "Backend tìm user theo email, chặn typeLogin google, bcrypt compare.",
+      "Backend rotate cặp RSA theo user, ký token 15m và refresh 7d.",
+      "Response 200 đặt cookie; UI gọi auth, tải cart rồi điều hướng admin hoặc trang chủ."
+    ],
+    "rules": "Cookie token/refreshToken httpOnly; logged có thể đọc từ JS; production secure + Strict, dev Lax. Login không có rate limiter riêng.",
+    "errors": "403 Tài khoản hoặc mật khẩu không chính xác !!!; 403 Vui lòng đăng nhập bằng Google. Lỗi bcrypt/cast không chuẩn hóa có thể thành 500.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Cookie phiên và dữ liệu auth/cart; đăng nhập mới thay cặp key cũ.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-05",
+    "name": "Đăng nhập Google",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/login-google"
+    ],
+    "models": [
+      "user",
+      "apikey"
+    ],
+    "page": "client/src/Pages/LoginUser/LoginUser.jsx",
+    "handler": "server/src/controllers/users.controller.js:loginGoogle",
+    "steps": [
+      "Khách chọn GoogleLogin popup.",
+      "Frontend gửi credential.",
+      "Server verifyIdToken với audience GOOGLE_CLIENT và email_verified.",
+      "Server tìm theo email, dùng user sẵn có hoặc tạo user google.",
+      "Server rotate RSA, đặt cookie giống email login; UI xác định trang theo isAdmin."
+    ],
+    "rules": "Không tin name/email do client tự gửi; cần credential và GOOGLE_CLIENT. Account cùng email được liên kết trực tiếp.",
+    "errors": "403 Không thể xác thực Google; Google credential không hợp lệ; Email Google chưa được xác minh.",
+    "external": "Google",
+    "alt": "Email đã có: không tạo user mới; email mới: lưu name/email/typeLogin google.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-06",
+    "name": "Kiểm tra và gia hạn phiên",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/auth",
+      "/api/refresh-token",
+      "/api/admin"
+    ],
+    "models": [
+      "user",
+      "apikey"
+    ],
+    "page": "client/src/store/Provider.jsx",
+    "handler": "server/src/controllers/users.controller.js:authUser",
+    "steps": [
+      "Provider thấy cookie logged và yêu cầu auth; AdminRoute còn yêu cầu admin.",
+      "authUser middleware verify JWT RSA qua key theo id; authAdmin kiểm tra isAdmin từ DB.",
+      "Handler auth chỉ trả các trường hồ sơ được chọn.",
+      "Nếu API trả 401, ApiClient dùng refresh cookie để lấy access cookie mới rồi retry; lỗi refresh thì logout và chuyển /login."
+    ],
+    "rules": "Access 15m/refresh 7d dùng cùng cặp RSA và verifyToken. /api/admin chạy authUser rồi authAdmin. logged chỉ là dấu hiệu để UI thử request.",
+    "errors": "401 Vui lòng đăng nhập / Vui lòng đăng nhập lại / Bạn không có quyền truy cập; 403 Tài khoản không tồn tại từ refresh nếu user bị xóa.",
+    "external": "Không",
+    "alt": "request.jsx có interceptor khác ApiClient; nhánh queue đầu tiên có bất thường ghi ở 05, không coi retry luôn thành công.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-07",
+    "name": "Đăng xuất",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/logout"
+    ],
+    "models": [
+      "apikey"
+    ],
+    "page": "client/src/Components/Header/Header.jsx",
+    "handler": "server/src/controllers/users.controller.js:logout",
+    "steps": [
+      "Khách/admin chọn đăng xuất.",
+      "Client gọi GET logout.",
+      "Nếu access token verify được, backend xóa key theo userId.",
+      "Backend clear token/refreshToken/logged với cùng flags.",
+      "Header clearAuth hoặc admin chuyển /login."
+    ],
+    "rules": "Không có auth middleware nên vẫn clear cookie khi access hết hạn; chỉ xóa key nếu access verify được.",
+    "errors": "200 Đăng xuất thành công; lỗi DB xóa key bị catch trong khối verify/xóa.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Cookie phía browser được clear; key chỉ bị thu hồi ở nhánh verify thành công.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-08",
+    "name": "Khôi phục mật khẩu bằng OTP",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/forgot-password",
+      "/api/verify-reset-password",
+      "/api/reset-password"
+    ],
+    "models": [
+      "user",
+      "otp"
+    ],
+    "page": "client/src/Pages/ForgotPassword/ForgotPassword.jsx",
+    "handler": "server/src/controllers/users.controller.js:requestPasswordResetOtp",
+    "steps": [
+      "Khách gửi email, UI chờ mã.",
+      "Server tìm tài khoản email hợp lệ, issue OTP rồi gửi Gmail; trả thông báo chung 202.",
+      "Khách gửi email/otp, backend consume đúng purpose rồi đặt cookie proof 5m.",
+      "Khách nhập password/confirmPassword, server verify proof purpose=passwordReset và user email.",
+      "Backend bcrypt password, save user, clear proof; UI chuyển /login."
+    ],
+    "rules": "OTP TTL 10m, 5 lần sai, resend 60s; rate send 5/giờ/IP và verify 15/15m/IP. Reset yêu cầu password truthy, confirm khớp; min 6 chỉ UI.",
+    "errors": "429 cooldown; 400 mã không hợp lệ; 401 Password reset session has expired. Verify the code again.; 400 Password reset request is invalid.",
+    "external": "Gmail",
+    "alt": "Email không tồn tại/google/không hợp lệ đều 202; lỗi mail reset được log và vẫn 202 (trừ cooldown).",
+    "post": "Mật khẩu thay đổi; key phiên đang có không bị xóa; proof chỉ clear cookie, chưa có record consume proof.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-09",
+    "name": "Xem và cập nhật hồ sơ",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/update-user"
+    ],
+    "models": [
+      "user"
+    ],
+    "page": "client/src/Pages/InfoUser/InfoUser.jsx",
+    "handler": "server/src/controllers/users.controller.js:updateUser",
+    "steps": [
+      "Khách mở profile và chọn chỉnh sửa.",
+      "UI nạp dữ liệu từ Provider, validate form.",
+      "Backend lấy id từ JWT, chỉ cập nhật fullName/address/phone.",
+      "UI gọi auth để nạp lại hồ sơ."
+    ],
+    "rules": "authUser; không nhận id hoặc isAdmin từ body để sửa chính mình; không có runValidators ở query update.",
+    "errors": "401 nếu không có phiên; lỗi cast/DB chuyển error middleware.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "200 Cập nhật thông tin thành công; response hiện trả nguyên user document (xem 05).",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Tài khoản"
+  },
+  {
+    "id": "UC-10",
+    "name": "Xem catalog trang chủ",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/get-product-new",
+      "/api/product-catalog",
+      "/api/get-product-manufactured",
+      "/api/get-product-by-category"
+    ],
+    "models": [
+      "products",
+      "category"
+    ],
+    "page": "client/src/Components/HomePage/ProductNew/ProductNew.jsx",
+    "handler": "server/src/services/product-catalog.service.js:catalog",
+    "steps": [
+      "Khách mở trang chủ.",
+      "useProductCatalog lấy section mới và danh sách section gender/brand.",
+      "Service chọn tối đa 10 sản phẩm mới còn hàng, đếm section đồng hồ theo category tên chuẩn hóa.",
+      "CatalogSection tải khi thấy trong viewport và phân trang theo section.",
+      "UI hiển thị card hoặc loading/error/retry."
+    ],
+    "rules": "PAGE_SIZE 10; sort createdAt/_id giảm; page nguyên dương và clamp về totalPages; new chỉ 1 trang. Legacy manufactured lọc discount >=10; by-category còn bộ lọc cũ.",
+    "errors": "400 Invalid page/section type/section value/gender/brand.",
+    "external": "Không",
+    "alt": "Legacy API get-product-new/manufactured/by-category vẫn có dù không phải đường gọi chính mới.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Catalog"
+  },
+  {
+    "id": "UC-11",
+    "name": "Tìm kiếm và lọc sản phẩm",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/search",
+      "/api/catalog-options",
+      "/api/catalog-browse"
+    ],
+    "models": [
+      "products",
+      "category",
+      "brand"
+    ],
+    "page": "client/src/Pages/Category/Category.jsx",
+    "handler": "server/src/services/catalog-browse.service.js:browse",
+    "steps": [
+      "Khách nhập tìm kiếm Header hoặc chọn category/brand/giá/tồn kho.",
+      "Header debounce gọi search; Category giữ filter/page trong query string và abort request cũ.",
+      "Backend browse validate, escape regex search, tính giá sau discount trong query.",
+      "Backend đếm, clamp page và trả 20 item/trang.",
+      "UI hiển thị tổng/trang và chọn lại filter."
+    ],
+    "rules": "Không chọn đồng thời category và brand; stock all/in/order; min/max là số nguyên không âm, min<=max; search tối đa 100. Legacy /api/search dùng regex trực tiếp chưa escape.",
+    "errors": "400 Choose category or brand / Invalid stock / Invalid price range / Invalid search; lỗi regex legacy có thể 500.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Catalog"
+  },
+  {
+    "id": "UC-12",
+    "name": "Xem chi tiết sản phẩm và đánh giá",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/get-product-by-id",
+      "/api/get-preview-product-home"
+    ],
+    "models": [
+      "products",
+      "previewProduct",
+      "user"
+    ],
+    "page": "client/src/Pages/DetailProduct/DetailProduct.jsx",
+    "handler": "server/src/controllers/products.controller.js:getProductById",
+    "steps": [
+      "Khách mở /product/:id.",
+      "useFetch yêu cầu sản phẩm theo id.",
+      "Controller đọc product, tìm tối đa 8 sản phẩm cùng category và các previewProduct.",
+      "Controller tra tên user cho từng đánh giá.",
+      "UI hiển thị thông số, ảnh, giá và rating."
+    ],
+    "rules": "Public read. get-preview-product-home lấy 10 record không sort; tra user/product từng record.",
+    "errors": "ID không hợp lệ hoặc product/user đã xóa có thể thành 500 do truy cập null; không có nhánh 404 chuẩn trong handler.",
+    "external": "Không",
+    "alt": "DetailProduct còn gọi get-preview-product-home qua useFetch rồi lọc theo productId; API chỉ trả tối đa 10 review toàn hệ thống. Wrapper requestGetPreviewProductHome không có consumer ngoài request.jsx.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Catalog"
+  },
+  {
+    "id": "UC-13",
+    "name": "Tạo đánh giá sản phẩm",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/create-preview-product"
+    ],
+    "models": [
+      "previewProduct"
+    ],
+    "page": "client/src/Pages/InfoUser/OrderUser/OrderUser.jsx",
+    "handler": "server/src/controllers/previewProduct.controller.js:createPreviewProduct",
+    "steps": [
+      "UI OrderUser cho phép nhập rating/comment cho sản phẩm trong đơn.",
+      "Client gửi productId/content/rating.",
+      "Route yêu cầu authAdmin.",
+      "Controller lấy userId từ JWT và tạo previewProduct, trả 201."
+    ],
+    "rules": "As-is chỉ admin gọi được API; không kiểm tra đã mua/giao hàng, không giới hạn rating ở schema. UI khách hàng tồn tại nhưng bị server từ chối.",
+    "errors": "401 Bạn không có quyền truy cập với khách thường; lỗi schema/DB có thể 500.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Admin có thể tạo đánh giá; luồng khách hàng dở dang được ghi tại 05.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Catalog"
+  },
+  {
+    "id": "UC-14",
+    "name": "Xem giỏ hàng",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/get-cart"
+    ],
+    "models": [
+      "cartUser",
+      "products",
+      "coupon"
+    ],
+    "page": "client/src/Pages/Cart/CartUser.jsx",
+    "handler": "server/src/controllers/cartUser.controller.js:getCart",
+    "steps": [
+      "Provider/khách yêu cầu giỏ.",
+      "Server tìm cart theo id JWT.",
+      "Nếu có giỏ, server bỏ item có productId không hợp lệ/sản phẩm đã xóa, tính lại tổng từ giá hiện tại.",
+      "Server lưu giỏ đã sửa nếu cần và tìm coupon theo tổng, date, quantity.",
+      "UI nhận cartId, cartItems, totalPrice, dataCoupon."
+    ],
+    "rules": "authUser; GET có thể ghi sửa giỏ; không có cart trả 200 mảng rỗng và total=0.",
+    "errors": "401 phiên; lỗi DB/cast thành 500.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Giỏ được phản ánh giá hiện tại; không reserve kho ở bước này.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Giỏ hàng"
+  },
+  {
+    "id": "UC-15",
+    "name": "Thêm sản phẩm vào giỏ",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/create-cart"
+    ],
+    "models": [
+      "cartUser",
+      "products"
+    ],
+    "page": "client/src/Components/CardBody/CardBody.jsx",
+    "handler": "server/src/controllers/cartUser.controller.js:addToCart",
+    "steps": [
+      "Khách bấm thêm ở card/chi tiết.",
+      "Client gửi productId/quantity.",
+      "Server kiểm tra sản phẩm và số nguyên dương <= stock, kể cả tổng quantity cũ+mới.",
+      "Server tạo giỏ hoặc push/tăng item, tính tổng từ DB rồi save.",
+      "UI gọi getCart."
+    ],
+    "rules": "authUser; chưa reserve stock; thao tác read/save giỏ không transaction; quantityProduct không dùng giá client.",
+    "errors": "403 Số lượng sản phẩm không hợp lệ / Sản phẩm không tồn tại / Số lượng sản phẩm không đủ / Missing required fields.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Giỏ mới 201 hoặc giỏ cũ 200.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Giỏ hàng"
+  },
+  {
+    "id": "UC-16",
+    "name": "Sửa số lượng giỏ",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/update-product-cart"
+    ],
+    "models": [
+      "cartUser",
+      "products"
+    ],
+    "page": "client/src/Pages/Cart/CartUser.jsx",
+    "handler": "server/src/controllers/cartUser.controller.js:updateProductCart",
+    "steps": [
+      "Khách tăng/giảm số lượng.",
+      "Backend validate quantityProduct.",
+      "Server tìm cart của JWT và item, lấy giá hiện tại.",
+      "Trừ thành tiền cũ, cộng thành tiền mới rồi save.",
+      "UI nạp lại giỏ."
+    ],
+    "rules": "Số nguyên dương không vượt stock; quantity=0 không phải thao tác xóa.",
+    "errors": "403 Giỏ hàng không tồn tại / Sản phẩm không tồn tại trong giỏ hàng / Số lượng sản phẩm không đủ.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Giỏ hàng"
+  },
+  {
+    "id": "UC-17",
+    "name": "Xóa sản phẩm khỏi giỏ",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/delete-product-cart"
+    ],
+    "models": [
+      "cartUser",
+      "products"
+    ],
+    "page": "client/src/Pages/Cart/CartUser.jsx",
+    "handler": "server/src/controllers/cartUser.controller.js:deleteProductCart",
+    "steps": [
+      "Khách chọn xóa item.",
+      "Server tìm giỏ theo JWT và item theo productId.",
+      "Server đọc product hiện tại để tính tiền trừ.",
+      "Server filter item, save cart, trả 200.",
+      "UI tải lại giỏ."
+    ],
+    "rules": "authUser; nếu product đã xóa, deleteProductCart từ chối; getCart mới có cơ chế dọn item mất.",
+    "errors": "403 Giỏ hàng không tồn tại / Sản phẩm không tồn tại trong giỏ hàng / Không tìm thấy thông tin sản phẩm.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Giỏ hàng"
+  },
+  {
+    "id": "UC-18",
+    "name": "Chọn coupon và thông tin giao hàng",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/update-info-cart",
+      "/api/coupon"
+    ],
+    "models": [
+      "cartUser",
+      "coupon"
+    ],
+    "page": "client/src/Pages/CheckOut/CheckOut.jsx",
+    "handler": "server/src/controllers/cartUser.controller.js:updateInfoCart",
+    "steps": [
+      "Khách nhập fullName/phone/address/note và chọn coupon từ dataCoupon trong getCart.",
+      "UI giữ nameCoupon là id coupon và hiển thị tổng dự kiến.",
+      "COD/VNPay gửi thông tin trực tiếp create-payment; MoMo gọi update-info-cart trước.",
+      "updateInfoCart gán thông tin vào cart, trả 200; checkout COD/VNPay kiểm lại coupon ở server."
+    ],
+    "rules": "UI phone 10 chữ số; checkout server kiểm shipping string dài <=500, coupon quantity/date/minPrice. /api/coupon là endpoint legacy lỗi req.user vì route thiếu auth, không phải nguồn coupon của UI hiện tại.",
+    "errors": "403 Giỏ hàng không tồn tại; checkout 400 Coupon is invalid, expired or unavailable; /api/coupon thường 500.",
+    "external": "Goong (gợi ý địa chỉ tùy chọn)",
+    "alt": "Gợi ý địa chỉ sau 3 ký tự và debounce 500ms; lỗi Goong xóa gợi ý, vẫn nhập tay được.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Giỏ hàng"
+  },
+  {
+    "id": "UC-19",
+    "name": "Đặt hàng COD",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/create-payment"
+    ],
+    "models": [
+      "cartUser",
+      "products",
+      "coupon",
+      "payments"
+    ],
+    "page": "client/src/Pages/CheckOut/CheckOut.jsx",
+    "handler": "server/src/services/vnpay.service.js:checkout",
+    "steps": [
+      "Khách chọn COD và submit; UI chặn submit lặp bằng ref.",
+      "Server validate cartId và quyền sở hữu; tìm đơn theo checkoutKey để tái sử dụng.",
+      "Trong transaction server snapshot giá/ảnh/tên, tính subtotal-discount, shipping=0.",
+      "Server trừ stock có điều kiện và reserve coupon, save order pending/unpaid rồi xóa cart.",
+      "Response 201 document đơn; UI tới /payments/:id và nạp lại giỏ."
+    ],
+    "rules": "Replica set transaction bắt buộc. checkoutKey unique sparse; không tin totalPrice từ client. unitPrice làm tròn VND bằng BigInt. Giá giảm hợp lệ 0..100%, số tiền safe integer.",
+    "errors": "400 Cart is empty / Invalid cartId / Insufficient stock; 409 Cart already checked out; 503 Checkout requires MongoDB replica set transactions.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Đơn pending/unpaid, inventory/coupon reserved và cart xóa atomically; lỗi rollback transaction.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Thanh toán"
+  },
+  {
+    "id": "UC-20",
+    "name": "Khởi tạo thanh toán VNPay",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/create-payment"
+    ],
+    "models": [
+      "cartUser",
+      "products",
+      "coupon",
+      "payments",
+      "paymentAttempts"
+    ],
+    "page": "client/src/Pages/CheckOut/CheckOut.jsx",
+    "handler": "server/src/services/vnpay.service.js:newAttempt",
+    "steps": [
+      "Khách chọn VNPAY và submit.",
+      "Checkout tính snapshot và reserve trong transaction như COD.",
+      "Server validate cấu hình gateway/Return/client URL và IP, tạo ref ngẫu nhiên.",
+      "SDK build URL có hạn 15m, lưu paymentAttempt và order pending.",
+      "Trả 201 metadata URL; browser chuyển sang VNPay."
+    ],
+    "rules": "Gateway allowlist; production callback/client bắt buộc HTTPS công khai; không tạo URL khi tổng bằng 0. SDK nhận VND; callback amount đối chiếu *100. Retry checkout cùng cartId trả URL attempt pending còn hạn.",
+    "errors": "400 Invalid VNPay amount / Invalid client IP; 503 thiếu/cấu hình sai biến; 409 Use the order page to check payment status or retry.",
+    "external": "VNPay",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Cart xóa, đơn và attempt pending được lưu trước chuyển hướng; chưa phải đã thanh toán.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Thanh toán"
+  },
+  {
+    "id": "UC-21",
+    "name": "Hiển thị kết quả Return VNPay",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/check-payment-vnpay",
+      "/api/vnpay-return"
+    ],
+    "models": [
+      "paymentAttempts"
+    ],
+    "page": "client/src/Pages/PaymentSuccess/PaymentSuccess.jsx",
+    "handler": "server/src/controllers/payments.controller.js:checkPaymentVnpay",
+    "steps": [
+      "VNPay đưa browser về Return URL.",
+      "Server verify HMAC/params, tìm attempt theo TxnRef và so amount.",
+      "Server redirect 302 /payments/:orderId (absolute client URL ở production, relative khi dev).",
+      "Trang kết quả đọc đơn có auth/ownership và có thể đối soát."
+    ],
+    "rules": "Return endpoint công khai nhưng không cập nhật paid. Không phụ thuộc cookie trên request callback; trang kết quả cần phiên của chủ đơn.",
+    "errors": "400 Dữ liệu hoặc chữ ký VNPay không hợp lệ / Số tiền thanh toán không khớp; 404 Không tìm thấy giao dịch.",
+    "external": "VNPay",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Thanh toán"
+  },
+  {
+    "id": "UC-22",
+    "name": "Xác nhận IPN VNPay",
+    "actor": "VNPay",
+    "paths": [
+      "/api/vnpay-ipn"
+    ],
+    "models": [
+      "payments",
+      "paymentAttempts",
+      "products",
+      "coupon"
+    ],
+    "page": "server/src/controllers/payments.controller.js",
+    "handler": "server/src/services/vnpay.service.js:ipn",
+    "steps": [
+      "VNPay gửi GET IPN.",
+      "Service verify chữ ký và trường bắt buộc.",
+      "Trong transaction tìm attempt/order, kiểm method, amount và orderInfo.",
+      "Callback đã nhận/đối soát trả 02; success hiện tại cập nhật paid.",
+      "Thất bại release kho/coupon; success đến muộn/attempt cũ ghi refund_required.",
+      "Trả HTTP 200 với RspCode nghiệp vụ."
+    ],
+    "rules": "Thành công cần responseCode=00 và transactionStatus=00; idempotency qua receivedAt/reconciledAt trong transaction. Callback trễ không tự bán lại hàng hoặc tự hoàn tiền.",
+    "errors": "RspCode 97 chữ ký/params; 01 không khớp đơn; 04 amount; 02 đã xác nhận; 99 unknown error; 00 confirm success.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "paid/failed/refund_required hoặc không đổi nếu reject/replay; không có API hoàn tiền thực tế.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Thanh toán"
+  },
+  {
+    "id": "UC-23",
+    "name": "Thanh toán lại VNPay",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/retry-payment-vnpay"
+    ],
+    "models": [
+      "payments",
+      "paymentAttempts",
+      "products",
+      "coupon"
+    ],
+    "page": "client/src/Pages/PaymentSuccess/PaymentSuccess.jsx",
+    "handler": "server/src/services/vnpay.service.js:retry",
+    "steps": [
+      "Khách chọn thanh toán lại ở đơn pending.",
+      "Server kiểm ownership, method VNPAY và paymentStatus pending/failed/expired.",
+      "Pending còn hạn tái dùng URL; pending đã quá hạn yêu cầu chờ worker.",
+      "Failed/expired reserve lại stock/coupon và tạo attempt mới trong transaction.",
+      "UI chuyển URL mới."
+    ],
+    "rules": "Đơn status phải pending; không được retry paid/refund_required/cancelled; snapshot giá đơn được giữ.",
+    "errors": "409 Order cannot be paid / Payment is awaiting expiry processing; retry shortly; 400 Insufficient stock/coupon; 401 phiên.",
+    "external": "VNPay",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Thanh toán"
+  },
+  {
+    "id": "UC-24",
+    "name": "Đối soát trạng thái VNPay",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/reconcile-payment-vnpay"
+    ],
+    "models": [
+      "payments",
+      "paymentAttempts",
+      "products",
+      "coupon"
+    ],
+    "page": "client/src/Pages/PaymentSuccess/PaymentSuccess.jsx",
+    "handler": "server/src/services/vnpay.service.js:reconcile",
+    "steps": [
+      "Trang kết quả đọc đơn và gọi reconcile cho pending/expired/failed khi đến lịch.",
+      "Server kiểm ownership, method và lấy DB lease nextQueryAt 5 phút.",
+      "Server ký querydr gửi VNPay ngoài transaction, timeout 10s.",
+      "Service verify response; chỉ code=00, status=00/02 mới settle vào transaction.",
+      "UI cập nhật paymentStatus/nextCheckAt; polling đọc đơn mỗi 3s khi pending, tối đa 200 lần hẹn."
+    ],
+    "rules": "Lease hạn chế nhiều tab/worker; lỗi mạng giữ trạng thái cũ và lịch query; không tin query string browser để paid.",
+    "errors": "400 Invalid order ID; 404 Order not found; provider lỗi trả summary cũ (không throw về UI).",
+    "external": "VNPay",
+    "alt": "paid/refund_required/unpaid trả summary ngay; đang lease trả nextQueryAt hiện tại.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Thanh toán"
+  },
+  {
+    "id": "UC-25",
+    "name": "Thanh toán MoMo",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/create-payment",
+      "/api/check-payment-momo"
+    ],
+    "models": [
+      "cartUser",
+      "products",
+      "coupon",
+      "payments"
+    ],
+    "page": "client/src/Pages/CheckOut/CheckOut.jsx",
+    "handler": "server/src/controllers/payments.controller.js:checkPaymentMomo",
+    "steps": [
+      "Khách chọn MOMO, UI lưu shipping vào cart rồi gọi create-payment.",
+      "Server lấy cart, tính amount từ totalPrice và coupon, ký HMAC SHA256 gửi endpoint cấu hình để nhận payUrl.",
+      "Browser chuyển MoMo rồi callback GET về server.",
+      "Với resultCode=0 server lấy cartId từ orderInfo, reserveInventory, tạo đơn và trừ coupon/xóa cart.",
+      "Redirect DOMAIN_URL/payments/:id."
+    ],
+    "rules": "Đường xử lý legacy riêng, không dùng snapshot/transaction/attempt như VNPay. Chỉ kiểm transactionRef unique để chống lặp; chưa verify callback chữ ký.",
+    "errors": "Thiếu cấu hình throw Error →500; callback resultCode khác 0 không kết thúc response; reserve lỗi 403.",
+    "external": "MoMo",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Có nhánh tạo đơn MOMO status pending, paymentStatus default unpaid; tính an toàn bị hạn chế, xem Phát hiện 05.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Thanh toán"
+  },
+  {
+    "id": "UC-26",
+    "name": "Xem đơn hàng của mình",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/get-payment-success",
+      "/api/get-order-user"
+    ],
+    "models": [
+      "payments",
+      "products"
+    ],
+    "page": "client/src/Pages/InfoUser/OrderUser/OrderUser.jsx",
+    "handler": "server/src/controllers/payments.controller.js:getOrderUser",
+    "steps": [
+      "Khách mở lịch sử hoặc /payments/:id.",
+      "Server lọc userId từ JWT và idPayment nếu xem chi tiết.",
+      "Server dựng sản phẩm từ snapshot; fallback product hiện tại cho đơn legacy.",
+      "UI hiển thị trạng thái đơn, phương thức và paymentStatus."
+    ],
+    "rules": "Ownership phía server; order mới độc lập giá hiện tại; ảnh/tên legacy có fallback sản phẩm đã xóa.",
+    "errors": "403 Không tìm thấy đơn hàng / Có lỗi xảy ra khi lấy đơn hàng; 401 phiên.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Đơn hàng"
+  },
+  {
+    "id": "UC-27",
+    "name": "Hủy đơn hàng của mình",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/cancel-order"
+    ],
+    "models": [
+      "payments",
+      "paymentAttempts",
+      "products",
+      "coupon"
+    ],
+    "page": "client/src/Pages/InfoUser/OrderUser/OrderUser.jsx",
+    "handler": "server/src/services/vnpay.service.js:changeStatus",
+    "steps": [
+      "Khách chọn hủy đơn pending.",
+      "Server kiểm ownership và transition.",
+      "Đơn online đã paid/unpaid legacy hoặc refund_required bị chặn theo rule.",
+      "Trong transaction release inventory/coupon, cancel attempt pending, đổi order status cancelled; VNPay paymentStatus failed.",
+      "UI nạp lại danh sách."
+    ],
+    "rules": "User chỉ được hủy pending; cùng status trả ngay không cộng kho lần nữa. COD có thể hủy trước confirmed đối với user.",
+    "errors": "400 Invalid order status or ID; 404 Order not found; 409 Invalid order status transition / Paid online orders require a refund workflow.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Đơn hàng"
+  },
+  {
+    "id": "UC-28",
+    "name": "Đọc blog",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/blog/get-all",
+      "/api/blog/get-by-id"
+    ],
+    "models": [
+      "blog"
+    ],
+    "page": "client/src/Pages/DetailBlog/DetailBlog.jsx",
+    "handler": "server/src/controllers/blog.controller.js:getBlogById",
+    "steps": [
+      "Khách mở danh sách hoặc chọn bài.",
+      "UI lấy get-all/get-by-id và bài liên quan từ get-all.",
+      "Backend find/findById, trả metadata.",
+      "UI render title/image/content HTML."
+    ],
+    "rules": "Public read, không pagination; HTML render bằng dangerouslySetInnerHTML.",
+    "errors": "Không có nhánh not found rõ ở get-by-id; lỗi query trong async handler không có wrapper (xem 05).",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Nội dung"
+  },
+  {
+    "id": "UC-29",
+    "name": "Chat với quản trị viên",
+    "actor": "Khách hàng đã đăng nhập",
+    "paths": [
+      "/api/message/create",
+      "/api/message/get-message-user",
+      "/api/message/read-message"
+    ],
+    "models": [
+      "Message",
+      "user"
+    ],
+    "page": "client/src/Components/Messger/Messger.jsx",
+    "handler": "server/src/controllers/message.controller.js:createMessage",
+    "steps": [
+      "Khách mở khung chat ở trang chủ và tải lịch sử.",
+      "UI gửi text bằng HTTP; backend chọn user admin đầu tiên, tạo conversationId từ hai id đã sort.",
+      "Backend lưu Message và emit newMessage tới socket admin nếu online.",
+      "Provider nhận newMessageUser cho trả lời, UI nối message.",
+      "GET read-message có thể đặt isRead=true cho cả conversation."
+    ],
+    "rules": "authUser; sender lấy từ JWT; socket identity từ token đã verify. Không queue giao nhận realtime, lịch sử trong DB.",
+    "errors": "Không có admin hoặc khách chưa từng gửi tin khiến truy cập null ở controller →500; lỗi socket có thể sau khi DB đã ghi.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Chat"
+  },
+  {
+    "id": "UC-30",
+    "name": "Quản trị hội thoại",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/message/create-admin",
+      "/api/message/all",
+      "/api/message/get-message"
+    ],
+    "models": [
+      "Message",
+      "user"
+    ],
+    "page": "client/src/Pages/Admin/Components/Messager/Messager.jsx",
+    "handler": "server/src/controllers/message.controller.js:createMessageAdmin",
+    "steps": [
+      "Admin mở tab tin nhắn, GET all aggregate sidebar/unread.",
+      "Admin chọn khách, GET read-message và get-message.",
+      "Admin gửi receiverId/text qua create-admin.",
+      "Backend lưu Message rồi emit newMessageUser nếu socket khách online.",
+      "ChatWindow cập nhật state; sidebar tải lại khi newMessage."
+    ],
+    "rules": "authAdmin cho all/get-message/create-admin; read-message dùng authUser. get-message lấy sender/receiver từ query, không ràng buộc admin hiện tại.",
+    "errors": "401 quyền; cast/DB lỗi có thể 500; receiver offline chỉ bỏ push, vẫn lưu DB.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Chat"
+  },
+  {
+    "id": "UC-31",
+    "name": "Tư vấn bằng chatbot Gemini",
+    "actor": "Khách vãng lai",
+    "paths": [
+      "/api/chatbot"
+    ],
+    "models": [
+      "products"
+    ],
+    "page": "client/src/utils/Chatbot/Chatbot.jsx",
+    "handler": "server/src/utils/chatbot.js:askQuestion",
+    "steps": [
+      "Khách nhập câu hỏi tối đa 1000 ký tự.",
+      "Server rate-limit, validate question/history, tạo requestId.",
+      "Service kiểm key, đọc tối đa 10 sản phẩm còn hàng và dựng systemInstruction.",
+      "Gemini generateContent, retry tối đa 2 lần cho quota/network/503.",
+      "Backend kiểm safety/finishReason/text và trả string metadata.",
+      "UI sanitize control chars, cắt 4000 ký tự, render text và cho thử lại khi lỗi."
+    ],
+    "rules": "10/phút/IP; history tối đa 10 message role user/model, mỗi text<=1000; UI hiện chỉ gửi question, không history; timeout SDK 30s mỗi lần.",
+    "errors": "400 INVALID_INPUT; 429 RATE_LIMIT/QUOTA_429; 503 INVALID_KEY/NETWORK/UNAVAILABLE_5xx; 504 TIMEOUT; 502 MODEL_NOT_FOUND/EMPTY_RESPONSE/UNKNOWN; 422 BLOCKED_BY_SAFETY.",
+    "external": "Gemini",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Chat"
+  },
+  {
+    "id": "UC-32",
+    "name": "Quản lý sản phẩm",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/create-product",
+      "/api/get-all-product",
+      "/api/update-product",
+      "/api/delete-product"
+    ],
+    "models": [
+      "products",
+      "category",
+      "brand"
+    ],
+    "page": "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx",
+    "handler": "server/src/controllers/products.controller.js:createProduct",
+    "steps": [
+      "Admin mở tab, tải toàn bộ sản phẩm, danh mục và thương hiệu.",
+      "Admin nhập form/TinyMCE và upload ảnh nếu mới.",
+      "Tạo: backend kiểm các trường truthy rồi createProduct.",
+      "Sửa: backend chỉ gán name/price/discount/description/category/size/stock/images/brand.",
+      "Xóa: backend findByIdAndDelete.",
+      "UI đóng modal và tải lại bảng."
+    ],
+    "rules": "Ghi yêu cầu authAdmin; get-all public. Không có brand CRUD. Update dùng name/size không có trong schema, không cập nhật toàn bộ thông số tạo.",
+    "errors": "403 Vui lòng nhập đầy đủ thông tin bắt buộc / Sản phẩm không tồn tại; get-all có category null →500.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "UC-39 mở rộng tùy chọn khi có ảnh mới, không phải include bắt buộc.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-33",
+    "name": "Quản lý danh mục",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/create-category",
+      "/api/get-all-category",
+      "/api/update-category",
+      "/api/delete-category"
+    ],
+    "models": [
+      "category",
+      "products"
+    ],
+    "page": "client/src/Pages/Admin/Components/ManagerCategory/ManagerCategory.jsx",
+    "handler": "server/src/controllers/category.controller.js:deleteCategory",
+    "steps": [
+      "Admin xem bảng danh mục.",
+      "Admin tạo/sửa tên hoặc chọn xóa.",
+      "Server kiểm name khi tạo; create/update category.",
+      "Khi xóa server xóa category rồi deleteMany sản phẩm cùng category.",
+      "UI tải lại danh sách."
+    ],
+    "rules": "Read public; write authAdmin; xóa cứng cascade products, không transaction/cascade cart/review/upload.",
+    "errors": "403 Vui lòng nhập đầy đủ thông tin; category không tồn tại gọi NotFoundError chưa import →500.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-34",
+    "name": "Quản lý coupon",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/create-coupon",
+      "/api/coupons",
+      "/api/update-coupon",
+      "/api/delete-coupon"
+    ],
+    "models": [
+      "coupon"
+    ],
+    "page": "client/src/Pages/Admin/Components/ManagerCoupon/CouponManagement.jsx",
+    "handler": "server/src/controllers/coupon.controller.js:createCoupon",
+    "steps": [
+      "Admin tải tất cả coupon.",
+      "Admin nhập nameCoupon/discount/quantity/startDate/endDate/minPrice.",
+      "Tạo: backend kiểm truthy và save.",
+      "Sửa hoặc xóa theo id; backend update/delete.",
+      "UI thông báo và tải lại."
+    ],
+    "rules": "GET coupons public; write authAdmin; discount là số tiền, không phần trăm. Schema required nhưng thiếu min/max; query update không runValidators.",
+    "errors": "400 Vui lòng nhập đầy đủ thông tin (dấu Unicode trong code); delete catch trả 500 message error.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-35",
+    "name": "Quản lý bài viết",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/blog/create",
+      "/api/blog/update",
+      "/api/blog/delete"
+    ],
+    "models": [
+      "blog"
+    ],
+    "page": "client/src/Pages/Admin/Components/ManagerBlog/BlogAdmin.jsx",
+    "handler": "server/src/controllers/blog.controller.js:createBlog",
+    "steps": [
+      "Admin tải blog bằng get-all.",
+      "Admin nhập title/content TinyMCE và upload ảnh tùy chọn.",
+      "Server tạo/sửa/xóa blog theo body.",
+      "UI hiển thị preview HTML, đóng modal và refresh."
+    ],
+    "rules": "authAdmin cho write; handlers async không bọc asyncHandler trên Express 4; schema dùng require thay required.",
+    "errors": "Update không tìm thấy bài gọi NotFoundError chưa import; promise rejection không được forward nhất quán.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-36",
+    "name": "Xem người dùng và đổi quyền",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/users",
+      "/api/update-user-admin"
+    ],
+    "models": [
+      "user"
+    ],
+    "page": "client/src/Pages/Admin/Components/ManagerUser/ManagerUser.jsx",
+    "handler": "server/src/controllers/users.controller.js:updateUserAdmin",
+    "steps": [
+      "Admin tải danh sách users.",
+      "UI hiển thị bảng và switch quyền.",
+      "Backend nhận id/isAdminUser, gán isAdmin true hoặc false.",
+      "UI cập nhật/tải lại danh sách."
+    ],
+    "rules": "authAdmin; không có endpoint CRUD user đầy đủ; không kiểm giữ ít nhất một admin, findAdmin được đọc nhưng không dùng.",
+    "errors": "401 quyền; cast/DB lỗi 500; user không tồn tại có thể metadata null.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "200 với document user; response chứa cả password field, xem 05.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-37",
+    "name": "Xử lý đơn hàng phía quản trị",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/get-order-admin",
+      "/api/update-order-status"
+    ],
+    "models": [
+      "payments",
+      "paymentAttempts",
+      "products",
+      "coupon"
+    ],
+    "page": "client/src/Pages/Admin/Components/ManagerOrder/ManagerOrder.jsx",
+    "handler": "server/src/services/vnpay.service.js:changeStatus",
+    "steps": [
+      "Admin tải orders cùng snapshot/attempts.",
+      "UI chỉ hiện statusChoices phù hợp trạng thái/phương thức.",
+      "Backend kiểm transition và điều kiện thanh toán trong transaction.",
+      "Hủy thì release; delivered tăng soldCount và COD paymentStatus paid.",
+      "UI tải lại bảng và chi tiết modal."
+    ],
+    "rules": "pending→confirmed/cancelled; confirmed→shipped/cancelled; shipped→delivered; delivered/cancelled terminal. VNPAY muốn tiếp tục phải paid, refund_required bị chặn.",
+    "errors": "400 id/status sai; 404 Order not found; 409 Invalid order status transition / Payment has not been confirmed or requires reconciliation.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-38",
+    "name": "Xem thống kê",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/statistical"
+    ],
+    "models": [
+      "user",
+      "products",
+      "payments",
+      "previewProduct"
+    ],
+    "page": "client/src/Pages/Admin/Components/ManagerStatistical/ManagerStatistical.jsx",
+    "handler": "server/src/controllers/users.controller.js:getStatistical",
+    "steps": [
+      "Admin mở dashboard.",
+      "UI gọi statistical và kiểm admin.",
+      "Backend chạy aggregate users, products, orders, revenue và reviews lần lượt.",
+      "Revenue chỉ match delivered, nhóm theo tháng và 7 ngày gần nhất.",
+      "UI hiển thị tổng, biểu đồ và top sản phẩm."
+    ],
+    "rules": "authAdmin; không có filter năm; byLoginType dùng loginType khác schema typeLogin, review group dùng product khác productId (xem 05).",
+    "errors": "500 Đã xảy ra lỗi khi lấy dữ liệu thống kê; body có error.message.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-39",
+    "name": "Tải ảnh sản phẩm hoặc blog",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/upload-image",
+      "/api/blog/upload-image"
+    ],
+    "models": [],
+    "page": "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx",
+    "handler": "server/src/routes/index.js:routes",
+    "steps": [
+      "Admin chọn ảnh trong form; component tạo FormData.",
+      "Multer ghi file xuống src/uploads/products hoặc blogs với timestamp và extname gốc.",
+      "Server trả URL tương đối; frontend ghép vào product.images hoặc blog.image.",
+      "Khi lưu entity thất bại, file đã upload vẫn còn."
+    ],
+    "rules": "Products có authAdmin rồi array(images); blog single(image) không có authAdmin nên thực tế khách vãng lai cũng upload được. Không thấy limits/fileFilter/maxCount.",
+    "errors": "Products không có file trả 400 No file uploaded nếu req.files falsy (mảng rỗng vẫn truthy); Blog không có file forward BadRequestError mặc định 403.",
+    "external": "Không",
+    "alt": "Blog uploadImage trả metadata string; sản phẩm trả images array ngoài metadata.",
+    "post": "File trên filesystem, không có model Upload; không có bước dọn file khi entity xóa.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-40",
+    "name": "Xem danh sách thương hiệu",
+    "actor": "Quản trị viên",
+    "paths": [
+      "/api/brands"
+    ],
+    "models": [
+      "brand",
+      "products"
+    ],
+    "page": "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx",
+    "handler": "server/src/services/brand.service.js:list",
+    "steps": [
+      "Admin mở form sản phẩm.",
+      "Client gọi requestGetBrands.",
+      "Backend list hợp nhất brand đã lưu và aggregate products.brand không rỗng theo tên lowercase/trim.",
+      "Backend tính productCount và sort vi.",
+      "UI đưa tên vào gợi ý brand."
+    ],
+    "rules": "GET /api/brands authAdmin; catalog-options public gọi cùng list nhưng chỉ trả mảng tên. Không có create/update/delete brand route.",
+    "errors": "401 quyền; lỗi DB 500.",
+    "external": "Không",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Response thành công theo handler; client cập nhật state hoặc chuyển trang.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Quản trị"
+  },
+  {
+    "id": "UC-41",
+    "name": "Xem thông tin liên hệ",
+    "actor": "Khách vãng lai",
+    "paths": [],
+    "models": [],
+    "page": "client/src/Pages/Contact/Contact.jsx",
+    "handler": "client/src/Pages/Contact/Contact.jsx:Contact",
+    "steps": [
+      "Khách mở /contact.",
+      "Frontend lấy địa chỉ, phone, email và socialLinks từ contactInfo.js.",
+      "Trang hiển thị liên kết tel/mailto/bản đồ/mạng xã hội khi có cấu hình, nếu thiếu hiện trạng thái đang cập nhật."
+    ],
+    "rules": "Không có API gửi form liên hệ, không ghi DB. Liên kết ngoài mở tab với noopener noreferrer.",
+    "errors": "Không có HTTP lỗi nghiệp vụ riêng vì trang chỉ render cấu hình.",
+    "external": "Google Maps và các kênh liên hệ (liên kết ngoài)",
+    "alt": "Không có nhánh thay thế riêng.",
+    "post": "Hiển thị thông tin; click liên kết có thể mở ứng dụng/kênh bên ngoài.",
+    "pre": "Ứng dụng được cấu hình và có thể truy cập API.",
+    "relation": "Không xác lập include/extend từ việc chỉ dùng chung middleware.",
+    "module": "Nội dung"
+  }
+]

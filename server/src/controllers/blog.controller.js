@@ -1,3 +1,4 @@
+const { richText } = require('../utils/richText');
 const modelBlog = require('../models/blog.model');
 
 const { BadRequestError } = require('../core/error.response');
@@ -19,10 +20,10 @@ class BlogController {
 
     async createBlog(req, res, next) {
         const { title, content, image } = req.body;
-        const blog = await modelBlog.create({ title, content, image });
+        const blog = await modelBlog.create({ title, content: richText(content), image });
         new Created({
             message: 'Tạo bài viết thành công',
-            metadata: blog,
+            metadata: blog ? { ...blog.toObject(), content: richText(blog.content) } : null,
         }).send(res);
     }
 
@@ -30,7 +31,7 @@ class BlogController {
         const blogs = await modelBlog.find();
         new OK({
             message: 'Lấy tất cả bài viết thành công',
-            metadata: blogs,
+            metadata: blogs.map(blog => ({ ...blog.toObject(), content: richText(blog.content) })),
         }).send(res);
     }
 
@@ -40,10 +41,10 @@ class BlogController {
         if (!findBlog) {
             return next(new NotFoundError('Bài viết không tồn tại'));
         }
-        const blog = await modelBlog.findByIdAndUpdate(id, { title, content, image });
+        const blog = await modelBlog.findByIdAndUpdate(id, { title, content: richText(content), image });
         new OK({
             message: 'Cập nhật bài viết thành công',
-            metadata: blog,
+            metadata: blog ? { ...blog.toObject(), content: richText(blog.content) } : null,
         }).send(res);
     }
 
@@ -60,7 +61,7 @@ class BlogController {
         const blog = await modelBlog.findById(id);
         new OK({
             message: 'Lấy bài viết thành công',
-            metadata: blog,
+            metadata: blog ? { ...blog.toObject(), content: richText(blog.content) } : null,
         }).send(res);
     }
 }

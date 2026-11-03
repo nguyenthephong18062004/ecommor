@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { authUser } = require('../auth/checkAuth');
+const { authAdmin } = require('../auth/checkAuth');
 
 const multer = require('multer');
 const path = require('path');
@@ -20,10 +20,10 @@ var upload = multer({ storage: storage });
 const controllerBlog = require('../controllers/blog.controller');
 
 router.post('/upload-image', upload.single('image'), controllerBlog.uploadImage);
-router.post('/create', authUser, controllerBlog.createBlog);
+router.post('/create', authAdmin, controllerBlog.createBlog);
 router.get('/get-all', controllerBlog.getAllBlog);
-router.post('/update', authUser, controllerBlog.updateBlog);
-router.post('/delete', authUser, controllerBlog.deleteBlog);
+router.post('/update', authAdmin, controllerBlog.updateBlog);
+router.post('/delete', authAdmin, controllerBlog.deleteBlog);
 router.get('/get-by-id', controllerBlog.getBlogById);
 
 module.exports = router;

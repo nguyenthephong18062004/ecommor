@@ -1,0 +1,56 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Backend|
+start
+:Worker mỗi 30s khi DB ready, không chạy chồng process;
+:Lấy tối đa 100 order VNPAY pending hết hạn;
+while (Còn đơn trong batch?) is (Có)
+ :Transaction đọc lại điều kiện;
+ if (Vẫn pending và hết hạn?) then (Có)
+  :Release stock/coupon; paymentStatus và attempt=expired;
+  :Save/commit;
+ endif
+endwhile (Không)
+|Khách hàng đã đăng nhập|
+if (Chọn thanh toán lại?) then (Có)
+ |Backend|
+ :Kiểm owner/status/method;
+ if (Pending attempt còn hạn?) then (Có)
+  :Trả URL cũ;
+ else (Không)
+  if (Pending chờ worker?) then (Có)
+   :409 chờ xử lý hết hạn;
+   stop
+  endif
+  if (Failed/expired, order pending?) then (Có)
+   :Reserve lại; tạo ref/attempt mới;
+  else (Không)
+   :409 không được thanh toán;
+   stop
+  endif
+ endif
+ |Frontend|
+ :Chuyển URL VNPay;
+else (Kiểm tra trạng thái)
+ |Backend|
+ :Lease querydr 5 phút theo attempt;
+ |VNPay|
+ :Trả querydr đã ký hoặc lỗi;
+ |Backend|
+ :Verify; chỉ settle result được chấp nhận;
+endif
+|Backend|
+if (Confirmation mới đến muộn hoặc thuộc attempt cũ?) then (Có)
+ if (Đã nhận/đối soát trước?) then (Có)
+  :Bỏ lặp (IPN code 02);
+ else (Không)
+  :Thành công: refund_required;
+  :Không tự tạo lại quyền bán hay gọi hoàn tiền;
+ endif
+endif
+stop
+@enduml

@@ -1,0 +1,333 @@
+[
+  {
+    "level": "Critical",
+    "title": "Callback MoMo tin tham số chưa xác minh chữ ký",
+    "description": "Endpoint GET công khai chỉ kiểm resultCode=0, lấy cartId từ orderInfo, tạo đơn và trừ kho/coupon. Không verify signature, amount, merchant hoặc quan hệ request đã tạo với callback. Đơn mới MOMO có paymentStatus mặc định unpaid nhưng changeStatus chỉ bắt buộc paid với VNPAY.",
+    "repro": "Trong môi trường test riêng, chuẩn bị giỏ có shipping và sản phẩm; gửi GET /api/check-payment-momo với resultCode=0, orderId mới và orderInfo có cartId ở token thứ ba mà không có chữ ký. Đối chiếu order/kho. Chưa thực thi request trong nhiệm vụ.",
+    "impact": "Có thể tạo đơn online chưa trả tiền, thay đổi kho/coupon và đi tiếp quy trình giao hàng MoMo.",
+    "fix": "Liên kết attempt/order đã tạo, verify callback HMAC và amount/merchant, dùng IPN đã xác minh + transaction/idempotency tương đương luồng VNPay.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/payments.controller.js:180",
+      "server/src/routes/payments.route.js:13"
+    ]
+  },
+  {
+    "level": "High",
+    "title": "Upload blog công khai và không giới hạn loại/kích thước file",
+    "description": "Blog upload thiếu authAdmin; cả hai cấu hình Multer không có fileFilter, limits hoặc kiểm magic bytes. Tên giữ đuôi file gốc. Blog upload dùng single nhưng sản phẩm array không maxCount.",
+    "repro": "Ở môi trường test, POST multipart /api/blog/upload-image không cookie với một file HTML vô hại; kiểm response URL và Content-Type khi truy cập. Không tải file lên trong nhiệm vụ.",
+    "impact": "Người không đăng nhập ghi file, có thể làm đầy disk hoặc host nội dung chủ động cùng origin; khả năng thực thi JS cần xác minh theo MIME/proxy thực tế.",
+    "fix": "Đặt authAdmin trước upload blog; whitelist ảnh qua MIME/extension/magic bytes, limits và tên random, phục vụ uploads bằng chính sách nội dung phù hợp.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/routes/blog.routes.js:22",
+      "server/src/routes/index.js:25"
+    ]
+  },
+  {
+    "level": "High",
+    "title": "Static middleware công khai cả source backend",
+    "description": "express.static trỏ cả server/src thay vì chỉ uploads; các file routes/controllers/services/models trong src có thể được tải như static.",
+    "repro": "Trong môi trường test, GET /controllers/users.controller.js hoặc /services/vnpay.service.js qua backend trực tiếp. Nginx hiện không proxy các path này nên cần phân biệt đường truy cập backend.",
+    "impact": "Lộ logic backend và cấu trúc nội bộ nếu backend truy cập được; không kết luận .env ở server root bị phục vụ.",
+    "fix": "Chỉ mount /uploads tới thư mục uploads, không dùng src làm static root.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/server.js:46"
+    ]
+  },
+  {
+    "level": "High",
+    "title": "Response cập nhật hồ sơ trả cả password field",
+    "description": "updateUser, findAllUser và updateUserAdmin trả Mongoose document không projection; schema password không select:false. AuthUser riêng đã whitelist nhưng không áp dụng cho các response này.",
+    "repro": "Ở môi trường test, đăng nhập rồi POST update-user; chỉ kiểm sự hiện diện field password, không in giá trị. Admin GET users và đổi quyền cũng kiểm field tương tự.",
+    "impact": "Password hash bị truyền tới browser không cần thiết, làm tăng khả năng lộ khi response/log/client bị truy cập.",
+    "fix": "Dùng DTO whitelist hoặc projection loại password và các dữ liệu nhạy cảm trước response; không trả key/OTP.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/users.controller.js:218",
+      "server/src/controllers/users.controller.js:396",
+      "server/src/controllers/users.controller.js:401"
+    ]
+  },
+  {
+    "level": "High",
+    "title": "Reset password chưa thu hồi phiên và proof có thể dùng lại",
+    "description": "Reset chỉ đổi password và clear proof cookie, không xóa apikey hoặc ghi trạng thái proof đã consume. Một bản proof hợp lệ còn giữ được có thể gửi lại đến khi hết 5m. JWT phiên cũ vẫn verify bằng cặp RSA cũ.",
+    "repro": "Trong test riêng, giữ phiên A, thực hiện reset bằng B, thử API auth của A; lưu proof trong test rồi thử dùng lại sau lần reset đầu. Không xuất token ra báo cáo.",
+    "impact": "Đổi mật khẩu chưa kết thúc phiên bị chiếm; proof còn hạn chưa được thu hồi phía server.",
+    "fix": "Thu hồi/rotate key khi reset và gắn proof với nonce/version có consume một lần; kiểm tra atomically khi đổi mật khẩu.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/users.controller.js:585",
+      "server/src/services/tokenSevices.js:49"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Access token và refresh token chưa phân biệt purpose",
+    "description": "Hai loại JWT có cùng payload id và key RS256; verifyToken không kiểm token use/purpose. Middleware authUser có thể xác minh refresh JWT nếu nó được đặt vào cookie token.",
+    "repro": "Test đơn vị với khóa giả: tạo refresh JWT rồi gọi verifyToken/authUser qua cookie token; kiểm được chấp nhận dù thời hạn access dự kiến 15m.",
+    "impact": "Ranh giới access 15m và refresh 7d không được enforce qua token purpose.",
+    "fix": "Thêm purpose và verify riêng cho access/refresh; không tái sử dụng verifier thiếu purpose.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/services/tokenSevices.js:23",
+      "server/src/services/tokenSevices.js:36",
+      "server/src/services/tokenSevices.js:49"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "UI đánh giá khách hàng bị chặn bởi authAdmin",
+    "description": "OrderUser cho khách gửi đánh giá, nhưng endpoint yêu cầu admin. Handler không kiểm order delivered/mua sản phẩm hoặc bound rating.",
+    "repro": "Khách thường đã đăng nhập gửi đánh giá ở đơn đủ điều kiện UI; API trả 401 Bạn không có quyền truy cập. Test admin có thể tạo mà không chứng minh đã mua.",
+    "impact": "Tính năng review khách hàng không hoạt động end-to-end; integrity rating còn thiếu.",
+    "fix": "Nếu cho khách review: authUser cộng kiểm ownership/đơn delivered/product và validate rating/content; xác định chính sách mỗi đơn/sản phẩm.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/routes/previewProduct.routes.js:8",
+      "client/src/Pages/InfoUser/OrderUser/OrderUser.jsx:71"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Sửa tên/thông số sản phẩm không khớp schema và form",
+    "description": "Form dùng nameProduct nhưng handleEdit gán name; controller update whitelist name/size không có trong schema và bỏ nameProduct/modelNumber/origin/movement cùng nhiều thông số.",
+    "repro": "Ở test UI, sửa nameProduct hoặc modelNumber rồi lưu, tải lại product để so; giá/stock có thể đổi nhưng các field bị bỏ không đổi.",
+    "impact": "Admin tưởng đã lưu thông tin nhưng dữ liệu giữ giá trị cũ.",
+    "fix": "Đồng bộ đúng field whitelist theo schema và form, giữ validate tối thiểu cho các field sửa.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/products.controller.js:201",
+      "client/src/Pages/Admin/Components/ManagerProduct/ManagerProduct.jsx:128"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Endpoint coupon legacy thiếu auth và dùng field tổng không tồn tại",
+    "description": "Route không có authUser nhưng handler destructure req.user.id; nếu bổ sung auth vẫn dùng findCart.totalCartBefore khác schema totalPrice. UI hiện lấy coupon qua get-cart nên không cần endpoint này để checkout.",
+    "repro": "GET /api/coupon theo registered route ở test sẽ đi vào req.user undefined; tiếp theo kiểm tên field với cart schema.",
+    "impact": "Endpoint lỗi 500, không cung cấp coupon hợp lệ như tên gọi.",
+    "fix": "Xác định loại bỏ legacy hoặc thêm authUser và tính tổng nhất quán từ giỏ; không vá UI gọi endpoint lỗi.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/routes/coupon.routes.js:9",
+      "server/src/controllers/coupon.controller.js:27"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Async blog chưa được wrapper bắt rejection trên Express 4",
+    "description": "Các blog controller async được truyền trực tiếp, không asyncHandler/try catch. Express đang khai báo 4.x nên rejected Promise không tự gọi next.",
+    "repro": "Trong test mock modelBlog.create/find reject; xác minh error middleware không được gọi. Không tạo lỗi DB thật.",
+    "impact": "Request có thể treo hoặc process gặp unhandled rejection tùy runtime.",
+    "fix": "Bọc các handler async bằng wrapper hiện có, forward error nhất quán.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/routes/blog.routes.js:23",
+      "server/package.json:28"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "NotFoundError được dùng nhưng chưa import/định nghĩa",
+    "description": "Xóa category không tồn tại và update blog không tồn tại gọi identifier không được khai báo trong module; error.response cũng chưa export NotFoundError.",
+    "repro": "Mock findByIdAndDelete/findById trả null và chạy handler trong test riêng; gặp ReferenceError thay lỗi không tồn tại.",
+    "impact": "Category trả 500 qua wrapper; blog có thêm vấn đề rejection chưa wrapper.",
+    "fix": "Dùng error class hiện có với status 404 rõ hoặc định nghĩa/import NotFoundError thống nhất.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/category.controller.js:44",
+      "server/src/controllers/blog.controller.js:41"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Schema dùng require thay required và thiếu ràng buộc nghiệp vụ",
+    "description": "Nhiều field khai báo require:true, không phải validator required. products.price/stock và coupon.discount/quantity không min; review rating không bound. Một số update query không runValidators.",
+    "repro": "Tạo document trong test đơn vị với field thiếu/giá âm để kiểm schema validate; không ghi DB. So sánh options required với require.",
+    "impact": "Dữ liệu có thể thiếu/không hợp lệ nếu vượt qua validation controller hoặc đi qua update/import.",
+    "fix": "Sửa constraint đúng theo policy và validate ở controller/query; cần kiểm dữ liệu legacy trước enforce.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/models/users.model.js:7",
+      "server/src/models/cartUser.model.js:7",
+      "server/src/models/payments.model.js:7",
+      "server/src/models/blog.model.js:7"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Ref model không nhất quán tên đăng ký",
+    "description": "Model đăng ký user/products nhưng có refs users/User/product. Truy vấn tay hiện có không kích hoạt populate nên chưa kết luận toàn bộ request đang lỗi.",
+    "repro": "Kiểm schema.path(...).options.ref và các modelNames; test populate trên dữ liệu giả ở môi trường riêng nếu cần.",
+    "impact": "Populate có thể báo MissingSchemaError; quan hệ không được đảm bảo như ref mô tả.",
+    "fix": "Thống nhất ref với tên model đăng ký, giữ nguyên dữ liệu id và kiểm các consumer trước đổi.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/models/payments.model.js:10",
+      "server/src/models/previewProduct.model.js:7",
+      "server/src/models/message.model.js:7"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Giỏ hàng đọc rồi ghi và thiếu unique userId",
+    "description": "Add/update giỏ thao tác findOne→save/create, chưa unique userId hoặc atomic update/transaction; request đồng thời có thể tạo hai cart hoặc mất cập nhật.",
+    "repro": "Trong test concurrency riêng, gửi hai add đồng thời cho user chưa có cart rồi đếm cart theo userId; lặp update cùng item. Chưa tái hiện runtime.",
+    "impact": "Giỏ bị trùng/mất quantity; findOne có thể chọn giỏ khác mong muốn.",
+    "fix": "Unique userId sau dọn legacy và mutation atomic hoặc transaction theo cart.",
+    "certainty": "Cần xác minh",
+    "sources": [
+      "server/src/controllers/cartUser.controller.js:31",
+      "server/src/models/cartUser.model.js:7"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "OTP window gửi theo email mất khi record bị xóa",
+    "description": "SendCount/sendWindowStartedAt nằm cùng record OTP TTL 10m và consume xóa record; giới hạn 5 lần/email/type/giờ không tồn tại đủ 1 giờ sau TTL/consume. Limiter IP vẫn còn nhưng nhiều IP có thể khác.",
+    "repro": "Test dùng clock/mock Otp: issue, xóa record mô phỏng TTL hoặc consume, issue lần tiếp theo và quan sát sendCount bắt đầu lại. Kiểm thêm concurrent issue vì không unique email/type.",
+    "impact": "Giới hạn email/giờ yếu hơn hằng số/policy thể hiện; có thể gây nhiều mail nếu đổi IP.",
+    "fix": "Tách counter gửi khỏi OTP có TTL, dùng atomic counter/unique email-type và window đủ 1h.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/services/otp.service.js:21",
+      "server/src/services/otp.service.js:65",
+      "server/src/models/otp.model.js:9"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Thống kê dùng tên field khác schema và gộp tháng qua nhiều năm",
+    "description": "User schema là typeLogin nhưng aggregate loginType; review schema productId nhưng group product, lookup/project còn name thay nameProduct. Revenue byMonth chỉ month không year.",
+    "repro": "Test dữ liệu giả có hai typeLogin, review nhiều sản phẩm và delivered orders cùng tháng khác năm; so output facets với kỳ vọng.",
+    "impact": "Dashboard trả nhóm null, top review rỗng/sai và revenue gộp khác năm.",
+    "fix": "Đồng bộ field schema, group year-month hoặc filter kỳ thống kê rõ.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/users.controller.js:232",
+      "server/src/controllers/users.controller.js:324",
+      "server/src/controllers/users.controller.js:279"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Chi tiết sản phẩm dùng danh sách review giới hạn 10 toàn hệ thống",
+    "description": "DetailProduct hiển thị reviewsData từ endpoint home rồi filter productId, trong khi get-product-by-id cũng đã trả previewProduct đầy đủ. Một sản phẩm có review ngoài 10 record đầu không hiển thị.",
+    "repro": "Test mock home API có 10 review của sản phẩm khác, detail API có review của sản phẩm hiện tại; mở detail và so review render.",
+    "impact": "Người dùng thấy thiếu đánh giá hoặc tưởng sản phẩm chưa được đánh giá.",
+    "fix": "Dùng review theo productId từ detail hoặc endpoint phân trang riêng; không dùng home sampling cho chi tiết.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "client/src/Pages/DetailProduct/DetailProduct.jsx:22",
+      "server/src/controllers/previewProduct.controller.js:25"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Đọc chi tiết/list sản phẩm dễ truy cập null khi quan hệ mất",
+    "description": "getProductById dùng product.category trước kiểm product null; getAllProduct dùng category.name không kiểm category; review home dùng user/product không kiểm null và product.name khác nameProduct.",
+    "repro": "Test mock product/category/user trả null hoặc id không tồn tại, kiểm handler response; không xóa dữ liệu thật.",
+    "impact": "Một bản ghi mồ côi có thể làm cả danh sách hoặc trang chi tiết lỗi 500.",
+    "fix": "Xử lý 404/fallback từng quan hệ, thống nhất field và integrity khi xóa.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/products.controller.js:122",
+      "server/src/controllers/products.controller.js:191",
+      "server/src/controllers/previewProduct.controller.js:37"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Xóa category/products chưa bảo toàn các quan hệ và file",
+    "description": "Xóa category rồi products bằng hai thao tác không transaction; không cleanup review/cart/upload. getCart có tự dọn item mất nhưng không phải mọi consumer có fallback.",
+    "repro": "Test mock deleteMany reject sau category delete; kiểm trạng thái từng bước. Test các consumer với product/category đã mất bằng fixture riêng.",
+    "impact": "Dữ liệu mồ côi và lỗi danh sách; file rác; đơn mới giữ snapshot nên ít phụ thuộc hơn.",
+    "fix": "Thiết kế soft delete hoặc transaction/cơ chế bù và cleanup quan hệ có kiểm soát; không xóa snapshot đơn.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/category.controller.js:40",
+      "server/src/controllers/products.controller.js:215"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Legacy search nhận regex trực tiếp và không phân trang",
+    "description": "Header dùng /api/search; controller gán valueSearch vào $regex không escape, không giới hạn độ dài/limit. Service catalog-browse mới đã escape và phân trang nhưng không thay endpoint này.",
+    "repro": "Trong test mock query, gửi ký tự regex và chuỗi dài; kiểm filter được truyền và số kết quả. Không thử payload làm quá tải trên hệ thống thật.",
+    "impact": "Kết quả khác tìm văn bản thường; nguy cơ tiêu thụ CPU/response lớn tùy dữ liệu.",
+    "fix": "Validate scalar/độ dài, escape regex, limit hoặc chuyển consumer sang browse có phân trang.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/products.controller.js:237"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Refresh queue của axios request.jsx có thể không resolve request đầu",
+    "description": "Request đầu gặp 401 await refresh rồi flush queue trước khi chính request đó được push vào queue; sau đó Promise có thể chờ vô hạn. Chỉ áp dụng instance request; ApiClient có implementation khác.",
+    "repro": "Test axios adapter giả trả 401 rồi refresh 200, chờ requestLogin/requestCreateCart đi qua request interceptor; kiểm Promise chưa settle. Cần test mock để xác nhận runtime.",
+    "impact": "Một số call có thể treo sau access hết hạn dù refresh thành công.",
+    "fix": "Retry request đầu trực tiếp sau refresh và chỉ queue request chờ; thống nhất interceptor sau khi xác định phạm vi.",
+    "certainty": "Cần xác minh",
+    "sources": [
+      "client/src/config/request.jsx:364",
+      "client/src/config/request.jsx:379"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Nginx chưa proxy đường Socket.IO",
+    "description": "Nginx chỉ proxy /api và /uploads; đường /socket.io rơi vào SPA try_files. Vite dev đã proxy ws. Khi frontend/socket dùng origin Nginx thì realtime không tới backend.",
+    "repro": "Kiểm cấu hình build API_BASE_URL; nếu same-origin Nginx, thử handshake /socket.io trong môi trường test và xem response HTML. Không khởi động nginx trong nhiệm vụ.",
+    "impact": "Chat HTTP vẫn có thể lưu tin nhưng realtime lỗi trên mô hình deploy qua Nginx.",
+    "fix": "Bổ sung proxy Socket.IO với websocket upgrade/polling phù hợp hoặc cấu hình backend origin có thể truy cập.",
+    "certainty": "Cần xác minh",
+    "sources": [
+      "nginx/default.conf:16",
+      "client/src/store/Provider.jsx:47"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Dockerfile client build trước khi copy source",
+    "description": "Build stage mới chỉ copy package manifests rồi chạy vite build; index.html/src được copy sau. Compose hiện không build service client nên lỗi này nằm ở đường docker build client riêng.",
+    "repro": "Rà thứ tự Dockerfile; trên môi trường riêng chạy docker build client sẽ thiếu entry source ở bước build. Không build/cài dependency trong nhiệm vụ.",
+    "impact": "Đường dựng client image không hoạt động theo Dockerfile hiện có.",
+    "fix": "COPY source trước RUN npm run build; giữ cache npm install bằng layer manifests.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "client/Dockerfile:11",
+      "client/Dockerfile:13"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Chat lỗi khi chưa có lịch sử/admin và mark read quá rộng",
+    "description": "getMessageUser đọc data.receiverId khi findOne null; createMessage đọc findAdmin.id khi không có admin; readMessage update cả hai chiều conversation thay vì chỉ tin gửi tới id hiện tại.",
+    "repro": "Test mock user chưa từng gửi hoặc không có admin; test conversation hai chiều unread và gọi readMessage một phía.",
+    "impact": "Chat mới có thể lỗi 500 và trạng thái đã đọc không đúng chiều nhận.",
+    "fix": "Trả lịch sử rỗng/fallback admin rõ; lọc receiverId=id khi đánh dấu đã đọc.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "server/src/controllers/message.controller.js:164",
+      "server/src/controllers/message.controller.js:21",
+      "server/src/controllers/message.controller.js:175"
+    ]
+  },
+  {
+    "level": "Medium",
+    "title": "Goong API key được hardcode trong frontend",
+    "description": "onAddressSearch chứa literal API key trong code browser. Không chép giá trị vào tài liệu; không xác minh key còn hoạt động hoặc restriction.",
+    "repro": "Rà source/bundle và Network khi gợi ý địa chỉ trong môi trường test; chỉ xác nhận có literal và nơi sử dụng, không xuất giá trị.",
+    "impact": "Key có thể được người xem bundle sử dụng; mức ảnh hưởng phụ thuộc restriction/quota của Goong.",
+    "fix": "Chuyển cấu hình ra source, giới hạn domain/quota; nếu key cần giữ kín thì gọi qua backend. Cần kiểm restriction và rotate khi cần.",
+    "certainty": "Chắc chắn",
+    "sources": [
+      "client/src/Pages/CheckOut/CheckOut.jsx:60"
+    ]
+  }
+]

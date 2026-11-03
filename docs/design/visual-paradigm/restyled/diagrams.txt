@@ -1,0 +1,66 @@
+UC — Tổng quan ECOMMOR
+uc-module-01
+uc-module-02
+uc-module-03
+uc-module-04
+uc-module-05
+uc-module-06
+uc-module-07
+uc-module-08
+Class — Tổng thể ECOMMOR
+act-01 — Đăng ký và xác minh email
+act-02 — Đăng nhập và phân quyền
+act-03 — Khôi phục mật khẩu
+act-04 — Mua hàng
+act-05 — VNPay Return và xác nhận
+act-06 — VNPay hết hạn và đối soát
+act-07 — Xử lý đơn hàng
+act-08 — Quản lý catalog
+act-09 — Chat realtime
+act-10 — Chatbot Gemini
+act-11 — Thống kê và người dùng
+act-12 — Blog
+act-13 — MoMo legacy
+act-state-order
+act-state-payment
+seq-01 — Đăng ký tài khoản
+seq-02 — Xác minh email đăng ký
+seq-03 — Gửi lại mã xác minh đăng ký
+seq-04 — Đăng nhập email
+seq-05 — Đăng nhập Google
+seq-06 — Kiểm tra và gia hạn phiên
+seq-07 — Đăng xuất
+seq-08 — Khôi phục mật khẩu bằng OTP
+seq-09 — Xem và cập nhật hồ sơ
+seq-10 — Xem catalog trang chủ
+seq-11 — Tìm kiếm và lọc sản phẩm
+seq-12 — Xem chi tiết sản phẩm và đánh giá
+seq-13 — Tạo đánh giá sản phẩm
+seq-14 — Xem giỏ hàng
+seq-15 — Thêm sản phẩm vào giỏ
+seq-16 — Sửa số lượng giỏ
+seq-17 — Xóa sản phẩm khỏi giỏ
+seq-18 — Chọn coupon và thông tin giao hàng
+seq-19 — Đặt hàng COD
+seq-20 — Khởi tạo thanh toán VNPay
+seq-21 — Hiển thị kết quả Return VNPay
+seq-22 — Xác nhận IPN VNPay
+seq-23 — Thanh toán lại VNPay
+seq-24 — Đối soát trạng thái VNPay
+seq-25 — Thanh toán MoMo
+seq-26 — Xem đơn hàng của mình
+seq-27 — Hủy đơn hàng của mình
+seq-28 — Đọc blog
+seq-29 — Chat với quản trị viên
+seq-30 — Quản trị hội thoại
+seq-31 — Tư vấn bằng chatbot Gemini
+seq-32 — Quản lý sản phẩm
+seq-33 — Quản lý danh mục
+seq-34 — Quản lý coupon
+seq-35 — Quản lý bài viết
+seq-36 — Xem người dùng và đổi quyền
+seq-37 — Xử lý đơn hàng phía quản trị
+seq-38 — Xem thống kê
+seq-39 — Tải ảnh sản phẩm hoặc blog
+seq-40 — Xem danh sách thương hiệu
+seq-41 — Xem thông tin liên hệ

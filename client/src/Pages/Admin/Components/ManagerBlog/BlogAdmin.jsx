@@ -1,14 +1,15 @@
+import RichText from '../../../../Components/RichText';
 import { useState, useEffect, useRef } from 'react';
-import { Table, Button, Space, Modal, Form, Input, Upload, Tabs, Tag, Popconfirm } from 'antd';
+import { Table, Button, Space, Modal, Form, Input, Upload, Tabs, Tag, Popconfirm, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, UploadOutlined, EyeOutlined } from '@ant-design/icons';
 import { Editor } from '@tinymce/tinymce-react';
+import { uploadUrl } from '../../../../config/runtimeUrls';
 // import { toast, ToastContainer } from 'react-toastify';
 import {
     requestCreateBlog,
     requestDeleteBlog,
     requestGetAllBlog,
     requestUpdateBlog,
-    requestUploadImage,
     requestUploadImageBlog,
 } from '../../../../config/request';
 
@@ -50,7 +51,7 @@ function BlogAdmin() {
         setEditingBlog(blog);
         form.setFieldsValue({
             title: blog.title,
-            image: import.meta.env.VITE_URL_IMAGE_API + blog.image,
+            image: uploadUrl(blog.image),
             content: blog.content,
         });
 
@@ -60,7 +61,7 @@ function BlogAdmin() {
                 uid: '-1',
                 name: 'image.png',
                 status: 'done',
-                url: import.meta.env.VITE_URL_IMAGE_API + blog.image,
+                url: uploadUrl(blog.image),
             },
         ]);
 
@@ -85,7 +86,7 @@ function BlogAdmin() {
             // toast.success('Xóa bài viết thành công!');
             fetchBlogs();
         } catch (error) {
-            // toast.error('Xóa bài viết thất bại!');
+            message.error(error.response?.data?.message || 'Xóa bài viết thất bại!');
         } finally {
             setLoading(false);
         }
@@ -159,7 +160,7 @@ function BlogAdmin() {
                 <div className="flex items-center">
                     <div
                         className="w-12 h-12 mr-2 bg-cover bg-center rounded"
-                        style={{ backgroundImage: `url(${import.meta.env.VITE_URL_IMAGE_API}/${record.image})` }}
+                        style={{ backgroundImage: `url(${uploadUrl(record.image)})` }}
                     ></div>
                     <div>
                         <div className="font-medium">{text}</div>
@@ -279,10 +280,12 @@ function BlogAdmin() {
                     <TabPane tab="Nội dung" key="2">
                         <div className="mb-4">
                             <Editor
-                                apiKey="g2qwk2y6zg5bza6a968m294w0md3zbil24ymnczb48mcys7m"
+                                apiKey={import.meta.env.VITE_TINYMCE_API_KEY?.trim() || 'g2qwk2y6zg5bza6a968m294w0md3zbil24ymnczb48mcys7m'}
                                 onInit={(evt, editor) => (editorRef.current = editor)}
                                 initialValue={editingBlog ? editingBlog.content : ''}
                                 init={{
+                                    language: 'vi',
+                                    language_url: '/langs/vi.js',
                                     height: 500,
                                     menubar: true,
                                     plugins: [
@@ -299,7 +302,6 @@ function BlogAdmin() {
                                         'code',
                                         'fullscreen',
                                         'insertdatetime',
-                                        'media',
                                         'table',
                                         'code',
                                         'help',
@@ -347,7 +349,7 @@ function BlogAdmin() {
                         <h1 className="text-2xl font-bold mb-4">{previewBlog.title}</h1>
                         <div className="mb-4">
                             <img
-                                src={`${import.meta.env.VITE_URL_IMAGE_API}/${previewBlog.image}`}
+                                src={uploadUrl(previewBlog.image)}
                                 alt={previewBlog.title}
                                 className="w-full h-auto rounded-lg"
                             />
@@ -364,7 +366,7 @@ function BlogAdmin() {
 
                         <div className="mb-4">
                             <strong className="block mb-2">Nội dung:</strong>
-                            <div dangerouslySetInnerHTML={{ __html: previewBlog.content }}></div>
+                            <RichText html={previewBlog.content} />
                         </div>
                     </div>
                 )}

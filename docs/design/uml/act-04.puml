@@ -1,0 +1,50 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Khách hàng đã đăng nhập|
+start
+:Xem/tìm/lọc sản phẩm và mở chi tiết;
+|Frontend|
+:Gửi yêu cầu thêm giỏ;
+|Backend|
+:authUser và validate quantity/stock;
+if (Hợp lệ?) then (Không)
+ :Trả 401/403;
+ stop
+endif
+:Tạo/cập nhật giỏ, tính giá DB;
+|Khách hàng đã đăng nhập|
+:Xem giỏ; sửa/xóa item nếu cần;
+:Nhập shipping, chọn coupon/phương thức;
+|Frontend|
+:Submit cartId và shipping;
+|Backend|
+:COD/VNPAY transaction snapshot + reserve;
+if (Lỗi dữ liệu/kho/coupon/transaction?) then (Có)
+ :Rollback; trả 400/409/503;
+ stop
+endif
+:Save order, xóa cart;
+if (COD?) then (Có)
+ :Order pending/unpaid; trả document;
+ |Frontend|
+ :Mở trang đơn;
+else (VNPAY)
+ |Backend|
+ :Lưu attempt pending và trả URL;
+ |VNPay|
+ :Khách thanh toán; gửi Return và IPN độc lập;
+ |Backend|
+ :Return redirect; IPN/querydr settle theo điều kiện;
+ |Frontend|
+ :Đọc order và hiển thị paymentStatus;
+endif
+|Quản trị viên|
+:Xử lý confirmed -> shipped -> delivered nếu đủ điều kiện;
+|Backend|
+:Delivered tăng soldCount; COD chuyển paid;
+stop
+@enduml

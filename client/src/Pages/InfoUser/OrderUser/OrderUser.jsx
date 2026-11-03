@@ -4,6 +4,9 @@ import style from './OrderUser.module.scss';
 import classNames from 'classnames/bind';
 import { requestCancelOrder, requestGetOrderUser, requestCreatePreviewProduct } from '../../../config/request';
 import { StarOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
+import { uploadUrl } from '../../../config/runtimeUrls';
+import ShippingInfo from '../../../Components/ShippingInfo/ShippingInfo';
 
 const cx = classNames.bind(style);
 
@@ -34,6 +37,7 @@ function OrderUser() {
                         status: order.status,
                         totalPrice: order.totalPrice,
                         paymentMethod: order.paymentMethod,
+                        paymentStatus: order.paymentStatus,
                     })),
                 );
             }
@@ -65,8 +69,10 @@ function OrderUser() {
             rating,
         };
 
+        if (!reviewComment.trim() || !Number.isInteger(rating) || rating < 1) { message.warning('Vui lòng nhập nhận xét và chọn số sao.'); return; }
+        try {
         await requestCreatePreviewProduct(data);
-        message.success(`Đánh giá sản phẩm "${selectedProduct.name}" đã được gửi thành công!`);
+        message.success('Đã gửi đánh giá. Cửa hàng sẽ kiểm tra trước khi hiển thị.');
 
         if (selectedProductIndex < currentOrder.product.length - 1) {
             setSelectedProductIndex(selectedProductIndex + 1);
@@ -75,6 +81,7 @@ function OrderUser() {
         } else {
             setIsReviewModalOpen(false);
         }
+        } catch (error) { message.error(error.response?.data?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.'); }
     };
 
     const handleProductSelect = (index) => {
@@ -98,7 +105,7 @@ function OrderUser() {
             title: 'Mã đơn hàng',
             dataIndex: '_id',
             key: '_id',
-            render: (id) => <span style={{ fontWeight: 600, color: '#1890ff' }}>#{id.slice(0, 8)}</span>,
+            render: (id) => <Link to={`/payments/${id}`}>#{id.slice(0, 8)}</Link>,
             width: 160,
         },
         {
@@ -107,6 +114,7 @@ function OrderUser() {
             key: 'createdAt',
             render: (date) => {
                 const formattedDate = new Date(date).toLocaleDateString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
                     year: 'numeric',
                     month: '2-digit',
                     day: '2-digit',
@@ -124,7 +132,7 @@ function OrderUser() {
                     {(Array.isArray(products) ? products : []).map((item, index) => (
                         <div key={index} className={cx('order-product-item')}>
                             <img
-                                src={`${import.meta.env.VITE_URL_IMAGE_API}${item?.images?.split(',')[0]}`}
+                                src={uploadUrl(item?.images?.split(',')[0])}
                                 alt={item.nameProduct}
                                 className={cx('product-thumbnail')}
                             />
@@ -222,7 +230,8 @@ function OrderUser() {
                             Đánh giá
                         </Button>
                     );
-                } else if (record.status === 'pending') {
+                } else if (record.status === 'pending' && (record.paymentMethod === 'COD' ||
+                    (record.paymentMethod === 'VNPAY' && ['pending', 'failed', 'expired'].includes(record.paymentStatus)))) {
                     return (
                         <Button
                             type="primary"
@@ -243,7 +252,9 @@ function OrderUser() {
 
     return (
         <div className={cx('order-user-container')}>
-            <Table columns={columns} dataSource={orders} rowKey="_id" pagination={{ pageSize: 5 }} loading={loading} />
+            <Table columns={columns} dataSource={orders} rowKey="_id" pagination={{ pageSize: 5 }} loading={loading}
+                expandable={{ expandedRowRender: order => <ShippingInfo shipping={order.shipping} shipment={order.shipment} />,
+                    rowExpandable: order => !!order.shipping }} />
 
             <Modal
                 title="Đánh giá sản phẩm"
@@ -267,9 +278,7 @@ function OrderUser() {
                                     <Radio key={index} value={index} className={cx('product-radio')}>
                                         <div className={cx('review-product-item')}>
                                             <img
-                                                src={`${import.meta.env.VITE_URL_IMAGE_API}/${
-                                                    item?.images?.split(',')[0]
-                                                }`}
+                                                src={uploadUrl(item?.images?.split(',')[0])}
                                                 alt={item.name}
                                                 className={cx('product-thumbnail')}
                                             />
@@ -294,7 +303,7 @@ function OrderUser() {
                                     <div>Nhận xét:</div>
                                     <TextArea
                                         rows={4}
-                                        value={reviewComment}
+                                        maxLength={2000} showCount value={reviewComment}
                                         onChange={(e) => setReviewComment(e.target.value)}
                                         placeholder="Nhập nhận xét của bạn về sản phẩm..."
                                     />

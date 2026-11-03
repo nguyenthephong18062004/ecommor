@@ -1,0 +1,42 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+participant "Express route" as R
+participant "Controller" as C
+participant "Service" as S
+database "Model / MongoDB" as DB
+participant "VNPay" as E
+E -> R : GET /api/vnpay-ipn (query signed)
+R -> C : ipnVnpay()
+C -> S : ipn -> verify()
+alt Chữ ký/params sai
+S --> E : HTTP 200 RspCode=97
+else Verify hợp lệ
+S -> DB : Transaction: attempt + order
+alt Không khớp order/method/orderInfo
+S --> E : HTTP 200 RspCode=01
+else Amount khác attempt*100 hoặc totalPrice
+S --> E : HTTP 200 RspCode=04
+else receivedAt hoặc reconciledAt đã có
+S --> E : HTTP 200 RspCode=02
+else Callback mới
+S -> DB : Ghi response fields, receivedAt, source=ipn
+alt code=00,status=00 và attempt hiện tại, đơn pending còn reserved
+S -> DB : attempt.status=paid; order.paymentStatus=paid
+else Thành công nhưng muộn/attempt cũ/đơn không đủ điều kiện
+S -> DB : refund_required; release nếu còn reserve và pending
+else Thanh toán thất bại/hủy
+S -> DB : attempt.failed; nếu current pending: release, order.failed
+end
+S -> DB : save attempt/order; commit
+S --> E : HTTP 200 RspCode=00
+end
+end
+opt Exception
+C --> E : HTTP 200 RspCode=99
+end
+@enduml

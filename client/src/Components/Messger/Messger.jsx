@@ -16,7 +16,6 @@ function Messger() {
     const { dataUser, newMessageUser } = useStore();
     const [inputValue, setInputValue] = useState('');
     const [isOpen, setIsOpen] = useState(false);
-    const [isTyping, setIsTyping] = useState(false);
     const [unreadCount, setUnreadCount] = useState('');
     const messagesEndRef = useRef(null);
 
@@ -35,7 +34,7 @@ function Messger() {
             setMessages(res.metadata);
         };
         if (dataUser._id) fetchData();
-    }, []);
+    }, [dataUser._id]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -91,7 +90,7 @@ function Messger() {
                                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg">LuxTime Support</h3>
+                                <h3 className="font-bold text-lg">Hỗ trợ ECOMMOR</h3>
                                 <p className="text-xs text-blue-100">Luôn sẵn sàng hỗ trợ</p>
                             </div>
                         </div>
@@ -142,25 +141,6 @@ function Messger() {
                                 </div>
                             </div>
                         ))}
-
-                        {/* Typing indicator */}
-                        {isTyping && (
-                            <div className="flex items-end gap-3 mb-4 animate-pulse">
-                                <div className="bg-white p-3 rounded-2xl rounded-bl-md border border-gray-100 shadow-sm">
-                                    <div className="flex gap-1">
-                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                        <div
-                                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                                            style={{ animationDelay: '0.1s' }}
-                                        ></div>
-                                        <div
-                                            className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                                            style={{ animationDelay: '0.2s' }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
                         <div ref={messagesEndRef} />
                     </main>

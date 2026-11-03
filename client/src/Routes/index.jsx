@@ -1,29 +1,40 @@
-import App from '../App';
-import IndexDashBroad from '../Pages/Admin';
-import LoginUser from '../Pages/LoginUser/LoginUser';
-import Register from '../Pages/Register/Register';
-import DetailProduct from '../Pages/DetailProduct/DetailProduct';
-import Category from '../Pages/Category/Category';
-import CartUser from '../Pages/Cart/CartUser';
-import CheckOut from '../Pages/CheckOut/CheckOut';
-import PaymentSuccess from '../Pages/PaymentSuccess/PaymentSuccess';
-import InfoUser from '../Pages/InfoUser/InfoUser';
-import ForgotPassword from '../Pages/ForgotPassword/ForgotPassword';
-import Blogs from '../Pages/Blogs/Blogs';
-import DetailBlog from '../Pages/DetailBlog/DetailBlog';
-export const publicRoutes = [
-    { path: '/', component: <App /> },
-    { path: '/login', component: <LoginUser /> },
-    { path: '/register', component: <Register /> },
-    { path: '/admin', component: <IndexDashBroad /> },
-    { path: '/product/:id', component: <DetailProduct /> },
-    { path: '/category/:id', component: <Category /> },
-    { path: '/cart', component: <CartUser /> },
-    { path: '/checkout', component: <CheckOut /> },
-    { path: '/payments/:id', component: <PaymentSuccess /> },
-    { path: '/profile', component: <InfoUser /> },
-    { path: '/forgot-password', component: <ForgotPassword /> },
-    { path: '/orders', component: <InfoUser /> },
-    { path: '/blogs', component: <Blogs /> },
-    { path: '/blogs/:id', component: <DetailBlog /> },
-];
+import Loading from '../Components/Loading/Loading';
+import { useStore } from '../hooks/userStore';
+import { Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { requestAdmin } from '../config/request';
+
+function AdminRoute({ children }) {
+    const { getAuthUser, authLoading } = useStore();
+    const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
+    const [canAccessAdmin, setCanAccessAdmin] = useState(false);
+
+    useEffect(() => {
+        if (authLoading) return;
+
+        const checkAdmin = async () => {
+            setIsCheckingAdmin(true);
+            try {
+                await requestAdmin();
+                await getAuthUser();
+                setCanAccessAdmin(true);
+            } catch {
+                setCanAccessAdmin(false);
+            } finally {
+                setIsCheckingAdmin(false);
+            }
+        };
+
+        checkAdmin();
+    }, [authLoading, getAuthUser]);
+
+    if (authLoading || isCheckingAdmin) return <Loading />;
+
+    if (!canAccessAdmin) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
+}
+
+export default AdminRoute;

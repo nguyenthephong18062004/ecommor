@@ -1,0 +1,883 @@
+[
+  {
+    "operationId": "postApiBlogUploadImage",
+    "method": "POST",
+    "path": "/api/blog/upload-image",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/blog.routes.js:22"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiBlogCreate",
+    "method": "POST",
+    "path": "/api/blog/create",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/blog.routes.js:23"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiBlogGetAll",
+    "method": "GET",
+    "path": "/api/blog/get-all",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/blog.routes.js:24"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiBlogUpdate",
+    "method": "POST",
+    "path": "/api/blog/update",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/blog.routes.js:25"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiBlogDelete",
+    "method": "POST",
+    "path": "/api/blog/delete",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/blog.routes.js:26"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiBlogGetById",
+    "method": "GET",
+    "path": "/api/blog/get-by-id",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/blog.routes.js:27"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiBrands",
+    "method": "GET",
+    "path": "/api/brands",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/brand.routes.js:8"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "putApiBrandsName",
+    "method": "PUT",
+    "path": "/api/brands/{name}",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/brand.routes.js:11"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiCreateCart",
+    "method": "POST",
+    "path": "/api/create-cart",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/cartUser.routes.js:8"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetCart",
+    "method": "GET",
+    "path": "/api/get-cart",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/cartUser.routes.js:9"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiDeleteProductCart",
+    "method": "POST",
+    "path": "/api/delete-product-cart",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/cartUser.routes.js:10"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUpdateProductCart",
+    "method": "POST",
+    "path": "/api/update-product-cart",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/cartUser.routes.js:11"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUpdateInfoCart",
+    "method": "POST",
+    "path": "/api/update-info-cart",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/cartUser.routes.js:12"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiCreateCategory",
+    "method": "POST",
+    "path": "/api/create-category",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/category.routes.js:8"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetAllCategory",
+    "method": "GET",
+    "path": "/api/get-all-category",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/category.routes.js:9"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUpdateCategory",
+    "method": "POST",
+    "path": "/api/update-category",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/category.routes.js:10"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "deleteApiDeleteCategory",
+    "method": "DELETE",
+    "path": "/api/delete-category",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/category.routes.js:11"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiCreateCoupon",
+    "method": "POST",
+    "path": "/api/create-coupon",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/coupon.routes.js:8"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiCoupon",
+    "method": "GET",
+    "path": "/api/coupon",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/coupon.routes.js:9"
+    ],
+    "deprecated": true
+  },
+  {
+    "operationId": "getApiCoupons",
+    "method": "GET",
+    "path": "/api/coupons",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/coupon.routes.js:10"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "deleteApiDeleteCoupon",
+    "method": "DELETE",
+    "path": "/api/delete-coupon",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/coupon.routes.js:11"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUpdateCoupon",
+    "method": "POST",
+    "path": "/api/update-coupon",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/coupon.routes.js:12"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiMessageCreate",
+    "method": "POST",
+    "path": "/api/message/create",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/message.routes.js:8"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiMessageCreateAdmin",
+    "method": "POST",
+    "path": "/api/message/create-admin",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/message.routes.js:9"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiMessageAll",
+    "method": "GET",
+    "path": "/api/message/all",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/message.routes.js:11"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiMessageGetMessage",
+    "method": "GET",
+    "path": "/api/message/get-message",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/message.routes.js:12"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiMessageGetMessageUser",
+    "method": "GET",
+    "path": "/api/message/get-message-user",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/message.routes.js:13"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiMessageReadMessage",
+    "method": "GET",
+    "path": "/api/message/read-message",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/message.routes.js:14"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiCreatePayment",
+    "method": "POST",
+    "path": "/api/create-payment",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/payments.route.js:7"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiCheckPaymentVnpay",
+    "method": "GET",
+    "path": "/api/check-payment-vnpay",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/payments.route.js:8"
+    ],
+    "deprecated": true
+  },
+  {
+    "operationId": "getApiVnpayReturn",
+    "method": "GET",
+    "path": "/api/vnpay-return",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/payments.route.js:9"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiVnpayIpn",
+    "method": "GET",
+    "path": "/api/vnpay-ipn",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/payments.route.js:10"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiRetryPaymentVnpay",
+    "method": "POST",
+    "path": "/api/retry-payment-vnpay",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/payments.route.js:11"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiReconcilePaymentVnpay",
+    "method": "POST",
+    "path": "/api/reconcile-payment-vnpay",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/payments.route.js:12"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiCheckPaymentMomo",
+    "method": "GET",
+    "path": "/api/check-payment-momo",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/payments.route.js:13"
+    ],
+    "deprecated": true
+  },
+  {
+    "operationId": "getApiGetPaymentSuccess",
+    "method": "GET",
+    "path": "/api/get-payment-success",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/payments.route.js:14"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetOrderUser",
+    "method": "GET",
+    "path": "/api/get-order-user",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/payments.route.js:15"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiCancelOrder",
+    "method": "POST",
+    "path": "/api/cancel-order",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/payments.route.js:16"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetOrderAdmin",
+    "method": "GET",
+    "path": "/api/get-order-admin",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/payments.route.js:17"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUpdateOrderStatus",
+    "method": "POST",
+    "path": "/api/update-order-status",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/payments.route.js:18"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiPreferences",
+    "method": "GET",
+    "path": "/api/preferences",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/preferences.routes.js:7"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "patchApiPreferences",
+    "method": "PATCH",
+    "path": "/api/preferences",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/preferences.routes.js:8"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiPreorders",
+    "method": "POST",
+    "path": "/api/preorders",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/preorder.routes.js:16"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiPreordersMine",
+    "method": "GET",
+    "path": "/api/preorders/mine",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/preorder.routes.js:19"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiPreorders",
+    "method": "GET",
+    "path": "/api/preorders",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/preorder.routes.js:22"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "patchApiPreordersIdStatus",
+    "method": "PATCH",
+    "path": "/api/preorders/{id}/status",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/preorder.routes.js:25"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiReviews",
+    "method": "GET",
+    "path": "/api/reviews",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/previewProduct.routes.js:10"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiReviewsModeration",
+    "method": "GET",
+    "path": "/api/reviews/moderation",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/previewProduct.routes.js:11"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "patchApiReviewsIdStatus",
+    "method": "PATCH",
+    "path": "/api/reviews/{id}/status",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/previewProduct.routes.js:12"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiCreatePreviewProduct",
+    "method": "POST",
+    "path": "/api/create-preview-product",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/previewProduct.routes.js:13"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetPreviewProductHome",
+    "method": "GET",
+    "path": "/api/get-preview-product-home",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/previewProduct.routes.js:14"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiCreateProduct",
+    "method": "POST",
+    "path": "/api/create-product",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/products.routes.js:8"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetProductNew",
+    "method": "GET",
+    "path": "/api/get-product-new",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/products.routes.js:9"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiProductCatalog",
+    "method": "GET",
+    "path": "/api/product-catalog",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/products.routes.js:10"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiCatalogOptions",
+    "method": "GET",
+    "path": "/api/catalog-options",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/products.routes.js:11"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiCatalogBrowse",
+    "method": "GET",
+    "path": "/api/catalog-browse",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/products.routes.js:12"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetProductById",
+    "method": "GET",
+    "path": "/api/get-product-by-id",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/products.routes.js:13"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetProductByCategory",
+    "method": "GET",
+    "path": "/api/get-product-by-category",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/products.routes.js:14"
+    ],
+    "deprecated": true
+  },
+  {
+    "operationId": "getApiGetProductManufactured",
+    "method": "GET",
+    "path": "/api/get-product-manufactured",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/products.routes.js:15"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiSearch",
+    "method": "GET",
+    "path": "/api/search",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/products.routes.js:16"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiGetAllProduct",
+    "method": "GET",
+    "path": "/api/get-all-product",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/products.routes.js:18"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUpdateProduct",
+    "method": "POST",
+    "path": "/api/update-product",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/products.routes.js:19"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "deleteApiDeleteProduct",
+    "method": "DELETE",
+    "path": "/api/delete-product",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/products.routes.js:20"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiShippingProvinces",
+    "method": "GET",
+    "path": "/api/shipping/provinces",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/shipping.routes.js:13"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiShippingDistricts",
+    "method": "GET",
+    "path": "/api/shipping/districts",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/shipping.routes.js:14"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiShippingWards",
+    "method": "GET",
+    "path": "/api/shipping/wards",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/shipping.routes.js:15"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiShippingQuote",
+    "method": "POST",
+    "path": "/api/shipping/quote",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/shipping.routes.js:16"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiShippingAdminOrdersIdPreview",
+    "method": "POST",
+    "path": "/api/shipping/admin/orders/{id}/preview",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/shipping.routes.js:25"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiShippingAdminOrdersIdCreate",
+    "method": "POST",
+    "path": "/api/shipping/admin/orders/{id}/create",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/shipping.routes.js:26"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiShippingAdminOrdersIdSync",
+    "method": "POST",
+    "path": "/api/shipping/admin/orders/{id}/sync",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/shipping.routes.js:27"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiRegister",
+    "method": "POST",
+    "path": "/api/register",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:13",
+      "server/src/controllers/users.controller.js:500"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiVerifyEmail",
+    "method": "POST",
+    "path": "/api/verify-email",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:14"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiResendVerification",
+    "method": "POST",
+    "path": "/api/resend-verification",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:15"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiLogin",
+    "method": "POST",
+    "path": "/api/login",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:16"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiAuth",
+    "method": "GET",
+    "path": "/api/auth",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/users.routes.js:17"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiRefreshToken",
+    "method": "GET",
+    "path": "/api/refresh-token",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:18"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiLogout",
+    "method": "GET",
+    "path": "/api/logout",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:19"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiLoginGoogle",
+    "method": "POST",
+    "path": "/api/login-google",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:20"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUpdateUser",
+    "method": "POST",
+    "path": "/api/update-user",
+    "auth": "user",
+    "sources": [
+      "server/src/routes/users.routes.js:21"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiForgotPassword",
+    "method": "POST",
+    "path": "/api/forgot-password",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:23"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiVerifyResetPassword",
+    "method": "POST",
+    "path": "/api/verify-reset-password",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:24"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiResetPassword",
+    "method": "POST",
+    "path": "/api/reset-password",
+    "auth": "public",
+    "sources": [
+      "server/src/routes/users.routes.js:25"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiStatistical",
+    "method": "GET",
+    "path": "/api/statistical",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/users.routes.js:27"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiUsers",
+    "method": "GET",
+    "path": "/api/users",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/users.routes.js:28"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUpdateUserAdmin",
+    "method": "POST",
+    "path": "/api/update-user-admin",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/users.routes.js:29"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "getApiAdmin",
+    "method": "GET",
+    "path": "/api/admin",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/users.routes.js:31"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiUploadImage",
+    "method": "POST",
+    "path": "/api/upload-image",
+    "auth": "admin",
+    "sources": [
+      "server/src/routes/index.js:109"
+    ],
+    "deprecated": false
+  },
+  {
+    "operationId": "postApiChatbot",
+    "method": "POST",
+    "path": "/api/chatbot",
+    "auth": "user",
+    "sources": [
+      "server/src/server.js:65"
+    ],
+    "deprecated": false
+  }
+]

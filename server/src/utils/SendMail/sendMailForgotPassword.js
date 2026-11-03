@@ -116,7 +116,7 @@ const SendMailForgotPassword = async (email, otp) => {
             `,
         });
 
-        console.log('Forgot password email sent:', info.messageId);
+        console.log('Quên mật khẩu email sent:', info.messageId);
     } catch (error) {
         console.log('Error sending forgot password email:', error);
     }

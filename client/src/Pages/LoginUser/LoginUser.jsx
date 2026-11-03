@@ -7,12 +7,14 @@ import Footer from '../../Components/Footer/Footer';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { Form, Input, Button, Row, Col, message } from 'antd';
 import { useEffect } from 'react';
 
-import { requestLogin, requestLoginGoogle } from '../../config/request';
+import { requestAuth, requestLogin, requestLoginGoogle } from '../../config/request';
+import { useStore } from '../../hooks/userStore';
+import { getAuthReturnTo } from '../../utils/authRedirect';
 
 const cx = classNames.bind(styles);
 
@@ -22,15 +24,23 @@ function LoginUser() {
     }, []);
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = getAuthReturnTo(location.state?.from, null);
+    const { getAuthUser, getCart } = useStore();
+
+    const navigateAfterLogin = async () => {
+        const res = await requestAuth();
+        const destination = from || (res.metadata.auth.isAdmin === true ? '/admin' : '/');
+        await getAuthUser();
+        await getCart().catch(() => {});
+        navigate(destination, { replace: true });
+    };
 
     const onFinish = async (values) => {
         try {
             await requestLogin(values);
             message.success('Đăng nhập thành công!');
-            navigate('/');
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            await navigateAfterLogin();
         } catch (error) {
             message.error(error.response?.data?.message || 'Đăng nhập thất bại!');
         }
@@ -41,10 +51,7 @@ function LoginUser() {
         try {
             const res = await requestLoginGoogle(credential);
             message.success(res.message);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-            navigate('/');
+            await navigateAfterLogin();
         } catch (error) {
             if (error.response && error.response.data && error.response.data.message) {
                 message.error(error.response.data.message);
@@ -98,7 +105,7 @@ function LoginUser() {
                     </Form.Item>
 
                     <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID}>
-                        <GoogleLogin onSuccess={handleSuccess} onError={() => console.log('Login Failed')} />
+                        <GoogleLogin locale="vi" onSuccess={handleSuccess} onError={() => message.error('Không thể đăng nhập bằng Google. Vui lòng thử lại.')} />
                     </GoogleOAuthProvider>
 
                     <div className={cx('form-footer')}>
@@ -111,7 +118,7 @@ function LoginUser() {
                             <Col>
                                 <span className={cx('register-text')}>
                                     Chưa có tài khoản?{' '}
-                                    <Link to="/register" className={cx('register-link')}>
+                                    <Link to="/register" state={{ from }} className={cx('register-link')}>
                                         Đăng ký ngay
                                     </Link>
                                 </span>

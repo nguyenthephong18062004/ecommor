@@ -93,3 +93,31 @@
         }
     }
 }
+
+.preorderLink {
+    color: #a3262c;
+    font-size: 12px;
+    &:hover { text-decoration: underline; }
+}
+
+.catalog {
+    height: 360px;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+
+    .imageContainer {
+        height: 252px;
+        background: #f7f7f5;
+        img { transition: transform 180ms ease; }
+    }
+
+    &:hover .imageContainer img { transform: scale(1.04); }
+
+    .content {
+        padding: 12px 0 0;
+        .priceContainer .currentPrice { color: #a3262c; }
+    }
+    .title { font-size: 13px; font-weight: 500; text-transform: none; line-height: 1.4; }
+}

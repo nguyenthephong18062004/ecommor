@@ -1,0 +1,34 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Quản trị viên|
+start
+:Soạn bài, chọn ảnh tùy chọn;
+|Frontend|
+if (Có ảnh mới?) then (Có)
+ :POST blog/upload-image;
+ |Backend|
+ :Multer single(image), chưa authAdmin;
+ :Ghi filesystem, trả URL;
+endif
+|Frontend|
+:POST blog/create hoặc update;
+|Backend|
+:authAdmin, lưu title/content/image;
+note right
+Async handler chưa wrapper trên Express 4.
+Không bảo đảm lỗi DB được chuyển thành JSON.
+end note
+|Khách vãng lai|
+:Mở blog;
+|Frontend|
+:GET get-all/get-by-id;
+|Backend|
+:Đọc blog trả metadata;
+|Frontend|
+:Render HTML bằng dangerouslySetInnerHTML;
+stop
+@enduml

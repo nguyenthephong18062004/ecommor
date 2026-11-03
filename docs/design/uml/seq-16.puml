@@ -1,0 +1,34 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách hàng đã đăng nhập" as U
+participant "CartUser.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+database "Model / MongoDB" as DB
+U -> UI : Thay số lượng
+UI -> A : requestUpdateProductCart()
+A -> R : POST /api/update-product-cart
+R -> W : authUser
+W -> C : updateProductCart()
+C -> DB : quantityProduct(productId,quantity)
+alt Invalid quantity / thiếu stock
+C --> A : 403
+else Số lượng hợp lệ
+C -> DB : cart.findOne(userId), product.findById
+alt Giỏ hoặc item không tồn tại
+C --> A : 403 thông báo tương ứng
+else Có item
+C -> C : total = total - oldItemPrice + newItemPrice
+C -> DB : save quantity và total
+C --> A : 200 Cập nhật số lượng sản phẩm thành công
+UI -> A : getCart()
+end
+end
+@enduml

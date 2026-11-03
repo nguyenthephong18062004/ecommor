@@ -1,16 +1,19 @@
 .wrapper {
     width: 100%;
-    height: 70px;
+    min-height: 70px;
     background-color: #fff;
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
 }
 
 .inner {
-    width: 80%;
+    width: calc(100% - 32px);
+    max-width: 1280px;
     margin: 0px auto;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     padding: 8px 0px;
     img {
         width: 80px;
@@ -19,7 +22,10 @@
 }
 
 .search-box {
-    width: 600px;
+    flex: 1;
+    max-width: 600px;
+    min-width: 0;
+    flex-basis: 240px;
     height: 40px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -28,7 +34,8 @@
     justify-content: space-between;
     position: relative;
     input {
-        width: 100%;
+        flex: 1;
+        min-width: 0;
         height: 100%;
         border: none;
         outline: none;
@@ -36,7 +43,8 @@
         border-radius: 5px;
     }
     button {
-        width: 60px;
+        width: 52px;
+        flex: 0 0 52px;
         height: 40px;
         border: none;
         outline: none;
@@ -46,18 +54,50 @@
         font-size: 16px;
         border-radius: 5px;
     }
-    select {
-        width: 150px;
-        height: 30px;
-        border: none;
-        outline: none;
-        padding: 0 10px;
-        border-right: 1px solid #ccc;
-    }
-    option {
-        font-size: 15px;
-        color: #000;
-    }
+}
+
+.watch-nav {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 2px;
+    white-space: nowrap;
+}
+.watch-link {
+    color: #202020;
+    font-weight: 600;
+    text-decoration: none;
+    &:hover { color: #a3262c; }
+}
+.contact-link {
+    color: #202020;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    &:hover { color: #a3262c; }
+}
+.watch-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: #202020;
+    cursor: pointer;
+    padding: 6px;
+}
+
+.watch-dropdown :global(.ant-dropdown-menu) {
+    max-height: min(70vh, 560px);
+    overflow-y: auto;
+    min-width: 220px;
+}
+
+@media (max-width: 720px) {
+    .wrapper { height: auto; }
+    .inner { flex-wrap: wrap; }
+    .search-box { order: 3; flex-basis: 100%; max-width: none; }
+    .auth-box { order: 2; flex-basis: 100%; display: flex; justify-content: flex-end; }
 }
 
 .search-result-item {

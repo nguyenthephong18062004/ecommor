@@ -1,0 +1,55 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Khách vãng lai|
+start
+:Gửi email;
+|Frontend|
+:POST forgot-password;
+|Backend|
+:Limiter IP, normalize email;
+if (Tài khoản email đủ điều kiện?) then (Có)
+ :Issue OTP hash, kiểm cooldown;
+ if (Cooldown?) then (Có)
+  :Trả 429;
+  stop
+ endif
+ |Gmail|
+ :Gửi OTP;
+ |Backend|
+ :Log lỗi gửi nếu có;
+endif
+|Backend|
+:Trả 202 thông báo chung;
+|Khách vãng lai|
+:Nhập email/OTP;
+|Backend|
+:Limiter verify; consume OTP forgotPassword;
+if (OTP hợp lệ và user email tồn tại?) then (Không)
+ :Trả 400;
+ stop
+endif
+:Ký proof purpose=passwordReset 5m;
+:Set cookie httpOnly;
+|Khách vãng lai|
+:Nhập password/confirmPassword;
+|Frontend|
+:POST reset-password;
+|Backend|
+if (Body/purpose/user hợp lệ?) then (Không)
+ :Trả 400;
+ stop
+endif
+if (Chữ ký proof và thời hạn hợp lệ?) then (Không)
+ :Trả 401;
+ stop
+endif
+:Bcrypt và save password;
+:Clear proof cookie, trả 200;
+|Frontend|
+:Chuyển login;
+stop
+@enduml

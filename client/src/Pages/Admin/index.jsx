@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Layout, Menu, Avatar, theme, Typography } from 'antd';
+import { lazy, Suspense, useState, useEffect } from 'react';
+import { Layout, Menu, Avatar, Button, Tooltip, message, theme, Typography } from 'antd';
 import {
     DashboardOutlined,
     AppstoreOutlined,
@@ -11,33 +11,48 @@ import {
     GiftOutlined,
     MessageOutlined,
     BookOutlined,
+    LogoutOutlined,
 } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './index.module.scss';
 import classNames from 'classnames/bind';
 
-import ManagerStatistical from './Components/ManagerStatistical/ManagerStatistical';
-import ManagerCategory from './Components/ManagerCategory/ManagerCategory';
-import ManagerProduct from './Components/ManagerProduct/ManagerProduct';
-import ManagerUser from './Components/ManagerUser/ManagerUser';
-import ManagerOrder from './Components/ManagerOrder/ManagerOrder';
-import CouponManagement from './Components/ManagerCoupon/CouponManagement';
-import Messager from './Components/Messager/Messager';
+
+
+
+
+
+
+
+
 
 import React from 'react';
-import BlogAdmin from './Components/ManagerBlog/BlogAdmin';
+
+import { requestLogout } from '../../config/request';
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
 const cx = classNames.bind(styles);
 
+const panels = {
+    dashboard: lazy(() => import('./Components/ManagerStatistical/ManagerStatistical')),
+    categories: lazy(() => import('./Components/ManagerCategory/ManagerCategory')),
+    products: lazy(() => import('./Components/ManagerProduct/ManagerProduct')),
+    users: lazy(() => import('./Components/ManagerUser/ManagerUser')),
+    orders: lazy(() => import('./Components/ManagerOrder/ManagerOrder')),
+    preorders: lazy(() => import('./Components/ManagerPreorder/ManagerPreorder')),
+    coupons: lazy(() => import('./Components/ManagerCoupon/CouponManagement')),
+    messages: lazy(() => import('./Components/Messager/Messager')),
+    blogs: lazy(() => import('./Components/ManagerBlog/BlogAdmin')),
+    brands: lazy(() => import('./Components/ManagerBrands')),
+    reviews: lazy(() => import('./Components/ManagerReviews')),
+};
+
 function AdminLayout() {
-    const navigate = useNavigate();
-    const location = useLocation();
     const [collapsed, setCollapsed] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const [selectedKey, setSelectedKey] = useState('dashboard');
+    const ActivePanel = panels[selectedKey] || panels.dashboard;
 
     const {
         token: { colorBgContainer, borderRadius },
@@ -45,7 +60,6 @@ function AdminLayout() {
 
     useEffect(() => {
         const handleResize = () => {
-            setIsMobile(window.innerWidth <= 768);
             if (window.innerWidth <= 768) {
                 setCollapsed(true);
             }
@@ -57,6 +71,8 @@ function AdminLayout() {
 
     // Define menu items for the sidebar
     const menuItems = [
+        { key: 'brands', icon: <ShoppingOutlined />, label: 'Quản lý thương hiệu' },
+        { key: 'reviews', icon: <BookOutlined />, label: 'Duyệt đánh giá' },
         {
             key: 'dashboard',
             icon: <DashboardOutlined />,
@@ -83,6 +99,11 @@ function AdminLayout() {
             label: 'Quản lý đơn hàng',
         },
         {
+            key: 'preorders',
+            icon: <ShoppingOutlined />,
+            label: 'Yêu cầu đặt hàng',
+        },
+        {
             key: 'coupons',
             icon: <GiftOutlined />,
             label: 'Quản lý mã giảm giá',
@@ -99,11 +120,15 @@ function AdminLayout() {
         },
     ];
 
-    // Get current selected key from URL path
-    const getSelectedKey = () => {
-        const path = location.pathname;
-        const key = path.split('/').pop();
-        return [key] || ['dashboard'];
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        try {
+            await requestLogout();
+            window.location.replace('/login');
+        } catch (error) {
+            message.error(error.response?.data?.message || 'Đăng xuất thất bại!');
+            setIsLoggingOut(false);
+        }
     };
 
     return (
@@ -126,7 +151,7 @@ function AdminLayout() {
                     {!collapsed ? (
                         <div className={cx('logo-full')}>
                             <div className={cx('logo-icon')}></div>
-                            <h2>Admin</h2>
+                            <h2>Quản trị</h2>
                         </div>
                     ) : (
                         <div className={cx('logo-icon')}></div>
@@ -134,7 +159,7 @@ function AdminLayout() {
                 </div>
                 <Menu
                     mode="inline"
-                    selectedKeys={getSelectedKey()}
+                    selectedKeys={[selectedKey]}
                     onClick={({ key }) => setSelectedKey(key)}
                     items={menuItems}
                     className={cx('menu')}
@@ -146,7 +171,7 @@ function AdminLayout() {
                                 <Avatar size={40} icon={<UserOutlined />} className={cx('admin-avatar')} />
                                 <div className={cx('admin-details')}>
                                     <Text strong className={cx('admin-name')}>
-                                        Admin
+                                        Quản trị viên
                                     </Text>
                                     <Text type="secondary" className={cx('admin-role')}>
                                         Quản trị viên
@@ -167,9 +192,22 @@ function AdminLayout() {
                         })}
                         <div className={cx('header-title')}>
                             <h2>
-                                {menuItems.find((item) => item.key === getSelectedKey()[0])?.label || 'Bảng điều khiển'}
+                                {menuItems.find((item) => item.key === selectedKey)?.label || 'Bảng điều khiển'}
                             </h2>
                         </div>
+                    </div>
+                    <div className={cx('header-actions')}>
+                        <Tooltip title="Đăng xuất">
+                            <Button
+                                type="text"
+                                danger
+                                aria-label="Đăng xuất"
+                                className={cx('logout-button')}
+                                icon={<LogoutOutlined />}
+                                loading={isLoggingOut}
+                                onClick={handleLogout}
+                            />
+                        </Tooltip>
                     </div>
                 </Header>
                 <Content className={cx('content')}>
@@ -180,14 +218,7 @@ function AdminLayout() {
                         }}
                         className={cx('content-container')}
                     >
-                        {selectedKey === 'dashboard' && <ManagerStatistical />}
-                        {selectedKey === 'categories' && <ManagerCategory />}
-                        {selectedKey === 'products' && <ManagerProduct />}
-                        {selectedKey === 'users' && <ManagerUser />}
-                        {selectedKey === 'orders' && <ManagerOrder />}
-                        {selectedKey === 'coupons' && <CouponManagement />}
-                        {selectedKey === 'messages' && <Messager />}
-                        {selectedKey === 'blogs' && <BlogAdmin />}
+                        <Suspense fallback={<p role="status">Đang tải trang quản trị...</p>}><ActivePanel /></Suspense>
                     </div>
                 </Content>
             </Layout>

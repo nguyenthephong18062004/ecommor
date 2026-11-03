@@ -1,0 +1,38 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "main.jsx / publicRoutes" as Main <<EntryPoint>>
+class "AdminRoute" as Guard <<Component>>
+class "Provider" as Provider <<ContextProvider>> {
+ getAuthUser()
+ getCart()
+ clearAuth()
+}
+class "Context / useStore" as Context <<Context>>
+class "request.jsx" as Req <<API>>
+class "ApiClient" as API <<API>> {
+ setupInterceptors()
+ refreshToken()
+ processQueue()
+ logout()
+}
+class "runtimeUrls / apiBaseUrl" as URLs <<Config>>
+class "useFetch" as Fetch <<Hook>>
+class "useDebounce" as Debounce <<Hook>>
+class "useProductCatalog" as Catalog <<Hook>>
+class "Socket.IO client" as Socket <<Transport>>
+Main --> Provider
+Main --> Guard
+Guard --> Req
+Provider --> Context
+Provider --> Req
+Provider --> Socket
+Req --> API
+Req --> URLs
+API --> URLs
+Fetch --> URLs
+Catalog --> API
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách hàng đã đăng nhập" as A0
+rectangle "Đơn hàng" {
+usecase "UC-26\nXem đơn hàng của mình" as UC26
+usecase "UC-27\nHủy đơn hàng của mình" as UC27
+}
+A0 --> UC26
+A0 --> UC27
+@enduml

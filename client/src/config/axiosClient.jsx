@@ -1,10 +1,10 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { requestRefreshToken } from './request';
+import { API_BASE_URL } from './runtimeUrls';
 
 export class ApiClient {
     constructor(baseURL) {
-        this.baseURL = baseURL || import.meta.env.VITE_URL_API || '';
+        this.baseURL = baseURL ?? API_BASE_URL;
         this.axiosInstance = axios.create({
             baseURL: this.baseURL,
             timeout: 10000,
@@ -66,7 +66,7 @@ export class ApiClient {
 
     async refreshToken() {
         try {
-            await requestRefreshToken();
+            await axios.get(`${this.baseURL}/api/refresh-token`, { withCredentials: true });
             console.log('Token refreshed successfully');
         } catch (error) {
             console.error('Failed to refresh token:', error);
@@ -87,8 +87,11 @@ export class ApiClient {
     }
 
     handleAuthFailure() {
+        Cookies.remove('logged', { path: '/' });
         this.logout().finally(() => {
-            window.location.href = '/login';
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
         });
     }
 
@@ -98,7 +101,7 @@ export class ApiClient {
 
     async logout() {
         try {
-            await this.axiosInstance.get('/api/users/logout');
+            await axios.get(`${this.baseURL}/api/logout`, { withCredentials: true });
         } catch (error) {
             console.error('Logout error:', error);
         }

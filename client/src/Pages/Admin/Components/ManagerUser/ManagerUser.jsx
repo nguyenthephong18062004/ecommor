@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import classNames from 'classnames/bind';
 import styles from './ManagerUser.module.scss';
 import { Table, Switch, message, Typography, Space, Button } from 'antd';
-import { requestGetAllUser, requestUpdateUser, requestUpdateUserAdmin } from '../../../../config/request';
+import { requestGetAllUser, requestUpdateUserAdmin } from '../../../../config/request';
 
 const { Title } = Typography;
 const cx = classNames.bind(styles);
@@ -75,7 +75,7 @@ function ManagerUser() {
             title: 'Ngày tạo',
             dataIndex: 'createdAt',
             key: 'createdAt',
-            render: (date) => (date ? new Date(date).toLocaleDateString() : ''),
+            render: (date) => (date ? new Date(date).toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }) : ''),
         },
     ];
 

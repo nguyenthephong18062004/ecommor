@@ -1,0 +1,106 @@
+{
+  "date": "2026-10-21",
+  "mode": "static documentation validation",
+  "checks": [
+    {
+      "name": "route_coverage",
+      "passed": true,
+      "detail": {
+        "total": 71,
+        "missing": []
+      }
+    },
+    {
+      "name": "model_coverage",
+      "passed": true,
+      "detail": {
+        "total": 13,
+        "missing": []
+      }
+    },
+    {
+      "name": "sequence_coverage",
+      "passed": true,
+      "detail": {
+        "total": 41,
+        "missing": []
+      }
+    },
+    {
+      "name": "request_backend_mapping",
+      "passed": true,
+      "detail": {
+        "total": 60,
+        "missing": []
+      }
+    },
+    {
+      "name": "uml_embedded_exactly_once",
+      "passed": true,
+      "detail": {
+        "files": 87,
+        "embedded_blocks": 87,
+        "mismatches": []
+      }
+    },
+    {
+      "name": "uml_basic_structure_only",
+      "passed": true,
+      "detail": {
+        "errors": [],
+        "duplicate_aliases": [],
+        "compiler_validation": false
+      }
+    },
+    {
+      "name": "source_references",
+      "passed": true,
+      "detail": {
+        "numeric_references_checked": 1088,
+        "errors": []
+      }
+    },
+    {
+      "name": "use_case_consistency",
+      "passed": true,
+      "detail": {
+        "errors": []
+      }
+    },
+    {
+      "name": "known_secret_literals_absent",
+      "passed": true,
+      "detail": {
+        "files_with_matches": [],
+        "scope": "Sensitive env literals and identified inline Goong key; pattern scan, no values printed"
+      }
+    }
+  ],
+  "plantuml_compiler": {
+    "available": false,
+    "status": "Chưa kiểm tra cú pháp bằng công cụ",
+    "note": "Không có java/dot/plantuml trong PATH; thư mục Java jdk-21 chỉ thấy lib, không có bin/java.exe; không tìm thấy PlantUML jar trong workspace/VS Code extensions."
+  },
+  "lint": {
+    "date": "2026-10-21",
+    "command": "npm run lint",
+    "cwd": "client",
+    "exit_code": 0,
+    "status": "PASS",
+    "note": "Đã chạy một lần, không --fix; verify_design.py chỉ đọc lại kết quả này, không tự chạy lint."
+  },
+  "runtime_tests": {
+    "status": "NOT RUN",
+    "reason": "User cấm chạy server/MongoDB; suites có integration khởi động HTTP/DB"
+  },
+  "counts": {
+    "routes": 71,
+    "requests": 60,
+    "models": 13,
+    "use_cases": 41,
+    "diagrams": 87,
+    "sequences": 41,
+    "activities": 13,
+    "state_machines": 2
+  }
+}

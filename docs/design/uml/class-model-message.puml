@@ -1,0 +1,17 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "Message" as M_Message <<Model>> {
+  senderId : mongoose.Schema.Types.ObjectId {required=true; ref='User'}
+  receiverId : mongoose.Schema.Types.ObjectId {required=true; ref='User'}
+  conversationId : String {required=true; index=true}
+  text : String {required=true}
+  isRead : Boolean {default=false}
+  createdAt : Date {default=Date.now; index=true}
+  _id : ObjectId
+  __v : Number
+}
+@enduml

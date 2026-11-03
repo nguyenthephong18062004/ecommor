@@ -1,0 +1,17 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+class "previewProduct" as M_previewProduct <<Model>> {
+  userId : Schema.Types.ObjectId {require=true; ref='users'}
+  productId : Schema.Types.ObjectId {require=true; ref='products'}
+  content : String {require=true}
+  rating : Number {require=true}
+  _id : ObjectId
+  __v : Number
+  createdAt : Date
+  updatedAt : Date
+}
+@enduml

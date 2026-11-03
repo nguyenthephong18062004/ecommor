@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button, Card, Row, Col, Typography } from 'antd';
 
 const { Title, Text } = Typography;
@@ -10,7 +10,7 @@ import CardBody from '../../CardBody/CardBody';
 
 function ProductByCategory() {
     const { category } = useStore();
-    const categories = Array.isArray(category) ? category : [];
+    const categories = useMemo(() => (Array.isArray(category) ? category : []), [category]);
 
     const [selectedCategory, setSelectedCategory] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);

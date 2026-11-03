@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+|Quản trị viên|
+start
+:Chọn đối tượng và tạo/sửa/xóa;
+|Frontend|
+:Tải dữ liệu; validate form;
+if (Sản phẩm có ảnh mới?) then (Có)
+ :POST multipart upload-image;
+ |Backend|
+ :authAdmin; Multer ghi filesystem;
+ |Frontend|
+ :Ghép URL ảnh;
+endif
+:Gửi mutation API;
+|Backend|
+:authAdmin;
+if (Không đủ quyền?) then (Có)
+ :401;
+ stop
+endif
+if (Tạo mới?) then (Có)
+ :Kiểm truthy field theo controller;
+ if (Thiếu dữ liệu?) then (Có)
+  :Coupon 400; sản phẩm/category 403;
+  stop
+ endif
+ :Model.create/save; trả 201;
+else (Sửa hoặc xóa)
+ if (Xóa category?) then (Có)
+  :Xóa category rồi deleteMany products;
+ else (Khác)
+  :findByIdAndUpdate/Delete theo whitelist handler;
+ endif
+ :Trả 200 hoặc error thực tế;
+endif
+|Frontend|
+:Refresh bảng hoặc hiện lỗi;
+stop
+@enduml

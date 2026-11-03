@@ -7,6 +7,10 @@ const routesPreviewProduct = require('../routes/previewProduct.routes');
 const routesCoupon = require('../routes/coupon.routes');
 const routesMessage = require('../routes/message.routes');
 const routesBlog = require('../routes/blog.routes');
+const routesBrand = require('../routes/brand.routes');
+const routesPreorder = require('../routes/preorder.routes');
+const routesShipping = require('../routes/shipping.routes');
+const { authAdmin } = require('../auth/checkAuth');
 
 const multer = require('multer');
 const path = require('path');
@@ -24,6 +28,8 @@ var upload = multer({ storage: storage });
 
 function routes(app) {
     app.post('/api/register', routesUser);
+    app.post('/api/verify-email', routesUser);
+    app.post('/api/resend-verification', routesUser);
     app.post('/api/login', routesUser);
     app.get('/api/auth', routesUser);
     app.get('/api/refresh-token', routesUser);
@@ -36,6 +42,7 @@ function routes(app) {
     app.post('/api/update-user-admin', routesUser);
 
     app.post('/api/forgot-password', routesUser);
+    app.post('/api/verify-reset-password', routesUser);
     app.post('/api/reset-password', routesUser);
 
     /// category
@@ -46,6 +53,9 @@ function routes(app) {
     /// product
     app.post('/api/create-product', routesProducts);
     app.get('/api/get-product-new', routesProducts);
+    app.get('/api/product-catalog', routesProducts);
+    app.get('/api/catalog-options', routesProducts);
+    app.get('/api/catalog-browse', routesProducts);
     app.get('/api/get-product-by-id', routesProducts);
     app.get('/api/get-product-by-category', routesProducts);
     app.get('/api/get-all-product', routesProducts);
@@ -64,6 +74,10 @@ function routes(app) {
     /// payment
     app.post('/api/create-payment', routesPayments);
     app.get('/api/check-payment-vnpay', routesPayments);
+    app.get('/api/vnpay-return', routesPayments);
+    app.get('/api/vnpay-ipn', routesPayments);
+    app.post('/api/retry-payment-vnpay', routesPayments);
+    app.post('/api/reconcile-payment-vnpay', routesPayments);
     app.get('/api/check-payment-momo', routesPayments);
     app.get('/api/get-payment-success', routesPayments);
     app.get('/api/get-order-user', routesPayments);
@@ -71,6 +85,7 @@ function routes(app) {
     app.get('/api/get-order-admin', routesPayments);
     app.post('/api/update-order-status', routesPayments);
 
+    app.use(routesPreviewProduct);
     ///// preview product
     app.post('/api/create-preview-product', routesPreviewProduct);
     app.get('/api/get-preview-product-home', routesPreviewProduct);
@@ -84,24 +99,28 @@ function routes(app) {
 
     /// blog
     app.use('/api/blog', routesBlog);
+    app.use('/api/brands', routesBrand);
+    app.use('/api/preferences', require('./preferences.routes'));
+    app.use('/api/preorders', routesPreorder);
+    app.use('/api/shipping', routesShipping);
 
     app.use('/api/message', routesMessage);
 
-    app.post('/api/upload-image', upload.array('images'), (req, res) => {
+    app.post('/api/upload-image', authAdmin, upload.array('images'), (req, res) => {
         const file = req.files;
         if (!file) {
-            return res.status(400).json({ message: 'No file uploaded' });
+            return res.status(400).json({ message: 'Vui lòng chọn ảnh để tải lên.' });
         }
         const images = file.map((file) => {
             return `/uploads/products/${file.filename}`;
         });
         res.json({
-            message: 'Uploaded successfully',
+            message: 'Tải ảnh thành công.',
             images,
         });
     });
 
-    app.get('/admin', routesUser);
+    app.get('/api/admin', routesUser);
 }
 
 module.exports = routes;

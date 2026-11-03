@@ -2,15 +2,31 @@ import axios from 'axios';
 import cookies from 'js-cookie';
 
 import { apiClient } from './axiosClient';
+import { API_BASE_URL } from './runtimeUrls';
 
 const request = axios.create({
-    baseURL: import.meta.env.VITE_URL_API,
+    baseURL: API_BASE_URL,
     withCredentials: true,
 });
 
 export const requestGetAllProduct = async () => {
-    const res = await request.get('/api/get-all-product');
+    const res = await apiClient.get('/api/get-all-product');
     return res.data;
+};
+
+export const requestCreatePreorder = async (data) => {
+    const res = await apiClient.post('/api/preorders', data);
+    return res.data;
+};
+
+export const requestGetPreorders = async (params) => {
+    const res = await apiClient.get('/api/preorders', { params });
+    return res.data.metadata;
+};
+
+export const requestUpdatePreorderStatus = async (id, status, note = '') => {
+    const res = await apiClient.patch(`/api/preorders/${id}/status`, { status, note });
+    return res.data.metadata;
 };
 
 export const requestChatbot = async (data) => {
@@ -24,7 +40,7 @@ export const requestSearch = async (valueSearch) => {
 };
 
 export const requestUploadImage = async (formData) => {
-    const res = await request.post('/api/upload-image', formData);
+    const res = await apiClient.post('/api/upload-image', formData);
     return res.data;
 };
 
@@ -35,33 +51,48 @@ export const requestForgotPassword = async (data) => {
     return res.data;
 };
 
+export const requestVerifyResetPassword = async (data) => {
+    const res = await request.post('/api/verify-reset-password', data);
+    return res.data;
+};
+
 export const requestResetPassword = async (data) => {
     const res = await request.post('/api/reset-password', data);
     return res.data;
 };
 
 export const requestUpdateCategory = async (data) => {
-    const res = await request.post('/api/update-category', data);
+    const res = await apiClient.post('/api/update-category', data);
     return res.data;
 };
 
 export const requestDeleteCategory = async (id) => {
-    const res = await request.delete('/api/delete-category', { params: { id } });
+    const res = await apiClient.delete('/api/delete-category', { params: { id } });
     return res.data;
 };
 
 export const requestStatistical = async () => {
-    const res = await request.get('/api/statistical');
+    const res = await apiClient.get('/api/statistical');
     return res.data;
 };
 
 export const requestAdmin = async () => {
-    const res = await request.get('/admin');
+    const res = await apiClient.get('/api/admin');
     return res.data;
 };
 
 export const requestRegister = async (data) => {
     const res = await request.post('/api/register', data);
+    return res.data;
+};
+
+export const requestVerifyEmail = async (data) => {
+    const res = await request.post('/api/verify-email', data);
+    return res.data;
+};
+
+export const requestResendVerification = async (data) => {
+    const res = await request.post('/api/resend-verification', data);
     return res.data;
 };
 
@@ -91,7 +122,7 @@ export const requestRefreshToken = async () => {
 };
 
 export const requestCreateCategory = async (data) => {
-    const res = await request.post('/api/create-category', data);
+    const res = await apiClient.post('/api/create-category', data);
     return res.data;
 };
 
@@ -99,6 +130,8 @@ export const requestGetAllCategory = async () => {
     const res = await request.get('/api/get-all-category');
     return res.data;
 };
+
+export const requestGetBrands = async () => (await apiClient.get('/api/brands')).data;
 
 export const requestCreateCart = async (data) => {
     const res = await request.post('/api/create-cart', data);
@@ -122,6 +155,16 @@ export const requestUpdateProductCart = async (data) => {
 
 export const requestCreatePayment = async (data) => {
     const res = await apiClient.post('/api/create-payment', data);
+    return res.data;
+};
+
+export const requestRetryVnpay = async (idOrder) => {
+    const res = await apiClient.post('/api/retry-payment-vnpay', { idOrder });
+    return res.data;
+};
+
+export const requestReconcileVnpay = async (idOrder) => {
+    const res = await apiClient.post('/api/reconcile-payment-vnpay', { idOrder });
     return res.data;
 };
 
@@ -193,7 +236,7 @@ export const requestGetProductManufactured = async () => {
 };
 
 export const requestCreatePreviewProduct = async (data) => {
-    const res = await request.post('/api/create-preview-product', data);
+    const res = await apiClient.post('/api/create-preview-product', data);
     return res.data;
 };
 
@@ -307,6 +350,19 @@ export const requestGetBlogById = async (id) => {
         },
     });
     return res.data;
+};
+
+export const requestShippingLocations = async (kind, params = {}, signal) => {
+    const res = await apiClient.get(`/api/shipping/${kind}`, { params, signal, timeout: 30000 });
+    return res.data.metadata;
+};
+export const requestShippingQuote = async (data, signal) => {
+    const res = await apiClient.post('/api/shipping/quote', data, { signal, timeout: 45000 });
+    return res.data.metadata;
+};
+export const requestShipment = async (id, action, data = {}) => {
+    const res = await apiClient.post(`/api/shipping/admin/orders/${encodeURIComponent(id)}/${action}`, data, { timeout: 45000 });
+    return res.data.metadata;
 };
 
 let isRefreshing = false;

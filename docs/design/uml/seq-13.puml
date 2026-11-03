@@ -1,0 +1,29 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Quản trị viên" as U
+participant "OrderUser.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+database "Model / MongoDB" as DB
+U -> UI : Gửi rating/comment cho sản phẩm trong đơn
+UI -> A : requestCreatePreviewProduct()
+A -> R : POST /api/create-preview-product
+R -> W : authAdmin
+alt User thường hoặc thiếu phiên
+W --> A : 401 Bạn không có quyền truy cập
+else Admin
+W -> C : createPreviewProduct()
+C -> DB : previewProduct.create(userId từ JWT, body fields)
+C --> A : 201 Tạo đánh giá sản phẩm thành công
+end
+A --> UI : Response hoặc rejected Promise
+note over W,DB : Chưa kiểm đơn delivered/ownership, chưa bound rating;
+note over UI,A : Luồng khách thường ở UI chưa hoàn chỉnh
+@enduml

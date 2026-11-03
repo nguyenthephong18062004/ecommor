@@ -1,0 +1,37 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách vãng lai" as A0
+actor "Khách hàng đã đăng nhập" as A1
+actor "Gmail" as A2
+actor "Google" as A3
+rectangle "Tài khoản" {
+usecase "UC-01\nĐăng ký tài khoản" as UC01
+usecase "UC-02\nXác minh email đăng ký" as UC02
+usecase "UC-03\nGửi lại mã xác minh đăng ký" as UC03
+usecase "UC-04\nĐăng nhập email" as UC04
+usecase "UC-05\nĐăng nhập Google" as UC05
+usecase "UC-06\nKiểm tra và gia hạn phiên" as UC06
+usecase "UC-07\nĐăng xuất" as UC07
+usecase "UC-08\nKhôi phục mật khẩu bằng OTP" as UC08
+usecase "UC-09\nXem và cập nhật hồ sơ" as UC09
+}
+A0 --> UC01
+A2 --> UC01
+A0 --> UC02
+A0 --> UC03
+A2 --> UC03
+A0 --> UC04
+A0 --> UC05
+A3 --> UC05
+A1 --> UC06
+A1 --> UC07
+A0 --> UC08
+A2 --> UC08
+A1 --> UC09
+UC03 ..> UC02 : <<extend>>
+@enduml

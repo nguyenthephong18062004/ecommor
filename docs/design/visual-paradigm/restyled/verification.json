@@ -1,0 +1,975 @@
+{
+  "passed": true,
+  "project": "ECOMMOR-trinh-bay-theo-mau.vpp",
+  "sha256": "6e9c9c99091bca884aad3d953d9c1091cc9ade52d5bb6edfbcebf58a413f800f",
+  "checks": [
+    {
+      "name": "diagram_counts",
+      "passed": true,
+      "details": {
+        "UseCaseDiagram": 9,
+        "ClassDiagram": 1,
+        "InteractionDiagram": 41,
+        "StateDiagram": 2,
+        "ActivityDiagram": 13
+      }
+    },
+    {
+      "name": "overview_present",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "preserved_content:uc-overview",
+      "passed": true,
+      "details": {
+        "before": 15,
+        "after": 15,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:uc-module-01",
+      "passed": true,
+      "details": {
+        "before": 14,
+        "after": 14,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:uc-module-02",
+      "passed": true,
+      "details": {
+        "before": 4,
+        "after": 4,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:uc-module-03",
+      "passed": true,
+      "details": {
+        "before": 6,
+        "after": 6,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:uc-module-04",
+      "passed": true,
+      "details": {
+        "before": 12,
+        "after": 12,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:uc-module-05",
+      "passed": true,
+      "details": {
+        "before": 2,
+        "after": 2,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:uc-module-06",
+      "passed": true,
+      "details": {
+        "before": 3,
+        "after": 3,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:uc-module-07",
+      "passed": true,
+      "details": {
+        "before": 4,
+        "after": 4,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:uc-module-08",
+      "passed": true,
+      "details": {
+        "before": 11,
+        "after": 11,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-01",
+      "passed": true,
+      "details": {
+        "before": 17,
+        "after": 17,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-02",
+      "passed": true,
+      "details": {
+        "before": 19,
+        "after": 19,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-03",
+      "passed": true,
+      "details": {
+        "before": 15,
+        "after": 15,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-04",
+      "passed": true,
+      "details": {
+        "before": 14,
+        "after": 14,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-05",
+      "passed": true,
+      "details": {
+        "before": 15,
+        "after": 15,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-06",
+      "passed": true,
+      "details": {
+        "before": 20,
+        "after": 20,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-07",
+      "passed": true,
+      "details": {
+        "before": 10,
+        "after": 10,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-08",
+      "passed": true,
+      "details": {
+        "before": 30,
+        "after": 30,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-09",
+      "passed": true,
+      "details": {
+        "before": 9,
+        "after": 9,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-10",
+      "passed": true,
+      "details": {
+        "before": 13,
+        "after": 13,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-11",
+      "passed": true,
+      "details": {
+        "before": 16,
+        "after": 16,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-12",
+      "passed": true,
+      "details": {
+        "before": 14,
+        "after": 14,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-13",
+      "passed": true,
+      "details": {
+        "before": 9,
+        "after": 9,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-14",
+      "passed": true,
+      "details": {
+        "before": 12,
+        "after": 12,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-15",
+      "passed": true,
+      "details": {
+        "before": 15,
+        "after": 15,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-16",
+      "passed": true,
+      "details": {
+        "before": 13,
+        "after": 13,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-17",
+      "passed": true,
+      "details": {
+        "before": 11,
+        "after": 11,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-18",
+      "passed": true,
+      "details": {
+        "before": 13,
+        "after": 13,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-19",
+      "passed": true,
+      "details": {
+        "before": 20,
+        "after": 20,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-20",
+      "passed": true,
+      "details": {
+        "before": 16,
+        "after": 16,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-21",
+      "passed": true,
+      "details": {
+        "before": 10,
+        "after": 10,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-22",
+      "passed": true,
+      "details": {
+        "before": 15,
+        "after": 15,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-23",
+      "passed": true,
+      "details": {
+        "before": 19,
+        "after": 19,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-24",
+      "passed": true,
+      "details": {
+        "before": 18,
+        "after": 18,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-25",
+      "passed": true,
+      "details": {
+        "before": 22,
+        "after": 22,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-26",
+      "passed": true,
+      "details": {
+        "before": 11,
+        "after": 11,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-27",
+      "passed": true,
+      "details": {
+        "before": 14,
+        "after": 14,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-28",
+      "passed": true,
+      "details": {
+        "before": 7,
+        "after": 7,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-29",
+      "passed": true,
+      "details": {
+        "before": 18,
+        "after": 18,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-30",
+      "passed": true,
+      "details": {
+        "before": 21,
+        "after": 21,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-31",
+      "passed": true,
+      "details": {
+        "before": 17,
+        "after": 17,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-32",
+      "passed": true,
+      "details": {
+        "before": 21,
+        "after": 21,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-33",
+      "passed": true,
+      "details": {
+        "before": 16,
+        "after": 16,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-34",
+      "passed": true,
+      "details": {
+        "before": 16,
+        "after": 16,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-35",
+      "passed": true,
+      "details": {
+        "before": 14,
+        "after": 14,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-36",
+      "passed": true,
+      "details": {
+        "before": 15,
+        "after": 15,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-37",
+      "passed": true,
+      "details": {
+        "before": 17,
+        "after": 17,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-38",
+      "passed": true,
+      "details": {
+        "before": 13,
+        "after": 13,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-39",
+      "passed": true,
+      "details": {
+        "before": 11,
+        "after": 11,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-40",
+      "passed": true,
+      "details": {
+        "before": 11,
+        "after": 11,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "preserved_content:seq-41",
+      "passed": true,
+      "details": {
+        "before": 5,
+        "after": 5,
+        "missing": [],
+        "added": []
+      }
+    },
+    {
+      "name": "roundtrip_Diagram",
+      "passed": true,
+      "details": {
+        "expected": 66,
+        "actual": 66,
+        "missing": []
+      }
+    },
+    {
+      "name": "roundtrip_Shape",
+      "passed": true,
+      "details": {
+        "expected": 1880,
+        "actual": 1880,
+        "missing": []
+      }
+    },
+    {
+      "name": "roundtrip_Connector",
+      "passed": true,
+      "details": {
+        "expected": 1157,
+        "actual": 1157,
+        "missing": []
+      }
+    },
+    {
+      "name": "sequence_guards_preserved",
+      "passed": true,
+      "details": {
+        "before": 206,
+        "after": 206,
+        "missing": []
+      }
+    },
+    {
+      "name": "activations_native",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "png_exports",
+      "passed": true,
+      "details": []
+    },
+    {
+      "name": "sqlite_integrity",
+      "passed": true,
+      "details": {
+        "integrity": "ok",
+        "diagrams": 66
+      }
+    }
+  ],
+  "images": [
+    {
+      "name": "UC — Tổng quan ECOMMOR",
+      "file": "UC — Tổng quan ECOMMOR.png",
+      "width": 1290,
+      "height": 908
+    },
+    {
+      "name": "uc-module-01",
+      "file": "uc-module-01.png",
+      "width": 1660,
+      "height": 716
+    },
+    {
+      "name": "uc-module-02",
+      "file": "uc-module-02.png",
+      "width": 1011,
+      "height": 506
+    },
+    {
+      "name": "uc-module-03",
+      "file": "uc-module-03.png",
+      "width": 1290,
+      "height": 716
+    },
+    {
+      "name": "uc-module-04",
+      "file": "uc-module-04.png",
+      "width": 1660,
+      "height": 716
+    },
+    {
+      "name": "uc-module-05",
+      "file": "uc-module-05.png",
+      "width": 1011,
+      "height": 506
+    },
+    {
+      "name": "uc-module-06",
+      "file": "uc-module-06.png",
+      "width": 1290,
+      "height": 506
+    },
+    {
+      "name": "uc-module-07",
+      "file": "uc-module-07.png",
+      "width": 1290,
+      "height": 506
+    },
+    {
+      "name": "uc-module-08",
+      "file": "uc-module-08.png",
+      "width": 1381,
+      "height": 716
+    },
+    {
+      "name": "Class — Tổng thể ECOMMOR",
+      "file": "Class — Tổng thể ECOMMOR.png",
+      "width": 3474,
+      "height": 2551
+    },
+    {
+      "name": "seq-01 — Đăng ký tài khoản",
+      "file": "seq-01 — Đăng ký tài khoản.png",
+      "width": 3007,
+      "height": 2546
+    },
+    {
+      "name": "seq-02 — Xác minh email đăng ký",
+      "file": "seq-02 — Xác minh email đăng ký.png",
+      "width": 2681,
+      "height": 2526
+    },
+    {
+      "name": "seq-03 — Gửi lại mã xác minh đăng ký",
+      "file": "seq-03 — Gửi lại mã xác minh đăng ký.png",
+      "width": 3007,
+      "height": 2106
+    },
+    {
+      "name": "seq-04 — Đăng nhập email",
+      "file": "seq-04 — Đăng nhập email.png",
+      "width": 2354,
+      "height": 1666
+    },
+    {
+      "name": "seq-05 — Đăng nhập Google",
+      "file": "seq-05 — Đăng nhập Google.png",
+      "width": 2681,
+      "height": 1956
+    },
+    {
+      "name": "seq-06 — Kiểm tra và gia hạn phiên",
+      "file": "seq-06 — Kiểm tra và gia hạn phiên.png",
+      "width": 2354,
+      "height": 2536
+    },
+    {
+      "name": "seq-07 — Đăng xuất",
+      "file": "seq-07 — Đăng xuất.png",
+      "width": 2354,
+      "height": 1456
+    },
+    {
+      "name": "seq-08 — Khôi phục mật khẩu bằng OTP",
+      "file": "seq-08 — Khôi phục mật khẩu bằng OTP.png",
+      "width": 3007,
+      "height": 3516
+    },
+    {
+      "name": "seq-09 — Xem và cập nhật hồ sơ",
+      "file": "seq-09 — Xem và cập nhật hồ sơ.png",
+      "width": 2354,
+      "height": 1266
+    },
+    {
+      "name": "seq-10 — Xem catalog trang chủ",
+      "file": "seq-10 — Xem catalog trang chủ.png",
+      "width": 2354,
+      "height": 1796
+    },
+    {
+      "name": "seq-11 — Tìm kiếm và lọc sản phẩm",
+      "file": "seq-11 — Tìm kiếm và lọc sản phẩm.png",
+      "width": 2354,
+      "height": 1926
+    },
+    {
+      "name": "seq-12 — Xem chi tiết sản phẩm và đánh giá",
+      "file": "seq-12 — Xem chi tiết sản phẩm và đánh giá.png",
+      "width": 2027,
+      "height": 1956
+    },
+    {
+      "name": "seq-13 — Tạo đánh giá sản phẩm",
+      "file": "seq-13 — Tạo đánh giá sản phẩm.png",
+      "width": 2354,
+      "height": 1346
+    },
+    {
+      "name": "seq-14 — Xem giỏ hàng",
+      "file": "seq-14 — Xem giỏ hàng.png",
+      "width": 2027,
+      "height": 1726
+    },
+    {
+      "name": "seq-15 — Thêm sản phẩm vào giỏ",
+      "file": "seq-15 — Thêm sản phẩm vào giỏ.png",
+      "width": 2354,
+      "height": 2036
+    },
+    {
+      "name": "seq-16 — Sửa số lượng giỏ",
+      "file": "seq-16 — Sửa số lượng giỏ.png",
+      "width": 2354,
+      "height": 1686
+    },
+    {
+      "name": "seq-17 — Xóa sản phẩm khỏi giỏ",
+      "file": "seq-17 — Xóa sản phẩm khỏi giỏ.png",
+      "width": 2354,
+      "height": 1346
+    },
+    {
+      "name": "seq-18 — Chọn coupon và thông tin giao hàng",
+      "file": "seq-18 — Chọn coupon và thông tin giao hàng.png",
+      "width": 3007,
+      "height": 1956
+    },
+    {
+      "name": "seq-19 — Đặt hàng COD",
+      "file": "seq-19 — Đặt hàng COD.png",
+      "width": 2681,
+      "height": 2646
+    },
+    {
+      "name": "seq-20 — Khởi tạo thanh toán VNPay",
+      "file": "seq-20 — Khởi tạo thanh toán VNPay.png",
+      "width": 3007,
+      "height": 2006
+    },
+    {
+      "name": "seq-21 — Hiển thị kết quả Return VNPay",
+      "file": "seq-21 — Hiển thị kết quả Return VNPay.png",
+      "width": 2354,
+      "height": 1706
+    },
+    {
+      "name": "seq-22 — Xác nhận IPN VNPay",
+      "file": "seq-22 — Xác nhận IPN VNPay.png",
+      "width": 1700,
+      "height": 2346
+    },
+    {
+      "name": "seq-23 — Thanh toán lại VNPay",
+      "file": "seq-23 — Thanh toán lại VNPay.png",
+      "width": 3007,
+      "height": 2526
+    },
+    {
+      "name": "seq-24 — Đối soát trạng thái VNPay",
+      "file": "seq-24 — Đối soát trạng thái VNPay.png",
+      "width": 2681,
+      "height": 2406
+    },
+    {
+      "name": "seq-25 — Thanh toán MoMo",
+      "file": "seq-25 — Thanh toán MoMo.png",
+      "width": 2681,
+      "height": 2746
+    },
+    {
+      "name": "seq-26 — Xem đơn hàng của mình",
+      "file": "seq-26 — Xem đơn hàng của mình.png",
+      "width": 2354,
+      "height": 1456
+    },
+    {
+      "name": "seq-27 — Hủy đơn hàng của mình",
+      "file": "seq-27 — Hủy đơn hàng của mình.png",
+      "width": 2681,
+      "height": 1726
+    },
+    {
+      "name": "seq-28 — Đọc blog",
+      "file": "seq-28 — Đọc blog.png",
+      "width": 2027,
+      "height": 1186
+    },
+    {
+      "name": "seq-29 — Chat với quản trị viên",
+      "file": "seq-29 — Chat với quản trị viên.png",
+      "width": 2681,
+      "height": 2166
+    },
+    {
+      "name": "seq-30 — Quản trị hội thoại",
+      "file": "seq-30 — Quản trị hội thoại.png",
+      "width": 2681,
+      "height": 2236
+    },
+    {
+      "name": "seq-31 — Tư vấn bằng chatbot Gemini",
+      "file": "seq-31 — Tư vấn bằng chatbot Gemini.png",
+      "width": 3007,
+      "height": 2656
+    },
+    {
+      "name": "seq-32 — Quản lý sản phẩm",
+      "file": "seq-32 — Quản lý sản phẩm.png",
+      "width": 2354,
+      "height": 2506
+    },
+    {
+      "name": "seq-33 — Quản lý danh mục",
+      "file": "seq-33 — Quản lý danh mục.png",
+      "width": 2354,
+      "height": 2256
+    },
+    {
+      "name": "seq-34 — Quản lý coupon",
+      "file": "seq-34 — Quản lý coupon.png",
+      "width": 2354,
+      "height": 2066
+    },
+    {
+      "name": "seq-35 — Quản lý bài viết",
+      "file": "seq-35 — Quản lý bài viết.png",
+      "width": 2354,
+      "height": 2026
+    },
+    {
+      "name": "seq-36 — Xem người dùng và đổi quyền",
+      "file": "seq-36 — Xem người dùng và đổi quyền.png",
+      "width": 2127,
+      "height": 1566
+    },
+    {
+      "name": "seq-37 — Xử lý đơn hàng phía quản trị",
+      "file": "seq-37 — Xử lý đơn hàng phía quản trị.png",
+      "width": 2681,
+      "height": 2216
+    },
+    {
+      "name": "seq-38 — Xem thống kê",
+      "file": "seq-38 — Xem thống kê.png",
+      "width": 2354,
+      "height": 1666
+    },
+    {
+      "name": "seq-39 — Tải ảnh sản phẩm hoặc blog",
+      "file": "seq-39 — Tải ảnh sản phẩm hoặc blog.png",
+      "width": 2354,
+      "height": 1686
+    },
+    {
+      "name": "seq-40 — Xem danh sách thương hiệu",
+      "file": "seq-40 — Xem danh sách thương hiệu.png",
+      "width": 2354,
+      "height": 1506
+    },
+    {
+      "name": "seq-41 — Xem thông tin liên hệ",
+      "file": "seq-41 — Xem thông tin liên hệ.png",
+      "width": 1418,
+      "height": 1056
+    },
+    {
+      "name": "act-state-order",
+      "file": "act-state-order.png",
+      "width": 1286,
+      "height": 1216
+    },
+    {
+      "name": "act-state-payment",
+      "file": "act-state-payment.png",
+      "width": 1286,
+      "height": 1264
+    },
+    {
+      "name": "act-01 — Đăng ký và xác minh email",
+      "file": "act-01 — Đăng ký và xác minh email.png",
+      "width": 1446,
+      "height": 5142
+    },
+    {
+      "name": "act-02 — Đăng nhập và phân quyền",
+      "file": "act-02 — Đăng nhập và phân quyền.png",
+      "width": 1446,
+      "height": 4528
+    },
+    {
+      "name": "act-03 — Khôi phục mật khẩu",
+      "file": "act-03 — Khôi phục mật khẩu.png",
+      "width": 1446,
+      "height": 5174
+    },
+    {
+      "name": "act-04 — Mua hàng",
+      "file": "act-04 — Mua hàng.png",
+      "width": 1806,
+      "height": 4292
+    },
+    {
+      "name": "act-05 — VNPay Return và xác nhận",
+      "file": "act-05 — VNPay Return và xác nhận.png",
+      "width": 1446,
+      "height": 5412
+    },
+    {
+      "name": "act-06 — VNPay hết hạn và đối soát",
+      "file": "act-06 — VNPay hết hạn và đối soát.png",
+      "width": 1446,
+      "height": 5332
+    },
+    {
+      "name": "act-07 — Xử lý đơn hàng",
+      "file": "act-07 — Xử lý đơn hàng.png",
+      "width": 1086,
+      "height": 4692
+    },
+    {
+      "name": "act-08 — Quản lý catalog",
+      "file": "act-08 — Quản lý catalog.png",
+      "width": 1086,
+      "height": 4228
+    },
+    {
+      "name": "act-09 — Chat realtime",
+      "file": "act-09 — Chat realtime.png",
+      "width": 1446,
+      "height": 3694
+    },
+    {
+      "name": "act-10 — Chatbot Gemini",
+      "file": "act-10 — Chatbot Gemini.png",
+      "width": 1446,
+      "height": 4444
+    },
+    {
+      "name": "act-11 — Thống kê và người dùng",
+      "file": "act-11 — Thống kê và người dùng.png",
+      "width": 1086,
+      "height": 4110
+    },
+    {
+      "name": "act-12 — Blog",
+      "file": "act-12 — Blog.png",
+      "width": 1446,
+      "height": 2310
+    },
+    {
+      "name": "act-13 — MoMo legacy",
+      "file": "act-13 — MoMo legacy.png",
+      "width": 1446,
+      "height": 3740
+    }
+  ]
+}

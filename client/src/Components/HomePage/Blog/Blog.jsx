@@ -5,7 +5,7 @@ import { requestGetAllBlog } from '../../../config/request';
 import { Link } from 'react-router-dom';
 
 const { Title, Paragraph, Text } = Typography;
-const URL_IMAGE = import.meta.env.VITE_URL_IMAGE_API;
+import { uploadUrl } from '../../../config/runtimeUrls';
 
 const Blog = () => {
     const [blogs, setBlogs] = useState([]);
@@ -80,6 +80,7 @@ const Blog = () => {
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('vi-VN', {
+            timeZone: 'Asia/Ho_Chi_Minh',
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -90,11 +91,11 @@ const Blog = () => {
         <Card
             hoverable
             className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
-            bodyStyle={{ padding: 0 }}
+            styles={{ body: { padding: 0 } }}
         >
             <div className="relative overflow-hidden">
                 <img
-                    src={`${URL_IMAGE}${blog.image}`}
+                    src={uploadUrl(blog.image)}
                     alt={blog.title}
                     className="w-full h-96 object-cover transition-transform duration-700 group-hover:scale-110"
                 />
@@ -144,11 +145,11 @@ const Blog = () => {
         <Card
             hoverable
             className="group overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-            bodyStyle={{ padding: 0 }}
+            styles={{ body: { padding: 0 } }}
         >
             <div className="relative overflow-hidden">
                 <img
-                    src={`${URL_IMAGE}${blog.image}`}
+                    src={uploadUrl(blog.image)}
                     alt={blog.title}
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                 />

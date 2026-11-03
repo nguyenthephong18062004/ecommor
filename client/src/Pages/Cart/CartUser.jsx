@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { useStore } from '../../hooks/userStore';
 import { requestDeleteProductCart, requestUpdateProductCart } from '../../config/request';
 import { useEffect } from 'react';
+import { uploadUrl } from '../../config/runtimeUrls';
 
 const cx = classNames.bind(styles);
 
@@ -62,9 +63,7 @@ function CartUser() {
                                 <div key={item.product._id} className={cx('cart-item')}>
                                     <div className={cx('item-image')}>
                                         <img
-                                            src={`${import.meta.env.VITE_URL_IMAGE_API}/${
-                                                item.product.images.split(',')[0]
-                                            }`}
+                                            src={uploadUrl(item.product.images.split(',')[0])}
                                             alt="Ghế Sofa"
                                         />
                                     </div>
@@ -84,12 +83,12 @@ function CartUser() {
                                                     ? item?.product?.price -
                                                       (item?.product?.discount * item?.product?.price) / 100
                                                     : item?.product?.price
-                                                )?.toLocaleString()}
+                                                )?.toLocaleString('vi-VN')}
                                                 đ
                                             </span>
                                             {item?.product?.discount > 0 && (
                                                 <span className={cx('original-price')}>
-                                                    {item?.product?.price?.toLocaleString()}đ
+                                                    {item?.product?.price?.toLocaleString('vi-VN')}đ
                                                 </span>
                                             )}
                                         </div>
@@ -121,7 +120,7 @@ function CartUser() {
                                                 ? item?.product?.price -
                                                   (item?.product?.discount * item?.product?.price) / 100
                                                 : item?.product?.price
-                                            )?.toLocaleString()}
+                                            )?.toLocaleString('vi-VN')}
                                             đ
                                         </div>
                                     </div>
@@ -135,7 +134,7 @@ function CartUser() {
 
                             <div className={cx('summary-row')}>
                                 <span>Tổng tiền:</span>
-                                <span className={cx('total-price')}>{dataCart?.totalPrice?.toLocaleString()}đ</span>
+                                <span className={cx('total-price')}>{dataCart?.totalPrice?.toLocaleString('vi-VN')}đ</span>
                             </div>
                             <Link to="/checkout">
                                 <button className={cx('checkout-btn')}>THANH TOÁN</button>
@@ -149,12 +148,8 @@ function CartUser() {
                                 <div className={cx('info-item')}>
                                     <span className={cx('check-icon')}>✓</span>
                                     <div>
-                                        <strong>Không rủi ro. Đặt hàng trước, thanh toán sau tại nhà.</strong> Miễn phí
-                                        giao hàng & lắp đặt
-                                        <span>
-                                            tại tất cả quận huyện thuộc TP.HCM, Hà Nội, Khu đô thị Ecopark, Biên Hòa và
-                                            một số khu vực thuộc Bình Dương (*)
-                                        </span>
+                                        <strong>Phí vận chuyển tính theo địa chỉ và kiện hàng qua GHN.</strong>
+                                        <span> Shop hỗ trợ 50% phí ship khi thanh toán trước qua VNPay; COD thanh toán đủ phí ship.</span>
                                     </div>
                                 </div>
 
@@ -162,7 +157,7 @@ function CartUser() {
                                     <span className={cx('check-icon')}>✓</span>
                                     <div>
                                         <span>Đơn hàng của quý khách sẽ được </span>
-                                        <strong>giao hàng trong vòng 3 ngày</strong>
+                                        <strong>hiển thị thời gian giao dự kiến tại bước thanh toán</strong>
                                         <span>
                                             , vui lòng đợi nhân viên tư vấn xác nhận lịch giao hàng trước khi thực hiện
                                             chuyển khoản đơn hàng

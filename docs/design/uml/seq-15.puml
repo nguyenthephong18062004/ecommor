@@ -1,0 +1,39 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+autonumber
+actor "Khách hàng đã đăng nhập" as U
+participant "CardBody.jsx" as UI
+participant "axios / request.jsx" as A
+participant "Express route" as R
+participant "Middleware" as W
+participant "Controller" as C
+database "Model / MongoDB" as DB
+U -> UI : Chọn thêm quantity
+UI -> A : requestCreateCart(productId,quantity)
+A -> R : POST /api/create-cart
+R -> W : authUser
+W -> C : addToCart()
+C -> DB : Đọc product, quantityProduct()
+alt Quantity không nguyên dương / vượt stock / product mất
+C --> A : 403 thông báo số lượng/sản phẩm
+else Quantity hợp lệ
+C -> DB : cart.findOne(userId)
+alt Có giỏ
+C -> C : Tăng item hoặc push; kiểm tổng quantity nếu có item
+loop Mỗi item
+C -> DB : Đọc giá/discount product để tính tổng
+end
+C -> DB : cart.save()
+C --> A : 200
+else Chưa có giỏ
+C -> DB : cart.create(item,total)
+C --> A : 201
+end
+UI -> A : getCart()
+end
+note over C,DB : Read/save chưa transaction; không reserve kho
+@enduml

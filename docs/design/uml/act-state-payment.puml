@@ -1,0 +1,31 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+state "Chưa thanh toán COD (unpaid)" as Unpaid
+state "Chờ VNPay (pending)" as Pending
+state "Đã thanh toán (paid)" as Paid
+state "Thất bại (failed)" as Failed
+state "Hết hạn (expired)" as Expired
+state "Cần hoàn tiền (refund_required)" as Refund
+[*] --> Unpaid : checkout COD
+[*] --> Pending : checkout VNPAY
+Unpaid --> Paid : COD delivered
+Pending --> Paid : confirmation hợp lệ, current, còn reserve
+Pending --> Failed : confirmation thất bại current hoặc hủy đơn
+Pending --> Expired : worker quá expiresAt / release
+Failed --> Pending : retry đủ điều kiện / reserve lại
+Expired --> Pending : retry đủ điều kiện / reserve lại
+Pending --> Refund : success attempt cũ/đơn không đủ điều kiện
+Failed --> Refund : success đến sau release, chưa có confirmation trước
+Expired --> Refund : success đến sau hết hạn, chưa có confirmation trước
+Paid --> Refund : success của attempt cũ chưa được ghi nhận trước
+note bottom of Refund
+Không có API hoàn tiền tự động hoặc transition trở lại paid.
+Callback có receivedAt/reconciledAt trước: bỏ lặp.
+Sơ đồ paymentStatus order; attempt còn trạng thái cancelled riêng.
+MoMo dùng default unpaid và đường callback riêng.
+end note
+@enduml

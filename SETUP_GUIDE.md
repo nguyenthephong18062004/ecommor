@@ -1,5 +1,32 @@
 # 📦 ECOMMOR — Hướng Dẫn Cài Đặt & Tích Hợp
 
+## Node.js cho project
+
+Project dùng **Node 22.21.1** theo `.nvmrc`, tối thiểu **22.12.0** để tương thích dependency bảo mật đã duyệt. Docker dùng Node 22. `run-dev.ps1` và `run-vnpay-dev.ps1` chọn binary Node của project qua `scripts/project-node.ps1`, không đổi Node mặc định của máy.
+
+Nếu dùng terminal trực tiếp, kiểm tra `node --version` trước `npm ci`, `npm test` và `npm run build`; dùng đúng binary Node 22 hoặc môi trường riêng. Hướng dẫn kết quả nâng cấp và xác minh nằm tại [báo cáo triển khai](docs/storefront-upgrades-implementation.md).
+
+## Tài liệu API
+
+Bộ [tài liệu API tiếng Việt](docs/api/README.md) gồm tham chiếu 88 thao tác HTTP, OpenAPI, Postman Collection/environment, cookie authentication, workflow COD/VNPay/GHN/OTP, Socket.IO và các giới hạn hiện trạng. Bắt đầu tại README của bộ tài liệu để chọn file và cách gọi thử phù hợp.
+
+## Email OTP
+
+The OTP mail service uses `USER_EMAIL`, `GOOGLE_CLIENT`, `GOOGLE_SECRET`, `REDIRECT_URI`, and `REFRESH_TOKEN` from `server/.env`. Keep `USER_EMAIL` as the Gmail account that granted the refresh token. `EMAIL_USER` is not used by the shared mail service and can be removed from a future local configuration cleanup; do not commit `.env` files.
+
+Create the Google OAuth client, enable Gmail API, and add `https://developers.google.com/oauthplayground` as an authorized redirect URI before obtaining a refresh token through OAuth Playground. A Google OAuth consent screen in Testing mode can invalidate refresh tokens after seven days; publish the consent screen or renew the token when mail checks report `INVALID_GRANT`.
+
+For development without Gmail, use Ethereal or another isolated mail account. Never use real customer addresses during automated tests.
+
+To check configured delivery manually, set `MAIL_CHECK_RECIPIENT` locally, then run:
+
+```powershell
+cd server
+npm run mail:check
+```
+
+The command prints only `OK` or an error category (`INVALID_GRANT`, `INVALID_CLIENT`, `UNAUTHORIZED_CLIENT`, `NETWORK`, or `UNKNOWN`). It never prints credentials, tokens, OTP values, or message content.
+
 > Tài liệu này hướng dẫn cấu hình tất cả các biến môi trường và dịch vụ bên thứ ba cần thiết để chạy được project.
 
 ---
@@ -50,6 +77,7 @@ SECRET_CRYPTO=your_crypto_secret_key_here
 # 🤖  GEMINI AI (Chatbot tư vấn sản phẩm)
 # ===========================
 GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
 # Hướng dẫn lấy key: xem Mục 2 bên dưới
 
 # ===========================
@@ -109,7 +137,7 @@ VITE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
 
 ### 🤖 Mục 2 — Gemini AI API Key
 
-Chatbot tư vấn đồng hồ sử dụng **Google Gemini 1.5 Flash**.
+Chatbot tư vấn đồng hồ sử dụng **Google Gemini Flash**. Backend mặc định dùng model ổn định `gemini-2.5-flash`, hoặc bạn có thể đổi bằng biến `GEMINI_MODEL`.
 
 **Các bước lấy API Key:**
 
@@ -119,9 +147,10 @@ Chatbot tư vấn đồng hồ sử dụng **Google Gemini 1.5 Flash**.
 4. Sao chép key và đặt vào `server/.env`:
    ```
    GEMINI_API_KEY=AIzaSy...
+   GEMINI_MODEL=gemini-2.5-flash
    ```
 
-> **Lưu ý:** Gemini 1.5 Flash có **gói miễn phí** với giới hạn 15 request/phút.
+> **Lưu ý:** `gemini-1.5-flash` đã bị Google shutdown từ 29/09/2025, không nên dùng lại model này.
 > Nếu không cấu hình key, chatbot sẽ vẫn hoạt động nhưng trả về thông báo lỗi thân thiện.
 
 ---
@@ -190,13 +219,13 @@ VNPAY_RETURN_URL=http://localhost:3000/api/vnpay-return
 
 **Thẻ test VNPay Sandbox:**
 
-| Thông tin | Giá trị |
-|---|---|
-| Ngân hàng | NCB |
-| Số thẻ | `9704198526191432198` |
-| Tên chủ thẻ | `NGUYEN VAN A` |
-| Ngày phát hành | `07/15` |
-| OTP | `123456` |
+| Thông tin        | Giá trị               |
+| ----------------- | ----------------------- |
+| Ngân hàng       | NCB                     |
+| Số thẻ          | `9704198526191432198` |
+| Tên chủ thẻ    | `NGUYEN VAN A`        |
+| Ngày phát hành | `07/15`               |
+| OTP               | `123456`              |
 
 > **Production:** Cần ký hợp đồng với VNPay để có credentials thật.
 
@@ -204,21 +233,19 @@ VNPAY_RETURN_URL=http://localhost:3000/api/vnpay-return
 
 ### 🔐 Mục 5 — Google OAuth (Đăng Nhập Bằng Google)
 
-**Tái sử dụng** OAuth Client ID từ Mục 3 (hoặc tạo mới).
+Ứng dụng hiện dùng `GOOGLE_CLIENT` ở server cho cả Gmail OAuth2 và audience khi xác minh Google Sign-In. Để không làm mất hiệu lực `REFRESH_TOKEN`, cách ít rủi ro nhất là giữ nguyên `GOOGLE_CLIENT`, `GOOGLE_SECRET`, `REDIRECT_URI`, `REFRESH_TOKEN` và đặt `VITE_CLIENT_ID` bằng đúng Client ID đó. Client này phải là loại **Web application**.
 
 **Thêm Authorized JavaScript origins:**
 
 1. Vào [Google Cloud Console](https://console.cloud.google.com) → Credentials → Chọn OAuth client đã tạo
 2. Thêm vào **Authorized JavaScript origins**:
    ```
-   http://localhost:5173
-   http://localhost:3000
-   ```
-3. Thêm vào **Authorized redirect URIs**:
-   ```
+   http://localhost
    http://localhost:5173
    ```
-4. Lấy **Client ID** và đặt vào `client/.env`:
+   Nếu chạy Vite bằng `127.0.0.1`, thêm cả `http://127.0.0.1:5173`.
+3. Giữ `https://developers.google.com/oauthplayground` trong **Authorized redirect URIs** cho luồng lấy Gmail refresh token. Luồng `GoogleLogin` hiện tại dùng popup và không cần thêm redirect URI localhost.
+4. Đặt cùng Client ID vào `client/.env`:
    ```
    VITE_CLIENT_ID=xxxxxxxxxxxx.apps.googleusercontent.com
    ```
@@ -299,15 +326,15 @@ docker-compose down
 
 ## ✅ Checklist Tích Hợp
 
-| Dịch vụ | File | Biến | Bắt buộc |
-|---|---|---|---|
-| MongoDB | `server/.env` | `CONNECT_DB` | ✅ Bắt buộc |
-| JWT Secret | `server/.env` | `JWT_SECRET` | ✅ Bắt buộc |
-| Crypto Key | `server/.env` + `client/.env` | `SECRET_CRYPTO` / `VITE_SECRET_CRYPTO` | ✅ Bắt buộc |
-| API URL | `client/.env` | `VITE_URL_API` | ✅ Bắt buộc |
-| Image URL | `client/.env` | `VITE_URL_IMAGE_API` | ✅ Bắt buộc |
-| Gemini AI | `server/.env` | `GEMINI_API_KEY` | ⚠️ Tùy chọn (chatbot) |
-| Nodemailer | `server/.env` | `GOOGLE_CLIENT`, `GOOGLE_SECRET`, `REFRESH_TOKEN`, ... | ⚠️ Tùy chọn (quên mật khẩu) |
-| VNPay | `server/.env` | `VNPAY_TMN_CODE`, `VNPAY_SECRET_KEY`, ... | ⚠️ Tùy chọn (thanh toán) |
-| Google OAuth | `client/.env` + `server/.env` | `VITE_CLIENT_ID`, `GOOGLE_CLIENT` | ⚠️ Tùy chọn (login Google) |
-| Domain URL | `server/.env` | `DOMAIN_URL`, `CLIENT_URL` | ✅ Bắt buộc |
+| Dịch vụ    | File                              | Biến                                                        | Bắt buộc                         |
+| ------------ | --------------------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| MongoDB      | `server/.env`                   | `CONNECT_DB`                                               | ✅ Bắt buộc                      |
+| JWT Secret   | `server/.env`                   | `JWT_SECRET`                                               | ✅ Bắt buộc                      |
+| Crypto Key   | `server/.env` + `client/.env` | `SECRET_CRYPTO` / `VITE_SECRET_CRYPTO`                   | ✅ Bắt buộc                      |
+| API URL      | `client/.env`                   | `VITE_URL_API`                                             | ✅ Bắt buộc                      |
+| Image URL    | `client/.env`                   | `VITE_URL_IMAGE_API`                                       | ✅ Bắt buộc                      |
+| Gemini AI    | `server/.env`                   | `GEMINI_API_KEY`                                           | ⚠️ Tùy chọn (chatbot)          |
+| Nodemailer   | `server/.env`                   | `GOOGLE_CLIENT`, `GOOGLE_SECRET`, `REFRESH_TOKEN`, ... | ⚠️ Tùy chọn (quên mật khẩu) |
+| VNPay        | `server/.env`                   | `VNPAY_TMN_CODE`, `VNPAY_SECRET_KEY`, ...                | ⚠️ Tùy chọn (thanh toán)      |
+| Google OAuth | `client/.env` + `server/.env` | `VITE_CLIENT_ID`, `GOOGLE_CLIENT`                        | ⚠️ Tùy chọn (login Google)     |
+| Domain URL   | `server/.env`                   | `DOMAIN_URL`, `CLIENT_URL`                               | ✅ Bắt buộc                      |

@@ -1,0 +1,41 @@
+@startuml
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #334155
+skinparam defaultFontSize 13
+left to right direction
+actor "Khách vãng lai / Khách hàng / Quản trị viên" as UserActor
+component "React Pages + Provider" as ReactApp
+component "Vite proxy / Nginx" as Proxy
+component "Express routes" as ExpressApp
+component "Middleware xác thực / rate limit / upload" as MW
+component "Controllers" as Ctrl
+component "Services" as Svc
+database "MongoDB (Mongoose)" as DB
+component "Socket.IO + connectedUsers" as Socket
+component "Worker hết hạn 30s" as Worker
+cloud "VNPay" as VNP
+cloud "Google / Gmail" as Google
+cloud "Gemini" as Gemini
+cloud "MoMo" as Momo
+cloud "Goong" as Goong
+UserActor --> ReactApp
+ReactApp --> Proxy : HTTP + cookie
+Proxy --> ExpressApp
+ExpressApp --> MW
+MW --> Ctrl
+Ctrl --> Svc
+Ctrl --> DB
+Svc --> DB
+Svc --> VNP
+Ctrl --> Google
+Svc --> Google
+Ctrl --> Momo
+Svc --> Gemini
+ReactApp --> Goong
+ReactApp <--> Socket
+Ctrl --> Socket
+Socket --> DB
+Worker --> Svc
+@enduml
